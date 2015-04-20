@@ -13,6 +13,7 @@ cXD7Role [string]
     SourcePath = [string]
     [Ensure = [string]]
     [Credential = [PSCredential]]
+}
 ```
 ###Properties
 * Role: The Citrix XenDesktop 7.x role to install. Supported values are Controller, Studio, Licensing, Storefront, Director, SessionVDA or DesktopVDA.

@@ -1,0 +1,45 @@
+TOPIC
+    about_cCitrixXenDesktop7
+
+SHORT DESCRIPTION
+    cCitrixXenDesktop7 module is a collection of Desired Configuration State (DSC) resources which are used for
+    deploying Citrix XenDesktop 7.x.
+
+LONG DESCRIPTION
+    The cCitrixXenDesktop7 resources can be used to deploy Citrix XenDesktop  v7.0, v7.1, v7.5 or v7.6 via
+    Desired State Configuration (DSC).
+
+    This can be used to install the following Citrix XenDesktop roles:
+    
+        * Delivery Controller
+        * Desktop Studio
+        * License Server
+        * Storefront
+        * Desktop Director
+        * Virtual Delivery Agent (VDA)
+
+EXAMPLES
+
+    Configuration XenDesktopExample {
+
+        Import-DscResource -ModuleName cCitrixXenDesktop7
+    
+        node 'XDController1','XDController2' {
+        cXD7Role XDController {
+            Role = 'Controller'
+            SourcePath = 'C:\Source\XenDesktop76'
+        }
+
+        cXD7Role XDController2 {
+            Role = 'Controller'
+            SourcePath = 'C:\Source\XenDesktop76'
+        }
+    }
+
+CREDITS
+    The cXD7Role resource is a derivitive of the works of Brian Ehlert (@brianeh)
+    of Citrix Systems, Inc. and the Citrix XenDesktop Desired State Configuration
+    Resource provider (http://blogs.citrix.com/2014/10/09/tech-preview-xendesktop-desired-state-configuration-resource-provider/)
+
+KEYWORDS
+    DSC, DSC Resource, Citrix, XenDesktop

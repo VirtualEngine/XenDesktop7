@@ -2,9 +2,14 @@ $here = Split-Path -Parent $MyInvocation.MyCommand.Path;
 $sut = (Split-Path -Leaf $MyInvocation.MyCommand.Path).Replace(".Tests.", ".");
 . "$here\$sut";
 
+## Dot source XD7Common functions
+$moduleParent = Split-Path -Path $here -Parent;
+Get-ChildItem -Path "$moduleParent\XD7Common" -Include *.ps1 -Exclude '*.Tests.ps1' -Recurse |
+    ForEach-Object { . $_.FullName; }
+
 Describe 'cXD7Role\ResolveXDSetupArguments' {
 
-    It 'defaults log to %TMP%\Citrix\XenDesktop Installer.' {
+    It 'defaults log path to "%TMP%\Citrix\XenDesktop Installer".' {
         $role = 'Controller';
         $arguments = ResolveXDSetupArguments -Role $role;
         $arguments -match '/logpath' | Should Be $true;
@@ -248,6 +253,12 @@ Describe 'cXD7Role\ResolveXDSetupMedia' {
 Describe 'cXD7Role\Get-TargetResource' {
     $testDrivePath = (Get-PSDrive -Name TestDrive).Root;
     
+    It 'returns a System.Collections.Hashtable.' {
+        Mock -CommandName GetXDInstalledProduct -ParameterFilter { $Role -eq 'Controller' } -MockWith { }
+        $targetResource = Get-TargetResource -Role 'Controller' -SourcePath $testDrivePath -Ensure 'Present';
+        $targetResource -is [System.Collections.Hashtable] | Should Be $true;
+    }
+
     It 'returns input role, source path and credentials.' {
         $role = 'Controller';
         $credential = New-Object System.Management.Automation.PSCredential 'Username', (ConvertTo-SecureString -String 'Password' -AsPlainText -Force);
@@ -290,6 +301,12 @@ Describe 'cXD7Role\Get-TargetResource' {
 Describe 'cXD7Role\Test-TargetResource' {
     $testDrivePath = (Get-PSDrive -Name TestDrive).Root;
     
+    It 'returns a System.Boolean type.' {
+        Mock -CommandName GetXDInstalledProduct -ParameterFilter { $Role -eq 'Controller' } -MockWith { }
+        $targetResource = Test-TargetResource -Role 'Controller' -SourcePath $testDrivePath -Ensure 'Present';
+        $targetResource -is [System.Boolean] | Should Be $true;
+    }
+
     It 'returns Controller role is installed when it should be.' {
         Mock -CommandName GetXDInstalledProduct -ParameterFilter { $Role -eq 'Controller' } -MockWith {
             return @{ Name = 'Citrx Desktop Delivery Controller'; };
