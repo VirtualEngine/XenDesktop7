@@ -4,7 +4,7 @@ function Get-TargetResource {
     [CmdletBinding()]
     [OutputType([System.Collections.Hashtable])]
     param (
-        [Parameter(Mandatory)] [ValidateSet('Controller','Studio','Storefront','Licensing','Director','DesktopVDA','SessionVDA')] [System.String] $Role, # Studio?
+        [Parameter(Mandatory)] [ValidateSet('Controller','Studio','Storefront','Licensing','Director')] [System.String] $Role, # Studio?
         [Parameter(Mandatory)] [ValidateNotNullOrEmpty()] [System.String] $SourcePath,
         [Parameter()] [AllowNull()] [System.Management.Automation.PSCredential] $Credential,
         [Parameter()] [ValidateNotNullOrEmpty()] [ValidateSet('Present','Absent')] $Ensure = 'Present'
@@ -27,7 +27,7 @@ function Test-TargetResource {
     [CmdletBinding()]
     [OutputType([System.Boolean])]
     param (
-        [Parameter(Mandatory)] [ValidateSet('Controller','Studio','Storefront','Licensing','Director','DesktopVDA','SessionVDA')] [System.String] $Role,
+        [Parameter(Mandatory)] [ValidateSet('Controller','Studio','Storefront','Licensing','Director')] [System.String] $Role,
         [Parameter(Mandatory)] [ValidateNotNullOrEmpty()] [System.String] $SourcePath,
         [Parameter()] [AllowNull()] [System.Management.Automation.PSCredential] $Credential,
         [Parameter()] [ValidateNotNullOrEmpty()] [ValidateSet('Present','Absent')] $Ensure = 'Present'
@@ -42,7 +42,7 @@ function Test-TargetResource {
 function Set-TargetResource {
     [CmdletBinding()]
     param (
-        [Parameter(Mandatory)] [ValidateSet('Controller','Studio','Storefront','Licensing','Director','DesktopVDA','SessionVDA')] [System.String] $Role,
+        [Parameter(Mandatory)] [ValidateSet('Controller','Studio','Storefront','Licensing','Director')] [System.String] $Role,
         [Parameter(Mandatory)] [ValidateNotNullOrEmpty()] [System.String] $SourcePath,
         [Parameter()] [AllowNull()] [System.Management.Automation.PSCredential] $Credential,
         [Parameter()] [ValidateNotNullOrEmpty()] [ValidateSet('Present','Absent')] $Ensure = 'Present',
@@ -59,12 +59,12 @@ function Set-TargetResource {
         $installMediaPath = ResolveXDSetupMedia -Role $Role -SourcePath $SourcePath;
         if ($Ensure -eq 'Present') {
             Write-Verbose ($localizedData.InstallingRole -f $Role);
-            $installArguments = ResolveXDSetupArguments -Role $Role -LogPath $LogPath;
+            $installArguments = ResolveXDServerSetupArguments -Role $Role -LogPath $LogPath;
         }
         else {
             ## Uninstall
             Write-Verbose ($localizedData.UninstallingRole -f $Role);
-            $installArguments = ResolveXDSetupArguments -Role $Role -LogPath $LogPath -Uninstall;
+            $installArguments = ResolveXDServerSetupArguments -Role $Role -LogPath $LogPath -Uninstall;
         }
         $exitCode = StartWaitProcess -FilePath $installMediaPath -ArgumentList $installarguments -Credential $Credential;
         # Check for reboot
@@ -76,65 +76,7 @@ function Set-TargetResource {
 
 #region Private Functions
 
-function GetXDInstalledProduct {
-    <#
-    .SYNOPSIS
-        Returns installed XD product by role.
-    #>
-    [CmdletBinding()]
-    [OutputType([Microsoft.Win32.RegistryKey])]
-    param (
-        ## Citrix XenDesktop 7.x role to install/uninstall.
-        [Parameter(Mandatory)] [ValidateSet('Controller','Studio','Storefront','Licensing','Director','DesktopVDA','SessionVDA')] [System.String] $Role
-    )
-    process {
-        switch ($Role) {
-            'Controller' { $wmiFilter = 'Citrix Broker Service'; }
-            'Studio' { $wmiFilter = 'Citrix Studio'; }
-            'Storefront' { $wmiFilter = 'Citrix Storefront'; }
-            'Licensing' { $wmiFilter = 'Citrix Licensing'; }
-            'Director' { $wmiFilter = 'Citrix Director'; }
-            'DesktopVDA' { $wmiFilter = 'Citrix Virtual Desktop Agent'; }
-            'SessionVDA' { $wmiFilter = 'Citrix Virtual Desktop Agent'; } # Name: Citrix Virtual Delivery Agent 7.6, DisplayName: Citrix Virtual Desktop Agent?
-        }
-        return Get-WmiObject -Class 'Win32_Product' -Filter "Name Like '%$wmiFilter%'";
-    } #end process
-} #end functoin GetXDInstalledProduct
-
-function ResolveXDSetupMedia {
-    <#
-    .SYNOPSIS
-        Resolve the correct installation media source for the
-        local architecture depending on the role.
-    #>
-    [CmdletBinding()]
-    [OutputType([System.String])]
-    param (
-        ## Citrix XenDesktop 7.x role to install/uninstall.
-        [Parameter(Mandatory)] [ValidateSet('Controller','Studio','Storefront','Licensing','Director','DesktopVDA','SessionVDA')] [System.String] $Role,
-        ## Citrix XenDesktop 7.x installation media path.
-        [Parameter(Mandatory)] [ValidateNotNullOrEmpty()] [System.String] $SourcePath
-    )
-    process {
-        $architecture = 'x86';
-        if ([System.Environment]::Is64BitOperatingSystem) {
-            $architecture = 'x64';
-        }
-        switch ($Role) {
-            'DesktopVDA' { $installMedia = 'XenDesktopVdaSetup.exe'; }
-            'SessionVDA' { $installMedia = 'XenDesktopVdaSetup.exe'; }
-            Default { $installMedia = 'XenDesktopServerSetup.exe'; }
-        }
-        $sourceArchitecturePath = Join-Path -Path $SourcePath -ChildPath $architecture;
-        $installMediaPath = Get-ChildItem -Path $sourceArchitecturePath -Filter $installMedia -Recurse -File;
-        if (-not $installMediaPath) {
-            throw ($localizedData.NoValidSetupMediaError -f $installMedia, $sourceArchitecturePath);
-        }
-        return $installMediaPath.FullName;
-    } #end process
-} #end function ResolveXDSetupMedia
-
-function ResolveXDSetupArguments {
+function ResolveXDServerSetupArguments {
     <#
     .SYNOPSIS
         Resolve the installation arguments for the associated XenDesktop role.
@@ -143,7 +85,7 @@ function ResolveXDSetupArguments {
     [OutputType([System.String])]
     param (
         ## Citrix XenDesktop 7.x role to install/uninstall.
-        [Parameter(Mandatory)] [ValidateSet('Controller','Studio','Storefront','Licensing','Director','DesktopVDA','SessionVDA')] [System.String] $Role,
+        [Parameter(Mandatory)] [ValidateSet('Controller','Studio','Storefront','Licensing','Director')] [System.String] $Role,
         ## Citrix XenDesktop 7.x installation media path.
         [Parameter()] [ValidateNotNullOrEmpty()] [System.String] $LogPath = (Join-Path -Path $env:TMP -ChildPath '\Citrix\XenDesktop Installer'),
         ## Uninstall Citrix XenDesktop 7.x product.
@@ -159,7 +101,6 @@ function ResolveXDSetupArguments {
             'Storefront' { [ref] $null = $arguments.Add('STOREFRONT'); }
             'Licensing' { [ref] $null = $arguments.Add('LICENSESERVER'); }
             'Director' { [ref] $null = $arguments.Add('DESKTOPDIRECTOR'); }
-            { @('SessionVDA','DesktopVDA') -contains $_ } { $arguments.AddRange(@('VDA,PLUGINS')); }
         } #end switch Role
         
         if ($Uninstall) {
@@ -173,14 +114,6 @@ function ResolveXDSetupArguments {
                 'Storefront' { $arguments.AddRange(@('/CONFIGURE_FIREWALL')); }
                 'Licensing' { $arguments.AddRange(@('/CONFIGURE_FIREWALL')); }
                 'Director' { };
-                { @('SessionVDA','DesktopVDA') -contains $_ } {
-                    $arguments.AddRange(@('/OPTIMIZE', '/ENABLE_HDX_PORTS', '/ENABLE_REAL_TIME_TRANSPORT', '/ENABLE_REMOTE_ASSISTANCE'));
-                }
-                'DesktopVDA' {
-                    if ((Get-WmiObject -ClassName 'Win32_OperatingSystem').Caption -match 'Server') {
-                        [ref] $null = $arguments.Add('/SERVERVDI');
-                    }
-                }
             } #end switch Role
         }
         return [System.String]::Join(' ', $arguments.ToArray());
