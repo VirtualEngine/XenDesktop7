@@ -1,0 +1,16 @@
+TOPIC
+    about_cXD7Administrator
+
+SHORT DESCRIPTION
+
+LONG DESCRIPTION
+
+EXAMPLES
+
+CREDITS
+    The cXD7Role resource is a derivitive of the works of Brian Ehlert (@brianeh)
+    of Citrix Systems, Inc. and the Citrix XenDesktop Desired State Configuration
+    Resource provider (http://blogs.citrix.com/2014/10/09/tech-preview-xendesktop-desired-state-configuration-resource-provider/)
+
+KEYWORDS
+    DSC, DSC Resource, Citrix, XenDesktop, Administrator
