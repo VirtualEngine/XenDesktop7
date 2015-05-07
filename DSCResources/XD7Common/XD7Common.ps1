@@ -1,4 +1,40 @@
 #region Private Functions
+<#
+function InvokeScriptBlock {
+    <#
+    .SYNOPSIS
+        Executes a scriptblock in a separate Powershell instance, under different credentials.
+    #> <#
+    [CmdletBinding()]
+    param (
+        [Parameter(Mandatory)] [ValidateNotNull()] [SYstem.Management.Automation.ScriptBlock] $ScriptBlock,
+        [Parameter(Mandatory)] [ValidateNotNull()] [System.Management.Automation.PSCredential] $Credential,
+        [Parameter()] [AllowNull()] [System.Object[]] $ArgumentList
+    )
+    process {
+        if ($ArgumentList) {
+            $command = '& {{ {0} }} "{1}"' -f $command, [System.String]::Join('" "', $argumentList);
+        }
+        else {
+            $command = '& {{ {0} }}' -f $ScriptBlock;
+        }
+        #$encodedCommand = [System.Convert]::ToBase64String([System.Text.Encoding]::Unicode.GetBytes($ScriptBlock));
+        $powershellExeArguments = @(
+            '-NoProfile',
+            '-NonInteractive',
+            '-ExecutionPolicy',
+            'ByPass',
+            #'-EncodedCommand',
+            #$encodedCommand,
+            #$('"{0}"' -f [System.String]::Join('" "', $argumentList))
+            '-Command',
+            $command
+        );
+        $processResult = StartWaitProcess -Credential $Credential -FilePath "$env:WINDIR\System32\WindowsPowerShell\v1.0\powershell.exe" -ArgumentList $powershellExeArguments;
+        return $processResult;
+    } #end process
+} #end function InvokeScriptBlock #>
+
 
 function StartWaitProcess {
     <#
@@ -50,35 +86,37 @@ function StartWaitProcess {
     } #end process
 } #end function StartWaitProcess
 
-function TestModule {
+function FindXDModule {
+    <#
+    .SYNOPSIS
+        Locates a module's manifest (.psd1) file.
+    #>
+    [CmdletBinding()]
+    [OutputType([System.String])]
+    param (
+        [Parameter()] [ValidateNotNullOrEmpty()] [System.String] $Name = 'Citrix.XenDesktop.Admin',
+        [Parameter()] [ValidateNotNullOrEmpty()] [System.String] $Path = 'C:\Program Files\Citrix\XenDesktopPoshSdk\Module\Citrix.XenDesktop.Admin.V1'
+    )
+    process {
+        $module = Get-ChildItem -Path $Path -Include "$Name.psd1" -File -Recurse;
+        return $module.FullName;
+    } #end process
+} #end function FindModule
+
+function TestXDModule {
     <#
     .SYNOPSIS
         Tests whether Powershell modules or Snapin are available/registered.
     #>
     [CmdletBinding()]
     param (
-        [Parameter(Mandatory, ValueFromPipeline)] [ValidateNotNullOrEmpty()] [System.String[]] $Name,
-        [Parameter()] [System.Management.Automation.SwitchParameter] $IsSnapin
+        [Parameter()] [ValidateNotNullOrEmpty()] [System.String] $Name = 'Citrix.XenDesktop.Admin',
+        [Parameter()] [ValidateNotNullOrEmpty()] [System.String] $Path = 'C:\Program Files\Citrix\XenDesktopPoshSdk\Module\Citrix.XenDesktop.Admin.V1'
     )
-    begin {
-        [System.Boolean] $allModulesFound = $true;
-    }
     process {
-        foreach ($module in $Name) {
-            if ($IsSnapin) {
-                $powershellModule = Get-PSSnapin -Name $module -Registered -ErrorAction SilentlyContinue;
-            }
-            else {
-                $powershellModule = Get-Module -Name $module -ErrorAction SilentlyContinue;
-            }
-            if ($powershellModule -eq $null) {
-                $allModulesFound = $false;
-            }
-        }
+        if (FindXDModule @PSBoundParameters) { return $true; }
+        else { return $false; }
     } #end process
-    end {
-        return $allModulesFound;
-    }
 } #end TestModule
 
 function ThrowInvalidProgramException {
