@@ -111,11 +111,21 @@ function TestXDModule {
     [CmdletBinding()]
     param (
         [Parameter()] [ValidateNotNullOrEmpty()] [System.String] $Name = 'Citrix.XenDesktop.Admin',
-        [Parameter()] [ValidateNotNullOrEmpty()] [System.String] $Path = 'C:\Program Files\Citrix\XenDesktopPoshSdk\Module\Citrix.XenDesktop.Admin.V1'
+        [Parameter()] [ValidateNotNullOrEmpty()] [System.String] $Path = 'C:\Program Files\Citrix\XenDesktopPoshSdk\Module\Citrix.XenDesktop.Admin.V1',
+        [Parameter()] [System.Management.Automation.SwitchParameter] $IsSnapin
     )
     process {
-        if (FindXDModule @PSBoundParameters) { return $true; }
-        else { return $false; }
+        if ($IsSnapin) {
+            if (Get-PSSnapin -Name $Name -Registered) {
+                return $true;
+            }
+        }
+        else {
+            if (FindXDModule @PSBoundParameters) {
+                return $true;
+            }
+        }
+        return $false;
     } #end process
 } #end TestModule
 
@@ -133,5 +143,63 @@ function ThrowInvalidProgramException {
     $errorRecord = New-Object -TypeName 'System.Management.Automation.ErrorRecord' -ArgumentList $exception, $ErrorId, $errorCategory, $null;
     throw $errorRecord;
 } #end function ThrowInvalidProgramException
+
+function GetXDInstalledProduct {
+    <#
+    .SYNOPSIS
+        Returns installed XD product by role.
+    #>
+    [CmdletBinding()]
+    [OutputType([Microsoft.Win32.RegistryKey])]
+    param (
+        ## Citrix XenDesktop 7.x role to install/uninstall.
+        [Parameter(Mandatory)] [ValidateSet('Controller','Studio','Storefront','Licensing','Director','DesktopVDA','SessionVDA')] [System.String] $Role
+    )
+    process {
+        switch ($Role) {
+            'Controller' { $wmiFilter = 'Citrix Broker Service'; }
+            'Studio' { $wmiFilter = 'Citrix Studio'; }
+            'Storefront' { $wmiFilter = 'Citrix Storefront'; }
+            'Licensing' { $wmiFilter = 'Citrix Licensing'; }
+            'Director' { $wmiFilter = 'Citrix Director'; }
+            'DesktopVDA' { $wmiFilter = 'Citrix Virtual Desktop Agent'; }
+            'SessionVDA' { $wmiFilter = 'Citrix Virtual Desktop Agent'; } # Name: Citrix Virtual Delivery Agent 7.6, DisplayName: Citrix Virtual Desktop Agent?
+        }
+        return Get-WmiObject -Class 'Win32_Product' -Filter "Name Like '%$wmiFilter%'";
+    } #end process
+} #end functoin GetXDInstalledProduct
+
+function ResolveXDSetupMedia {
+    <#
+    .SYNOPSIS
+        Resolve the correct installation media source for the
+        local architecture depending on the role.
+    #>
+    [CmdletBinding()]
+    [OutputType([System.String])]
+    param (
+        ## Citrix XenDesktop 7.x role to install/uninstall.
+        [Parameter(Mandatory)] [ValidateSet('Controller','Studio','Storefront','Licensing','Director','DesktopVDA','SessionVDA')] [System.String] $Role,
+        ## Citrix XenDesktop 7.x installation media path.
+        [Parameter(Mandatory)] [ValidateNotNullOrEmpty()] [System.String] $SourcePath
+    )
+    process {
+        $architecture = 'x86';
+        if ([System.Environment]::Is64BitOperatingSystem) {
+            $architecture = 'x64';
+        }
+        switch ($Role) {
+            'DesktopVDA' { $installMedia = 'XenDesktopVdaSetup.exe'; }
+            'SessionVDA' { $installMedia = 'XenDesktopVdaSetup.exe'; }
+            Default { $installMedia = 'XenDesktopServerSetup.exe'; }
+        }
+        $sourceArchitecturePath = Join-Path -Path $SourcePath -ChildPath $architecture;
+        $installMediaPath = Get-ChildItem -Path $sourceArchitecturePath -Filter $installMedia -Recurse -File;
+        if (-not $installMediaPath) {
+            throw ($localizedData.NoValidSetupMediaError -f $installMedia, $sourceArchitecturePath);
+        }
+        return $installMediaPath.FullName;
+    } #end process
+} #end function ResolveXDSetupMedia
 
 #endregion Private Functions
