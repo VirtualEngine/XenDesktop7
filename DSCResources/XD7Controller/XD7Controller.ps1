@@ -8,10 +8,11 @@ function Get-TargetResource {
         [Parameter()] [ValidateSet('Present','Absent')] [System.String] $Ensure = 'Present'
     )
     begin {
-        if (-not (TestModule -Name 'Citrix.XenDesktop.Admin')) {
+        if (TestXDModule) { Import-Module (FindXDModule) -Force; }
+        else {
             ThrowInvalidProgramException -ErrorId 'Citrix.XenDesktop.Admin module not found.' -ErrorMessage $localizedData.XenDesktopSDKNotFoundError;
         }
-    }
+    } #end begin
     process {
         $xdSite = Get-XDSite -AdminAddress $ControllerName;
         $targetResource = @{
@@ -42,9 +43,9 @@ function Test-TargetResource {
     process {
         $xdSite = Get-TargetResource @PSBoundParameters;
         if ($xdSite.SiteName -eq $SiteName -and $xdSite.Ensure -eq $Ensure) {
-            return $false;
+            return $true;
         }
-        return $true;
+        return $false;
     } #end process
 } #end function Test-TargetResource
 
@@ -58,10 +59,11 @@ function Test-TargetResource {
         [Parameter()] [ValidateSet('Present','Absent')] [System.String] $Ensure = 'Present'
     )
     begin {
-        if (-not (TestModule -Name 'Citrix.XenDesktop.Admin')) {
+        if (TestXDModule) { Import-Module (FindXDModule) -Force; }
+        else {
             ThrowInvalidProgramException -ErrorId 'Citrix.XenDesktop.Admin module not found.' -ErrorMessage $localizedData.XenDesktopSDKNotFoundError;
         }
-    }
+    } #end begin
     process {
         $controllerParams = @{ }
         if ($Credential) { $controllerParams['DatabaseCredentials'] = $Credential; }

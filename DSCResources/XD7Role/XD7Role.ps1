@@ -137,8 +137,7 @@ function ResolveXDSetupMedia {
 function ResolveXDSetupArguments {
     <#
     .SYNOPSIS
-        Resolve the installation arguments for the associated
-        XenDesktop role.
+        Resolve the installation arguments for the associated XenDesktop role.
     #>
     [CmdletBinding()]
     [OutputType([System.String])]
