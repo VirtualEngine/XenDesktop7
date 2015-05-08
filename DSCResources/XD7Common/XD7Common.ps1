@@ -1,40 +1,24 @@
 #region Private Functions
-<#
-function InvokeScriptBlock {
+
+function GetRegistryValue {
     <#
     .SYNOPSIS
-        Executes a scriptblock in a separate Powershell instance, under different credentials.
-    #> <#
-    [CmdletBinding()]
+        Returns a registry string value.
+    .NOTES
+        This is an internal function and shouldn't be called from outside.
+        This function enables registry calls to be unit tested.
+    #>
+    [CmdletBinding(SupportsShouldProcess)]
     param (
-        [Parameter(Mandatory)] [ValidateNotNull()] [SYstem.Management.Automation.ScriptBlock] $ScriptBlock,
-        [Parameter(Mandatory)] [ValidateNotNull()] [System.Management.Automation.PSCredential] $Credential,
-        [Parameter()] [AllowNull()] [System.Object[]] $ArgumentList
+        # Registry key name/path to query.
+        [Parameter(Mandatory)] [ValidateNotNullOrEmpty()] [Alias('Path')] [System.String] $Key,
+        # Registry value to return.
+        [Parameter(Mandatory)] [ValidateNotNullOrEmpty()] [System.String] $Name
     )
     process {
-        if ($ArgumentList) {
-            $command = '& {{ {0} }} "{1}"' -f $command, [System.String]::Join('" "', $argumentList);
-        }
-        else {
-            $command = '& {{ {0} }}' -f $ScriptBlock;
-        }
-        #$encodedCommand = [System.Convert]::ToBase64String([System.Text.Encoding]::Unicode.GetBytes($ScriptBlock));
-        $powershellExeArguments = @(
-            '-NoProfile',
-            '-NonInteractive',
-            '-ExecutionPolicy',
-            'ByPass',
-            #'-EncodedCommand',
-            #$encodedCommand,
-            #$('"{0}"' -f [System.String]::Join('" "', $argumentList))
-            '-Command',
-            $command
-        );
-        $processResult = StartWaitProcess -Credential $Credential -FilePath "$env:WINDIR\System32\WindowsPowerShell\v1.0\powershell.exe" -ArgumentList $powershellExeArguments;
-        return $processResult;
-    } #end process
-} #end function InvokeScriptBlock #>
-
+        return Get-ItemProperty -Path $Key | Select-Object -ExpandProperty $Name;
+    }
+} #end function GetRegistryValue
 
 function StartWaitProcess {
     <#
