@@ -16,7 +16,7 @@ function Get-TargetResource {
             Credential = $Credential;
             Ensure = 'Absent';
         }
-        if (GetXDInstalledProduct -Role $Role) {
+        if (TestXDInstalledRole -Role $Role) {
             $targetResource['Ensure'] = 'Present';
         }       
         return $targetResource;
@@ -54,9 +54,6 @@ function Set-TargetResource {
         }
     }
     process {
-        Write-Verbose ($localizedData.LogDirectorySet -f $logPath);
-        Write-Verbose ($localizedData.SourceDirectorySet -f $SourcePath);
-        $installMediaPath = ResolveXDSetupMedia -Role $Role -SourcePath $SourcePath;
         if ($Ensure -eq 'Present') {
             Write-Verbose ($localizedData.InstallingRole -f $Role);
             $installArguments = ResolveXDServerSetupArguments -Role $Role -LogPath $LogPath;
@@ -66,6 +63,9 @@ function Set-TargetResource {
             Write-Verbose ($localizedData.UninstallingRole -f $Role);
             $installArguments = ResolveXDServerSetupArguments -Role $Role -LogPath $LogPath -Uninstall;
         }
+        Write-Verbose ($localizedData.LogDirectorySet -f $logPath);
+        Write-Verbose ($localizedData.SourceDirectorySet -f $SourcePath);
+        $installMediaPath = ResolveXDSetupMedia -Role $Role -SourcePath $SourcePath;
         $exitCode = StartWaitProcess -FilePath $installMediaPath -ArgumentList $installarguments -Credential $Credential;
         # Check for reboot
         if ($exitCode -eq 3010) {

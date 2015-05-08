@@ -144,28 +144,50 @@ function ThrowInvalidProgramException {
     throw $errorRecord;
 } #end function ThrowInvalidProgramException
 
-function GetXDInstalledProduct {
+function TestXDInstalledRole {
     <#
     .SYNOPSIS
-        Returns installed XD product by role.
+        Tests whether a Citrix XenDesktop 7.x role is installed.
     #>
     [CmdletBinding()]
-    [OutputType([Microsoft.Win32.RegistryKey])]
+    [OutputType([System.Boolean])]
     param (
-        ## Citrix XenDesktop 7.x role to install/uninstall.
+        ## Citrix XenDesktop 7.x role to query.
         [Parameter(Mandatory)] [ValidateSet('Controller','Studio','Storefront','Licensing','Director','DesktopVDA','SessionVDA')] [System.String] $Role
     )
     process {
-        switch ($Role) {
-            'Controller' { $wmiFilter = 'Citrix Broker Service'; }
-            'Studio' { $wmiFilter = 'Citrix Studio'; }
-            'Storefront' { $wmiFilter = 'Citrix Storefront'; }
-            'Licensing' { $wmiFilter = 'Citrix Licensing'; }
-            'Director' { $wmiFilter = 'Citrix Director'; }
-            'DesktopVDA' { $wmiFilter = 'Citrix Virtual Desktop Agent'; }
-            'SessionVDA' { $wmiFilter = 'Citrix Virtual Desktop Agent'; } # Name: Citrix Virtual Delivery Agent 7.6, DisplayName: Citrix Virtual Desktop Agent?
+        if (GetXDInstalledRole -Role $Role) {
+            return $true;
         }
-        return Get-WmiObject -Class 'Win32_Product' -Filter "Name Like '%$wmiFilter%'";
+        return $false;
+    } #end process
+} #end function TestXDRole
+
+function GetXDInstalledRole {
+    <#
+    .SYNOPSIS
+        Returns installed Citrix XenDesktop 7.x installed product by role.
+    #>
+    [CmdletBinding()]
+    [OutputType([System.String])]
+    param (
+        ## Citrix XenDesktop 7.x role to query.
+        [Parameter(Mandatory)] [ValidateSet('Controller','Studio','Storefront','Licensing','Director','DesktopVDA','SessionVDA')] [System.String] $Role
+    )
+    process {
+        $installedProducts = Get-ItemProperty 'HKLM:\SOFTWARE\Classes\Installer\Products\*' |
+            Where-Object { $_.ProductName -like '*Citrix*' -and $_.ProductName -notlike '*snap-in' } |
+                Select-Object -ExpandProperty ProductName;
+        switch ($Role) {
+            'Controller' { $filter = 'Citrix Broker Service'; }
+            'Studio' { $filter = 'Citrix Studio'; }
+            'Storefront' { $filter = 'Citrix Storefront'; }
+            'Licensing' { $filter = 'Citrix Licensing'; }
+            'Director' { $filter = 'Citrix Director'; }
+            'DesktopVDA' { $filter = 'Citrix Virtual Desktop Agent'; }
+            'SessionVDA' { $filter = 'Citrix Virtual Desktop Agent'; } # Name: Citrix Virtual Delivery Agent 7.6, DisplayName: Citrix Virtual Desktop Agent?
+        }
+        return $installedProducts -match $filter;
     } #end process
 } #end functoin GetXDInstalledProduct
 
