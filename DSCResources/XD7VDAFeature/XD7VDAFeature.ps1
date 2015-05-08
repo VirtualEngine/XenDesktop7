@@ -4,19 +4,29 @@ function Get-TargetResource {
     [CmdletBinding()]
     [OutputType([System.Collections.Hashtable])]
     param (
-        [Parameter(Mandatory)] [ValidateSet('DesktopVDA','SessionVDA')] [System.String] $Role, # Studio?
+        [Parameter(Mandatory)] [ValidateSet('DesktopVDA','SessionVDA')] [System.String] $Role,
         [Parameter(Mandatory)] [ValidateNotNullOrEmpty()] [System.String] $SourcePath,
         [Parameter()] [AllowNull()] [System.Management.Automation.PSCredential] $Credential,
-        [Parameter()] [ValidateNotNullOrEmpty()] [ValidateSet('Present','Absent')] $Ensure = 'Present'
+        [Parameter()] [ValidateNotNullOrEmpty()] [ValidateSet('Present','Absent')] [System.String] $Ensure = 'Present',
+        [Parameter()] [ValidateNotNull()] [System.Boolean] $InstallReceiver = $false,
+        [Parameter()] [ValidateNotNull()] [System.Boolean] $EnableRemoteAssistance = $true,
+        [Parameter()] [ValidateNotNull()] [System.Boolean] $Optimize = $false,
+        [Parameter()] [ValidateNotNull()] [System.Boolean] $InstallDesktopExperience = $true,
+        [Parameter()] [ValidateNotNull()] [System.Boolean] $EnableRealTimeTransport = $false
     )
     process {
         $targetResource = @{
             Role = $Role;
             SourcePath = $SourcePath;
             Credential = $Credential;
+            InstallReceiver = $InstallReceiver;
+            EnableRemoteAssistance = $EnableRemoteAssistance;
+            Optimize = $Optimize;
+            InstallDesktopExperience = $InstallDesktopExperience;
+            EnableRealTimeTransport = $EnableRealTimeTransport;
             Ensure = 'Absent';
         }
-        if (GetXDInstalledProduct -Role $Role) {
+        if (TestXDInstalledRole -Role $Role) {
             $targetResource['Ensure'] = 'Present';
         }       
         return $targetResource;
@@ -30,7 +40,12 @@ function Test-TargetResource {
         [Parameter(Mandatory)] [ValidateSet('DesktopVDA','SessionVDA')] [System.String] $Role,
         [Parameter(Mandatory)] [ValidateNotNullOrEmpty()] [System.String] $SourcePath,
         [Parameter()] [AllowNull()] [System.Management.Automation.PSCredential] $Credential,
-        [Parameter()] [ValidateNotNullOrEmpty()] [ValidateSet('Present','Absent')] $Ensure = 'Present'
+        [Parameter()] [ValidateNotNullOrEmpty()] [ValidateSet('Present','Absent')] [System.String] $Ensure = 'Present',
+        [Parameter()] [ValidateNotNull()] [System.Boolean] $InstallReceiver = $false,
+        [Parameter()] [ValidateNotNull()] [System.Boolean] $EnableRemoteAssistance = $true,
+        [Parameter()] [ValidateNotNull()] [System.Boolean] $Optimize = $false,
+        [Parameter()] [ValidateNotNull()] [System.Boolean] $InstallDesktopExperience = $true,
+        [Parameter()] [ValidateNotNull()] [System.Boolean] $EnableRealTimeTransport = $false
     )
     process {
         $targetResource = Get-TargetResource @PSBoundParameters;
@@ -45,7 +60,12 @@ function Set-TargetResource {
         [Parameter(Mandatory)] [ValidateSet('DesktopVDA','SessionVDA')] [System.String] $Role,
         [Parameter(Mandatory)] [ValidateNotNullOrEmpty()] [System.String] $SourcePath,
         [Parameter()] [AllowNull()] [System.Management.Automation.PSCredential] $Credential,
-        [Parameter()] [ValidateNotNullOrEmpty()] [ValidateSet('Present','Absent')] $Ensure = 'Present',
+        [Parameter()] [ValidateNotNullOrEmpty()] [ValidateSet('Present','Absent')] [System.String] $Ensure = 'Present',
+        [Parameter()] [ValidateNotNull()] [System.Boolean] $InstallReceiver = $false,
+        [Parameter()] [ValidateNotNull()] [System.Boolean] $EnableRemoteAssistance = $true,
+        [Parameter()] [ValidateNotNull()] [System.Boolean] $Optimize = $false,
+        [Parameter()] [ValidateNotNull()] [System.Boolean] $InstallDesktopExperience = $true,
+        [Parameter()] [ValidateNotNull()] [System.Boolean] $EnableRealTimeTransport = $false,
         [Parameter()] [ValidateNotNullOrEmpty()] [System.String] $LogPath = (Join-Path -Path $env:TMP -ChildPath '\Citrix\XenDesktop Installer')
     )
     begin {
@@ -57,20 +77,29 @@ function Set-TargetResource {
         Write-Verbose ($localizedData.LogDirectorySet -f $logPath);
         Write-Verbose ($localizedData.SourceDirectorySet -f $SourcePath);
         $installMediaPath = ResolveXDSetupMedia -Role $Role -SourcePath $SourcePath;
+
+        $resolveXDVdaSetupArgumentParams = @{
+            Role = $Role;
+            LogPath = $LogPath
+        }
         if ($Ensure -eq 'Present') {
             Write-Verbose ($localizedData.InstallingRole -f $Role);
-            $installArguments = ResolveXDVdaSetupArguments  -Role $Role -LogPath $LogPath;
+            $resolveXDVdaSetupArgumentParams['InstallReceiver'] = $InstallReceiver;
+            $resolveXDVdaSetupArgumentParams['EnableRemoteAssistance'] = $EnableRemoteAssistance;
+            $resolveXDVdaSetupArgumentParams['Optimize'] = $Optimize;
+            $resolveXDVdaSetupArgumentParams['InstallDesktopExperience'] = $InstallDesktopExperience;
+            $resolveXDVdaSetupArgumentParams['EnableRealTimeTransport'] = $EnableRealTimeTransport;
+            $installArguments = ResolveXDVdaSetupArguments @resolveXDVdaSetupArgumentParams;
         }
         else {
             ## Uninstall
             Write-Verbose ($localizedData.UninstallingRole -f $Role);
-            $installArguments = ResolveXDVdaSetupArguments  -Role $Role -LogPath $LogPath -Uninstall;
+            $resolveXDVdaSetupArgumentParams['InstallReceiver'] = $InstallReceiver;
+            $installArguments = ResolveXDVdaSetupArguments @resolveXDVdaSetupArgumentParams -Uninstall;
         }
         $exitCode = StartWaitProcess -FilePath $installMediaPath -ArgumentList $installarguments -Credential $Credential;
-        # Check for reboot
-        if ($exitCode -eq 3010) {
-            $global:DSCMachineStatus = 1;
-        }
+        # The Citrix XenDesktop requires a reboot
+        $global:DSCMachineStatus = 1;
     } #end process
 } #end function Set-TargetResource
 
@@ -88,32 +117,50 @@ function ResolveXDVdaSetupArguments {
         [Parameter(Mandatory)] [ValidateSet('DesktopVDA','SessionVDA')] [System.String] $Role,
         ## Citrix XenDesktop 7.x installation media path.
         [Parameter()] [ValidateNotNullOrEmpty()] [System.String] $LogPath = (Join-Path -Path $env:TMP -ChildPath '\Citrix\XenDesktop Installer'),
+        [Parameter()] [ValidateNotNull()] [System.Boolean] $InstallReceiver = $false,
+        [Parameter()] [ValidateNotNull()] [System.Boolean] $EnableRemoteAssistance = $true,
+        [Parameter()] [ValidateNotNull()] [System.Boolean] $Optimize = $false,
+        [Parameter()] [ValidateNotNull()] [System.Boolean] $InstallDesktopExperience = $true,
+        [Parameter()] [ValidateNotNull()] [System.Boolean] $EnableRealTimeTransport = $false,
         ## Uninstall Citrix XenDesktop 7.x product.
         [Parameter()] [System.Management.Automation.SwitchParameter] $Uninstall
     )
     process {
         $arguments = New-Object -TypeName System.Collections.ArrayList -ArgumentList @();
         $arguments.AddRange(@('/QUIET', '/LOGPATH', "`"$LogPath`"", '/NOREBOOT', '/COMPONENTS'));
-        $arguments.AddRange(@('VDA,PLUGINS'));
+        if ($InstallReceiver) {
+            [ref] $null = $arguments.AddRange(@('VDA,PLUGINS'));
+        }
+        else { 
+            [ref] $null = $arguments.Add('VDA');
+        }
         
         if ($Uninstall) {
             [ref] $null = $arguments.Add('/REMOVE');
         }
         else {
             ## Additional install parameters per role
-            switch ($Role) {
-                { @('SessionVDA','DesktopVDA') -contains $_ } {
-                    $arguments.AddRange(@('/OPTIMIZE', '/ENABLE_HDX_PORTS', '/ENABLE_REAL_TIME_TRANSPORT', '/ENABLE_REMOTE_ASSISTANCE'));
+            [ref] $null = $arguments.Add('/ENABLE_HDX_PORTS');
+            if ($EnableRemoteAssistance -eq $true) {
+                [ref] $null = $arguments.Add('/ENABLE_REMOTE_ASSISTANCE');
+            }
+            if ($Optimize) {
+                [ref] $null = $arguments.Add('/OPTIMIZE');
+            }
+            if (-not $InstalLDesktopExperience) {
+                [ref] $null = $arguments.Add('/NODESKTOPEXPERIENCE');
+            }
+            if ($EnableRealTimeTransport) {
+                [ref] $null = $arguments.Add('/ENABLE_REAL_TIME_TRANSPORT');
+            }
+            if ($Role -eq 'DesktopVDA') {
+                if ((Get-WmiObject -ClassName 'Win32_OperatingSystem').Caption -match 'Server') {
+                    [ref] $null = $arguments.Add('/SERVERVDI');
                 }
-                'DesktopVDA' {
-                    if ((Get-WmiObject -ClassName 'Win32_OperatingSystem').Caption -match 'Server') {
-                        [ref] $null = $arguments.Add('/SERVERVDI');
-                    }
-                }
-            } #end switch Role
+            }
         }
         return [System.String]::Join(' ', $arguments.ToArray());
     } #end process
-} #end function ResolveXDServerSetupArguments 
+} #end function ResolveXDServerSetupArguments
 
 #endregion Private Functions
