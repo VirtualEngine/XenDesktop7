@@ -1,5 +1,5 @@
 TOPIC
-    about_cXD7Licensing
+    about_cXD7Role
 
 SHORT DESCRIPTION
 
@@ -13,4 +13,4 @@ CREDITS
     Resource provider (http://blogs.citrix.com/2014/10/09/tech-preview-xendesktop-desired-state-configuration-resource-provider/)
 
 KEYWORDS
-    DSC, DSC Resource, Citrix, XenDesktop, Licensing
+    DSC, DSC Resource, Citrix, XenDesktop, Role

@@ -1,5 +1,5 @@
 TOPIC
-    about_cXD7Site
+    about_cXD7VDAFeature
 
 SHORT DESCRIPTION
 
@@ -10,4 +10,4 @@ EXAMPLES
 CREDITS
 
 KEYWORDS
-    DSC, DSC Resource, Citrix, XenDesktop, Site
+    DSC, DSC Resource, Citrix, XenDesktop, VDA
