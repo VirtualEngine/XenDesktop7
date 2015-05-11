@@ -1,5 +1,20 @@
 #region Private Functions
 
+function GetHostname {
+    [CmdletBinding()]
+    [OutputType([System.String])]
+    param ( )
+    process {
+        $globalIpProperties = [System.Net.NetworkInformation.IPGlobalProperties]::GetIPGlobalProperties();
+        if ($globalIpProperties.DomainName) {
+            return '{0}.{1}' -f $globalIpProperties.HostName, $globalIpProperties.DomainName;
+        }
+        else {
+            return $globalIpProperties.HostName;
+        }
+    } #end process
+} #end function GetHostname
+
 function GetRegistryValue {
     <#
     .SYNOPSIS
