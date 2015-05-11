@@ -73,11 +73,10 @@ function Test-TargetResource {
     )
     process {
         if ($Ensure -eq 'Absent') {
-            ## Not supported and will always return $true
+            ## Not supported and we will always return $true
             Write-Warning $localizedData.RemovingLicenseServerProperties;
         }
         else {
-
             $targetResource = Get-TargetResource @PSBoundParameters;
             if (Compare-Object -ReferenceObject $targetResource -DifferenceObject $PSBoundParameters -Property LicenseServer, LicenseServerPort, LicenseEdition, LicenseModel, Ensure) {
                 return $false;

@@ -1,5 +1,23 @@
 #region Private Functions
 
+function AddInvokeScriptBlockCredentials {
+    <#
+    .SYNOPSIS
+        Adds the required Invoke-Command parameters for loopback processing with CredSSP.
+    #>
+    [CmdletBinding()]
+    [OutputType([System.Collections.Hashtable])]
+    param (
+        [Parameter(Mandatory)] [System.Collections.Hashtable] $Hashtable,
+        [Parameter(Mandatory)] [System.Management.Automation.PSCredential] $Credential
+    )
+    process {
+        $Hashtable['ComputerName'] = $env:COMPUTERNAME;
+        $Hashtable['Credential'] = $Credential;
+        $Hashtable['Authentication'] = 'Credssp';
+    }
+} #end function AddInvokeScriptBlockCredentials
+
 function GetHostname {
     [CmdletBinding()]
     [OutputType([System.String])]
