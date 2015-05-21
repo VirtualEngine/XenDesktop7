@@ -19,28 +19,22 @@ function Get-TargetResource {
             param (
                 [System.String] $AdminAddress
             )
+            $VerbosePreference = 'SilentlyContinue';
             Import-Module 'C:\Program Files\Citrix\XenDesktopPoshSdk\Module\Citrix.XenDesktop.Admin.V1\Citrix.XenDesktop.Admin\Citrix.XenDesktop.Admin.psd1';
-            try {
-                ## ErrorAction is ignored :@
-                $xdSite = Get-XDSite -AdminAddress $AdminAddress -ErrorAction Stop;
-                $xdCustomSite = [PSCustomObject] @{
-                    SiteName = $xdSite.Name;
-                    Controllers = $xdSite | Select-Object -ExpandProperty Controllers;
-                }
-                return $xdCustomSite;
+            $xdSite = Get-XDSite -AdminAddress $AdminAddress -ErrorAction Stop;
+            $xdCustomSite = [PSCustomObject] @{
+                SiteName = $xdSite.Name;
+                Controllers = $xdSite | Select-Object -ExpandProperty Controllers;
             }
-            catch {
-                Write-Error $_;
-            }
+            return $xdCustomSite;
         } #end scriptBlock
-
         $invokeCommandParams = @{
-            ComputerName = $env:COMPUTERNAME;
-            Credential = $Credential;
-            Authentication = 'Credssp';
             ScriptBlock = $scriptBlock;
             ArgumentList = @($ExistingControllerName);
-            ErrorAction = 'SilentlyContinue';
+            ErrorAction = 'Stop';
+        }
+        if ($Credential) {
+            AddInvokeScriptBlockCredentials -Hashtable $invokeCommandParams -Credential $Credential;
         }
         Write-Verbose ($localizedData.InvokingScriptBlockWithParams -f [System.String]::Join("','", $invokeCommandParams['ArgumentList']));
         $xdSite = Invoke-Command @invokeCommandParams;
@@ -73,10 +67,15 @@ function Test-TargetResource {
     )
     process {
         $xdSite = Get-TargetResource @PSBoundParameters;
+        $localHostName = GetHostName;
         if ($xdSite.SiteName -eq $SiteName -and $xdSite.Ensure -eq $Ensure) {
+            Write-Verbose ($localizedData.ResourceInDesiredState -f $localHostName);
             return $true;
         }
-        return $false;
+        else {
+            Write-Verbose ($localizedData.ResourceNotInDesiredState -f $localHostName);
+            return $false;
+        }
     } #end process
 } #end function Test-TargetResource
 
@@ -102,6 +101,7 @@ function Set-TargetResource {
                 [System.String] $Ensure,
                 [System.Management.Automation.PSCredential] $Credential
             )
+            $VerbosePreference = 'SilentlyContinue';
             Import-Module 'C:\Program Files\Citrix\XenDesktopPoshSdk\Module\Citrix.XenDesktop.Admin.V1\Citrix.XenDesktop.Admin\Citrix.XenDesktop.Admin.psd1';
             Remove-Variable -Name CitrxHLSSdkContext -Force; ##
             if ($Ensure -eq 'Present') {
@@ -127,12 +127,12 @@ function Set-TargetResource {
         };
         $localHostName = GetHostName;
         $invokeCommandParams = @{
-            ComputerName = $env:COMPUTERNAME;
-            Credential = $Credential;
-            Authentication = 'Credssp';
             ScriptBlock = $scriptBlock;
             ArgumentList = @($ExistingControllerName, $localHostName, $Ensure, $Credential);
-            ErrorAction = 'SilentlyContinue';
+            ErrorAction = 'Stop';
+        }
+        if ($Credential) {
+            AddInvokeScriptBlockCredentials -Hashtable $invokeCommandParams -Credential $Credential;
         }
         if ($Ensure -eq 'Present') {
             Write-Verbose ($localizedData.AddingXDController -f $localHostName, $xdSite.SiteName);

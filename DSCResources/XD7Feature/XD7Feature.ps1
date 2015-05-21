@@ -34,8 +34,14 @@ function Test-TargetResource {
     )
     process {
         $targetResource = Get-TargetResource @PSBoundParameters;
-        if ($Ensure -eq $targetResource.Ensure) { return $true; }
-        else { return $false; }
+        if ($Ensure -eq $targetResource.Ensure) {
+            Write-Verbose ($localizedData.ResourceInDesiredState -f $Role);
+            return $true;
+        }
+        else {
+            Write-Verbose ($localizedData.ResourceNotInDesiredState -f $Role);
+            return $false;
+        }
     } #end process
 } #end function Test-TargetResource
 

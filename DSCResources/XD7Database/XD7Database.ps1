@@ -39,10 +39,12 @@ function Test-TargetResource {
         $targetResource = Get-TargetResource @PSBoundParameters;
         if ($targetResource.DatabaseName -eq $DatabaseName) {
             Write-Verbose ($localizedData.DatabaseDoesExist -f $DataStore, $DatabaseName, $DatabaseServer);
+            Write-Verbose ($localizedData.ResourceInDesiredState -f $DatabaseName);
             return $true;
         }
         else {
             Write-Verbose ($localizedData.DatabaseDoesNotExist -f $DataStore, $DatabaseName, $DatabaseServer);
+            Write-Verbose ($localizedData.ResourceNotInDesiredState -f $DatabaseName);
             return $false;
         }
     } #end process
@@ -67,20 +69,22 @@ function Set-TargetResource {
         ## The New-XDDatabase cmdlet needs to be run with domain credentials :(
         $scriptBlock = {
             param (
-                $DatabaseCredentials,
-                $SiteName,
-                $DatabaseServer,
-                $DataStore,
-                $DatabaseName
+                [System.Management.Automation.PSCredential] $DatabaseCredentials,
+                [System.String] $SiteName,
+                [System.String] $DatabaseServer,
+                [System.String] $DataStore,
+                [System.String] $DatabaseName
             )
             Import-Module 'C:\Program Files\Citrix\XenDesktopPoshSdk\Module\Citrix.XenDesktop.Admin.V1\Citrix.XenDesktop.Admin\Citrix.XenDesktop.Admin.psd1';
             New-XDDatabase -DatabaseServer $DatabaseServer -DatabaseName $DatabaseName -DataStore $DataStore -SiteName $SiteName -DatabaseCredentials $DatabaseCredentials;
         } #end scriptBlock
         $invokeCommandParams = @{
-            ComputerName = $env:COMPUTERNAME;
-            Credential = $Credential;
             ScriptBlock = $scriptBlock;
             ArgumentList = @($Credential, $SiteName, $DatabaseServer, $DataStore, $DatabaseName);
+            ErrorAction = 'Stop';
+        }
+        if ($Credential) {
+            AddInvokeScriptBlockCredentials -Hashtable $invokeCommandParams -Credential $Credential;
         }
         Write-Verbose ($localizedData.InvokingScriptBlock -f [System.String]::Join("','", $invokeCommandParams['ArgumentList']));
         $invokeCommandResult = Invoke-Command @invokeCommandParams;
@@ -99,7 +103,7 @@ function TestMSSQLDatabase {
     param (
         [Parameter(Mandatory)] [ValidateNotNullOrEmpty()] [System.String] $DatabaseServer,
         [Parameter(Mandatory)] [ValidateNotNullOrEmpty()] [System.String] $DatabaseName,
-        [Parameter(Mandatory)] [ValidateNotNull()] [System.Management.Automation.PSCredential] $Credential
+        [Parameter()] [AllowNull()] [System.Management.Automation.PSCredential] $Credential
     )
     process {
         $scriptBlock = {
@@ -127,15 +131,15 @@ function TestMSSQLDatabase {
             }
         } #end scriptblock
         $invokeCommandParams = @{
-            ComputerName = $env:COMPUTERNAME;
-            Credential = $Credential;
-            Authentication = 'Credssp';
             ScriptBlock = $scriptBlock;
             ArgumentList = @($DatabaseServer, $DatabaseName);
             ErrorAction = 'Stop';
         }
-        Write-Verbose ('Invoking script block with ''{0}'' parameters.' -f [System.String]::Join("','", $invokeCommandParams['ArgumentList']));
-        return Invoke-Command  @invokeCommandParams;
+        if ($Credential) {
+            AddInvokeScriptBlockCredentials -Hashtable $invokeCommandParams -Credential $Credential;
+        }
+        Write-Verbose ($localizedData.InvokingScriptBlockWithParams -f [System.String]::Join("','", $invokeCommandParams['ArgumentList']));
+        return Invoke-Command @invokeCommandParams;
     } #end process
 } #end function TestMSSQLDatabase
 

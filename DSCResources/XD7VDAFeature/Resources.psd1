@@ -10,4 +10,6 @@ ConvertFrom-StringData @'
     ProcessLaunched = Process Id '{0}' launched.
     WaitingForProcessToExit = Waiting for process Id '{0}' to exit..
     ProcessExited = Process Id '{0}' exited with code '{1}'.
+    ResourceInDesiredState = Citrix XenDesktop 7.x VDA Feature '{0}' is in the desired state.
+    ResourceNotInDesiredState = Citrix XenDesktop 7.x VDA Feature '{0}' is NOT in the desired state.
 '@

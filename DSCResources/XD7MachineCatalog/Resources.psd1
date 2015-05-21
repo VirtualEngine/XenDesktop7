@@ -4,7 +4,7 @@ ConvertFrom-StringData @'
     CreatingMachineCatalog = Creating Citrix XenDesktop 7.x Machine Catalog '{0}'.
     UpdatingMachineCatalog = Updating Citrix XenDesktop 7.x Machine Catalog '{0}'.
     RemovingMachineCatalog = Removing Citrix XenDesktop 7.x Machine Catalog '{0}'.
-    InvokingScriptBlockWithParams = Invoking script block with '{0}' parameters.
+    InvokingScriptBlockWithParams = Invoking script block with parameters: '{0}'.
     ResourceInDesiredState = Citrix XenDesktop 7.x Machine Catalog '{0}' is in the desired state.
     ResourceNotInDesiredState = Citrix XenDesktop 7.x Machine Catalog '{0}' is NOT in the desired state.
 '@

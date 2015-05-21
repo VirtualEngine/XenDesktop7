@@ -40,7 +40,14 @@ function Test-TargetResource {
                 $targetResource['Ensure'] = 'Present';
             }
         }
-        return $targetResource.Ensure -eq $Ensure;
+        if ($targetResource.Ensure -eq $Ensure) {
+            Write-Verbose $localizedData.ResourceInDesiredState;
+            return $true;
+        }
+        else {
+            Write-Verbose $localizedData.ResourceNotInDesiredState;
+            return $false;
+        }
     } #end process
 } #end Test-TargetResource
 

@@ -26,11 +26,11 @@ function Get-TargetResource {
                 [System.String] $Name
             )
             Add-PSSnapin -Name 'Citrix.Broker.Admin.V2' -ErrorAction Stop;
-            $brokerCatalog = Get-BrokerCatalog -Name $Name;
+            $brokerCatalog = Get-BrokerCatalog -Name $Name -ErrorAction SilentlyContinue;
             $targetResource = @{
                 Name = $brokerCatalog.Name;
-                Allocation = $brokerCatalog.AllocationType.ToString();
-                Provisioning = $brokerCatalog.ProvisioningType.ToString();
+                Allocation = [System.String] $brokerCatalog.AllocationType;
+                Provisioning = [System.String] $brokerCatalog.ProvisioningType;
                 Description = $brokerCatalog.Description;
                 PvsAddress = $brokerCatalog.PvsAddress;
                 PvsDomain = $brokerCatalog.PvsDomain;
@@ -130,10 +130,10 @@ function Set-TargetResource {
             )
             data localizedData {
                 ConvertFrom-StringData @'    
-    ChangingMachineCatalogUnsupportedWarning = Changing '{0}' Citrix XenDesktop 7.x Machine Catalog '{1}' type is not supported. Machine catalog will be recreated.
-    CreatingMachineCatalog = Creating Citrix XenDesktop 7.x Machine Catalog '{0}'.
-    UpdatingMachineCatalog = Updating Citrix XenDesktop 7.x Machine Catalog '{0}'.
-    RemovingMachineCatalog = Removing Citrix XenDesktop 7.x Machine Catalog '{0}'.
+                    ChangingMachineCatalogUnsupportedWarning = Changing '{0}' Citrix XenDesktop 7.x Machine Catalog '{1}' type is not supported. Machine catalog will be recreated.
+                    CreatingMachineCatalog = Creating Citrix XenDesktop 7.x Machine Catalog '{0}'.
+                    UpdatingMachineCatalog = Updating Citrix XenDesktop 7.x Machine Catalog '{0}'.
+                    RemovingMachineCatalog = Removing Citrix XenDesktop 7.x Machine Catalog '{0}'.
 '@
             }
             Add-PSSnapin -Name 'Citrix.Broker.Admin.V2' -ErrorAction Stop;

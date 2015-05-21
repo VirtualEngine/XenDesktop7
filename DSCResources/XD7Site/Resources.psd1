@@ -1,6 +1,8 @@
 ConvertFrom-StringData @'    
     XenDesktopSDKNotFoundError = The Citrix XenDesktop 7.x Powershell SDK was not found.
-    CreatingXDSite = Creating Citrix XenDesktop 7.x {0} site.
+    CreatingXDSite = Creating Citrix XenDesktop 7.x Site '{0}'.
     InvokingScriptBlock = Invoking script block.
-    InvokingScriptBlockWithParams = Invoking script block with '{0}' parameters.
+    ResourceInDesiredState = Citrix XenDesktop 7.x Site '{0}' is in the desired state.
+    ResourceNotInDesiredState = Citrix XenDesktop 7.x Site '{0}' is NOT in the desired state.
+    InvokingScriptBlockWithParams = Invoking script block with parameters: '{0}'.
 '@
