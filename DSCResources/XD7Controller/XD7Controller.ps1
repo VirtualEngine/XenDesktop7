@@ -36,6 +36,8 @@ function Get-TargetResource {
         if ($Credential) {
             AddInvokeScriptBlockCredentials -Hashtable $invokeCommandParams -Credential $Credential;
         }
+        ## Overwrite the local ComputerName returned by AddInvokeScriptBlockCredentials
+        $invokeCommandParams['ComputerName'] = $ExistingControllerName;
         Write-Verbose ($localizedData.InvokingScriptBlockWithParams -f [System.String]::Join("','", $invokeCommandParams['ArgumentList']));
         $xdSite = Invoke-Command @invokeCommandParams;
         $targetResource = @{
@@ -97,16 +99,16 @@ function Set-TargetResource {
         $scriptBlock = {
             param (
                 [System.String] $AdminAddress,
-                [System.String] $ExistingControllerName,
+                [System.String] $ControllerName,
                 [System.String] $Ensure,
                 [System.Management.Automation.PSCredential] $Credential
             )
             $VerbosePreference = 'SilentlyContinue';
             Import-Module 'C:\Program Files\Citrix\XenDesktopPoshSdk\Module\Citrix.XenDesktop.Admin.V1\Citrix.XenDesktop.Admin\Citrix.XenDesktop.Admin.psd1';
-            Remove-Variable -Name CitrxHLSSdkContext -Force; ##
+            Remove-Variable -Name CitrxHLSSdkContext -Force -ErrorAction SilentlyContinue; ##
             if ($Ensure -eq 'Present') {
                 $addXDControllerParams = @{
-                    AdminAddress = $ExistingControllerName;
+                    AdminAddress = $ControllerName;
                     SiteControllerAddress = $AdminAddress;
                 }
                 if ($Credential) {
@@ -116,7 +118,6 @@ function Set-TargetResource {
             }
             else {
                 $removeXDControllerParams = @{
-                    AdminAddress = $AdminAddress;
                     ControllerName = $ExistingControllerName;
                 }
                 if ($Credential) {
@@ -125,7 +126,7 @@ function Set-TargetResource {
                 Remove-XDController @removeXDControllerParams -ErrorAction Stop;
             }
         };
-        $localHostName = GetHostName;
+        $localHostName = (GetHostName);
         $invokeCommandParams = @{
             ScriptBlock = $scriptBlock;
             ArgumentList = @($ExistingControllerName, $localHostName, $Ensure, $Credential);
@@ -134,6 +135,9 @@ function Set-TargetResource {
         if ($Credential) {
             AddInvokeScriptBlockCredentials -Hashtable $invokeCommandParams -Credential $Credential;
         }
+        ## Override the local computer name returned by AddInvokeScriptBlockCredentials wiht
+        ## the existing XenDesktop controller address
+        $invokeCommandParams['ComputerName'] = $ExistingControllerName;
         if ($Ensure -eq 'Present') {
             Write-Verbose ($localizedData.AddingXDController -f $localHostName, $xdSite.SiteName);
         }
