@@ -49,7 +49,11 @@ function GetRegistryValue {
         [Parameter(Mandatory)] [ValidateNotNullOrEmpty()] [System.String] $Name
     )
     process {
-        return Get-ItemProperty -Path $Key | Select-Object -ExpandProperty $Name;
+        $itemProperty = Get-ItemProperty -Path $Key -ErrorAction SilentlyContinue;
+        if ($itemProperty -and $itemProperty.Name) {
+            return $itemProperty | Select-Object -ExpandProperty Name;
+        }
+        return '';
     }
 } #end function GetRegistryValue
 
@@ -160,6 +164,23 @@ function ThrowInvalidProgramException {
     $errorRecord = New-Object -TypeName 'System.Management.Automation.ErrorRecord' -ArgumentList $exception, $ErrorId, $errorCategory, $null;
     throw $errorRecord;
 } #end function ThrowInvalidProgramException
+
+function ThrowOperationCanceledException {
+    <#
+    .SYNOPSIS
+        Throws terminating error of category InvalidOperation with specified errorId and errorMessage.
+    #>
+    param(
+        [Parameter(Mandatory)] [System.String] $ErrorId,
+        [Parameter(Mandatory)] [System.String] $ErrorMessage
+    )
+    $errorCategory = [System.Management.Automation.ErrorCategory]::InvalidOperation;
+    $exception = New-Object -TypeName 'System.OperationCanceledException' -ArgumentList $ErrorMessage;
+    $errorRecord = New-Object -TypeName 'System.Management.Automation.ErrorRecord' -ArgumentList $exception, $ErrorId, $errorCategory, $null;
+    throw $errorRecord;
+} #end function ThrowOperationCanceledException
+
+#endregion Private Functions
 
 function TestXDInstalledRole {
     <#
