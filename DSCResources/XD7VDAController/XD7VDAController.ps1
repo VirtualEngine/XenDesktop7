@@ -8,10 +8,13 @@ function Get-TargetResource {
         [Parameter()] [ValidateSet('Present','Absent')] [System.String] $Ensure = 'Present'
     )
     process {
-        $listOfDDCs = GetRegistryValue -Key 'HKLM:\SOFTWARE\Citrix\VirtualDesktopAgent' -Name 'ListOfDDCs';
         $targetResource = @{
-            Name = $listOfDDCs.Split(' ');
+            Name = '';
             Ensure = $Ensure;
+        }
+        $listOfDDCs = GetRegistryValue -Key 'HKLM:\SOFTWARE\Citrix\VirtualDesktopAgent' -Name 'ListOfDDCs';
+        if ($listOfDDCs) {
+            $targetResource['Name'] = $listOfDDCs.Split(' ');
         }
         return $targetResource;
     } #end process
@@ -60,7 +63,9 @@ function Set-TargetResource {
     process {
         $listOfDDCs = GetRegistryValue -Key 'HKLM:\SOFTWARE\Citrix\VirtualDesktopAgent' -Name 'ListOfDDCs';
         $ddcs = New-Object -TypeName 'System.Collections.ArrayList' -ArgumentList @();
-        $ddcs.AddRange($listOfDDCs.Split(' '));
+        if (-not [System.String]::IsNullOrEmpty($listOfDDCs)) {
+            $ddcs.AddRange($listOfDDCs.Split(' '));
+        }
 
         ## Ensure that the controller is in the list
         if ($Ensure -eq 'Present') {
