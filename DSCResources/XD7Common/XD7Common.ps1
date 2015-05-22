@@ -49,9 +49,9 @@ function GetRegistryValue {
         [Parameter(Mandatory)] [ValidateNotNullOrEmpty()] [System.String] $Name
     )
     process {
-        $itemProperty = Get-ItemProperty -Path $Key -ErrorAction SilentlyContinue;
-        if ($itemProperty -and $itemProperty.Name) {
-            return $itemProperty | Select-Object -ExpandProperty Name;
+        $itemProperty = Get-ItemProperty -Path $Key -Name $Name -ErrorAction SilentlyContinue;
+        if ($itemProperty.$Name) {
+            return $itemProperty.$Name;
         }
         return '';
     }
