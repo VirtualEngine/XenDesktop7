@@ -58,16 +58,36 @@ function Test-TargetResource {
         foreach ($member in $Members) {
             if ($Ensure -eq 'Present') {
                 ## Ensure that the controller is in the list
-                if ($targetResource.Members -notcontains $member) {
-                    Write-Verbose ($localizedData.MissingMachineCatalogMachine -f $member);
-                    $targetResource['Ensure'] = 'Absent';
+                if (-not $member.Contains('.')) {
+                    ## Machines are stored by their FQDN but we don't have a FQDN, check by NetBIOS name
+                    if ($targetResource.Members -notlike "$member*") {
+                        Write-Verbose ($localizedData.MissingMachineCatalogMachine -f $member);
+                        $targetResource['Ensure'] = 'Absent';
+                    }
+                }
+                else {
+                    ## Check for match by FQDN
+                    if ($targetResource.Members -notcontains $member) {
+                        Write-Verbose ($localizedData.MissingMachineCatalogMachine -f $member);
+                        $targetResource['Ensure'] = 'Absent';
+                    }
                 }
             }
             else {
                 ## Ensure that the controller is NOT in the list
-                if ($targetResource.Members -contains $member) {
-                    Write-Verbose ($localizedData.SurplusMachineCatalogMachine -f $member);
-                    $targetResource['Ensure'] = 'Present';
+                if (-not $member.Contains('.')) {
+                    ## Machines are stored by their FQDN but we don't have a FQDN, check by NetBIOS name
+                    if ($targetResource.Members -like "$member*") {
+                        Write-Verbose ($localizedData.SurplusMachineCatalogMachine -f $member);
+                        $targetResource['Ensure'] = 'Present';
+                    }
+                }
+                else {
+                    ## Check for match by FQDN
+                    if ($targetResource.Members -contains $member) {
+                        Write-Verbose ($localizedData.SurplusMachineCatalogMachine -f $member);
+                        $targetResource['Ensure'] = 'Present';
+                    }
                 }
             }
         } #end foreach member
