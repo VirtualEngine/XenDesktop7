@@ -1,5 +1,5 @@
 ConvertFrom-StringData @'    
-    XenDesktopSDKNotFoundError = The Citrix Powershell Snap-in was not found.
+    XenDesktopSDKNotFoundError = Citrix XenDesktop 7.x Powershell SDK/Snap-in was not found.
     MissingRoleMember = Citrix XenDesktop 7.x account/group '{0}' is missing and will be added.
     SurplusRoleMember = Citrix XenDesktop 7.x account/group '{0}' is surplus and will be removed.
     ResourceInDesiredState = Citrix XenDesktop 7.x Role '{0}' is in the desired state.

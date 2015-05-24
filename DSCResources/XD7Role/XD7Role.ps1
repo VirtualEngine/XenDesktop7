@@ -8,16 +8,15 @@ function Get-TargetResource {
         [Parameter(Mandatory)] [ValidateNotNullOrEmpty()] [System.String[]] $Members,
         [Parameter()] [ValidateSet('Present','Absent')] [System.String] $Ensure = 'Present',
         [Parameter()] [ValidateNotNullOrEmpty()] [System.String] $RoleScope = 'All',
-        [Parameter()] [ValidateNotNull()] [System.Management.Automation.PSCredential] $Credential
+        [Parameter()] [AllowNull()] [System.Management.Automation.PSCredential] $Credential
     )
     begin {
         if (-not (TestXDModule -Name 'Citrix.DelegatedAdmin.Admin.V1' -IsSnapin)) {
-            ThrowInvalidProgramException -ErrorId 'Citrix.DelegatedAdmin.Admin.V1 module not found.' -ErrorMessage $localizedData.XenDesktopSDKNotFoundError;
+            ThrowInvalidProgramException -ErrorId 'Citrix.DelegatedAdmin.Admin.V1' -ErrorMessage $localizedData.XenDesktopSDKNotFoundError;
         }
     }
     process {
         $scriptBlock = {
-            $VerbosePreference = 'Continue';
             Add-PSSnapin -Name 'Citrix.DelegatedAdmin.Admin.V1' -ErrorAction Stop;
             $xdAdminRoleMembers = Get-AdminAdministrator |
                 Select-Object -Property Name -ExpandProperty Rights |
@@ -93,11 +92,11 @@ function Set-TargetResource {
         [Parameter(Mandatory)] [ValidateNotNullOrEmpty()] [System.String[]] $Members,
         [Parameter()] [ValidateSet('Present','Absent')] [System.String] $Ensure = 'Present',
         [Parameter()] [ValidateNotNullOrEmpty()] [System.String] $RoleScope = 'All',
-        [Parameter()] [ValidateNotNull()] [System.Management.Automation.PSCredential] $Credential
+        [Parameter()] [AllowNull()] [System.Management.Automation.PSCredential] $Credential
     )
     begin {
         if (-not (TestXDModule -Name 'Citrix.DelegatedAdmin.Admin.V1' -IsSnapin)) {
-            ThrowInvalidProgramException -ErrorId 'Citrix.DelegatedAdmin.Admin.V1 module not found.' -ErrorMessage $localizedData.XenDesktopSDKNotFoundError;
+            ThrowInvalidProgramException -ErrorId 'Citrix.DelegatedAdmin.Admin.V1' -ErrorMessage $localizedData.XenDesktopSDKNotFoundError;
         }
     }
     process {
