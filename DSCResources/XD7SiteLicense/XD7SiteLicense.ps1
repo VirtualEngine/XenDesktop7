@@ -13,7 +13,7 @@ function Get-TargetResource {
     )
     begin {
         if (-not (TestXDModule -Name 'Citrix.Configuration.Admin.V2' -IsSnapin)) {
-            ThrowInvalidProgramException -ErrorId 'Citrix.Configuration.Admin.V2 module not found.' -ErrorMessage $localizedData.XenDesktopSDKNotFoundError;
+            ThrowInvalidProgramException -ErrorId 'Citrix.Configuration.Admin.V2' -ErrorMessage $localizedData.XenDesktopSDKNotFoundError;
         }
     }
     process {
@@ -41,8 +41,7 @@ function Get-TargetResource {
         if ($Credential) { AddInvokeScriptBlockCredentials -Hashtable $invokeCommandParams -Credential $Credential; }
         else { $invokeCommandParams['ScriptBlock'] = [System.Management.Automation.ScriptBlock]::Create($scriptBlock.ToString().Replace('$using:','$')); }
         Write-Verbose ($localizedData.InvokingScriptBlockWithParams -f [System.String]::Join("','", @($LicenseServer, $LicenseServerPort, $LicenseEdition, $LicenseModel)));
-        $targetResource = Invoke-Command  @invokeCommandParams;
-        return $targetResource;
+        return Invoke-Command @invokeCommandParams;
     } #end process
 } #end function Get-TargetResource
 
@@ -76,7 +75,6 @@ function Test-TargetResource {
                 Write-Verbose $localizedData.ResourceNotInDesiredState;
             }
         }
-        
         return $isInDesiredState;
     } #end process
 } #end function Test-TargetResource
@@ -93,11 +91,10 @@ function Set-TargetResource {
     )
     begin {
         if (-not (TestXDModule -Name 'Citrix.Configuration.Admin.V2' -IsSnapin)) {
-            ThrowInvalidProgramException -ErrorId 'Citrix.Configuration.Admin.V2 module not found.' -ErrorMessage $localizedData.XenDesktopSDKNotFoundError;
+            ThrowInvalidProgramException -ErrorId 'Citrix.Configuration.Admin.V2' -ErrorMessage $localizedData.XenDesktopSDKNotFoundError;
         }
     }
     process {
-        Write-Verbose ($localizedData.SettingLicenseServerProperties -f $Server, $Port, $Edition);
         $scriptBlock = {
             Add-PSSnapin -Name 'Citrix.Configuration.Admin.V2' -ErrorAction Stop;
             $setConfigSiteParams = @{
@@ -106,8 +103,10 @@ function Set-TargetResource {
                 ProductEdition = $using:LicenseEdition;
                 LicensingModel = $using:LicenseModel;
             }
+            Write-Verbose ($localizedData.SettingLicenseServerProperties -f $using:LicenseServer, $using:LicenseServerPort, $using:Edition);
             $xdConfigSite = Set-ConfigSite @setConfigSiteParams;
         } #end scriptBlock
+        
         $invokeCommandParams = @{
             ScriptBlock = $scriptBlock;
             ErrorAction = 'Stop';
@@ -115,6 +114,6 @@ function Set-TargetResource {
         if ($Credential) { AddInvokeScriptBlockCredentials -Hashtable $invokeCommandParams -Credential $Credential; }
         else { $invokeCommandParams['ScriptBlock'] = [System.Management.Automation.ScriptBlock]::Create($scriptBlock.ToString().Replace('$using:','$')); }
         Write-Verbose ($localizedData.InvokingScriptBlockWithParams -f [System.String]::Join("','", @($LicenseServer, $LicenseServerPort, $LicenseEdition, $LicenseModel)));
-        Invoke-Command @invokeCommandParams;
+        return Invoke-Command @invokeCommandParams;
     } #end process
 } #end function Set-TargetResource

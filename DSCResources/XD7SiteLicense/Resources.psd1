@@ -1,5 +1,5 @@
 ConvertFrom-StringData @'    
-    XenDesktopSDKNotFoundError = The Citrix Powershell Snap-in was not found.
+    XenDesktopSDKNotFoundError = Citrix XenDesktop 7.x Powershell SDK/Snap-in was not found.
     SettingLicenseServerProperties = Setting Citrix XenDesktop 7.x Site License Server: '{0}', Port: '{1}', Edition: '{2}' properties.
     RemovingLicenseServerPropertiesWarning = Removing Citrix XenDesktop 7.x Site License Server properties is not supported.
     ResourceInDesiredState = Citrix XenDesktop 7.x Site Licensing is in the desired state.
