@@ -32,6 +32,7 @@ function Get-TargetResource {
             }
             return $targetResource;
         } #end scriptblock
+        
         $invokeCommandParams = @{
             ScriptBlock = $scriptBlock;
             ErrorAction = 'Stop';
