@@ -17,16 +17,13 @@ function Get-TargetResource {
     )
     begin {
         if (-not (TestXDModule -Name 'Citrix.Broker.Admin.V2' -IsSnapin)) {
-            ThrowInvalidProgramException -ErrorId 'Citrix.DelegatedAdmin.Admin.V1 module not found.' -ErrorMessage $localizedData.XenDesktopSDKNotFoundError;
+            ThrowInvalidProgramException -ErrorId 'Citrix.Broker.Admin.V2' -ErrorMessage $localizedData.XenDesktopSDKNotFoundError;
         }
     }
     process {
         $scriptBlock = {
-            param (
-                [System.String] $Name
-            )
             Add-PSSnapin -Name 'Citrix.Broker.Admin.V2' -ErrorAction Stop;
-            $brokerCatalog = Get-BrokerCatalog -Name $Name -ErrorAction SilentlyContinue;
+            $brokerCatalog = Get-BrokerCatalog -Name $using:Name -ErrorAction SilentlyContinue;
             $targetResource = @{
                 Name = $brokerCatalog.Name;
                 Allocation = [System.String] $brokerCatalog.AllocationType;
@@ -46,14 +43,14 @@ function Get-TargetResource {
 
         $invokeCommandParams = @{
             ScriptBlock = $scriptBlock;
-            ArgumentList = @($Name);
             ErrorAction = 'Stop';
         }
-        if ($Credential) {
-            AddInvokeScriptBlockCredentials -Hashtable $invokeCommandParams -Credential $Credential;
-        }
-        Write-Verbose ($localizedData.InvokingScriptBlockWithParams -f [System.String]::Join("','", $invokeCommandParams['ArgumentList']));
-        $targetResource = Invoke-Command  @invokeCommandParams;
+        if ($Credential) { AddInvokeScriptBlockCredentials -Hashtable $invokeCommandParams -Credential $Credential; }
+        else { $invokeCommandParams['ScriptBlock'] = [System.Management.Automation.ScriptBlock]::Create($scriptBlock.ToString().Replace('$using:','$')); }
+        ## Overwrite the local ComputerName returned by AddInvokeScriptBlockCredentials
+        $invokeCommandParams['ComputerName'] = $ExistingControllerName;
+        Write-Verbose ($localizedData.InvokingScriptBlockWithParams -f [System.String]::Join("','", @($Name)));
+        $targetResource = Invoke-Command @invokeCommandParams;
         $targetResource['Ensure'] = $Ensure;
         $targetResource['Credential'] = $Credential;
         return $targetResource;
@@ -112,115 +109,98 @@ function Set-TargetResource {
     )
     begin {
         if (-not (TestXDModule -Name 'Citrix.Broker.Admin.V2' -IsSnapin)) {
-            ThrowInvalidProgramException -ErrorId 'Citrix.DelegatedAdmin.Admin.V1 module not found.' -ErrorMessage $localizedData.XenDesktopSDKNotFoundError;
+            ThrowInvalidProgramException -ErrorId 'Citrix.Broker.Admin.V2' -ErrorMessage $localizedData.XenDesktopSDKNotFoundError;
         }
     }
     process {
         $scriptBlock = {
-            param (
-                [System.String] $Name,
-                [System.String] $Ensure,
-                [System.String] $Allocation,
-                [System.String] $Provisioning,
-                [System.String] $Persistence,
-                [System.Boolean] $IsMultiSession,
-                [System.String] $Description,
-                [System.String] $PvsAddress,
-                [System.String] $PvsDomain
-            )
-            data localizedData {
-                ConvertFrom-StringData @'    
-                    ChangingMachineCatalogUnsupportedWarning = Changing '{0}' Citrix XenDesktop 7.x Machine Catalog '{1}' type is not supported. Machine catalog will be recreated.
-                    CreatingMachineCatalog = Creating Citrix XenDesktop 7.x Machine Catalog '{0}'.
-                    UpdatingMachineCatalog = Updating Citrix XenDesktop 7.x Machine Catalog '{0}'.
-                    RemovingMachineCatalog = Removing Citrix XenDesktop 7.x Machine Catalog '{0}'.
-'@
-            }
             Add-PSSnapin -Name 'Citrix.Broker.Admin.V2' -ErrorAction Stop;
-            $brokerCatalog = Get-BrokerCatalog -Name $Name -ErrorAction SilentlyContinue;
-            if ($Ensure -eq 'Present') {
+            $brokerCatalog = Get-BrokerCatalog -Name $using:Name -ErrorAction SilentlyContinue;
+            if ($using:Ensure -eq 'Present') {
                 if ($brokerCatalog) {
                     $recreateMachineCatalog = $false;
-                    if ($brokerCatalog.AllocationType -ne $Allocation) {
-                        Write-Warning ($localizedData.ChangingMachineCatalogUnsupportedWarning -f $Name, 'Allocation');
+                    if ($brokerCatalog.AllocationType -ne $using:Allocation) {
+                        Write-Warning ($localizedData.ChangingMachineCatalogUnsupportedWarning -f $using:Name, 'Allocation');
                         $recreateMachineCatalog = $true;
                     }
-                    elseif ($brokerCatalog.ProvisioningType -ne $Provisioning) {
-                        Write-Warning ($localizedData.ChangingMachineCatalogUnsupportedWarning -f $Name, 'Provisioning');
+                    elseif ($brokerCatalog.ProvisioningType -ne $using:Provisioning) {
+                        Write-Warning ($localizedData.ChangingMachineCatalogUnsupportedWarning -f $using:Name, 'Provisioning');
                         $recreateMachineCatalog = $true;
                     }
-                    elseif (($brokerCatalog.PersistUserChanges -replace 'On', '') -ne $Persistence) {
-                        Write-Warning ($localizedData.ChangingMachineCatalogUnsupportedWarning -f $Name, 'Persistence');
+                    elseif (($brokerCatalog.PersistUserChanges -replace 'On', '') -ne $using:Persistence) {
+                        Write-Warning ($localizedData.ChangingMachineCatalogUnsupportedWarning -f $using:Name, 'Persistence');
                         $recreateMachineCatalog = $true;
                     }
-                    elseif ($brokerCatalog.SessionSupport -eq 'Multisession' -and $IsMultiSession -ne $true) {
-                        Write-Warning ($localizedData.ChangingMachineCatalogUnsupportedWarning -f $Name, 'Session');
+                    elseif ($brokerCatalog.SessionSupport -eq 'Multisession' -and $using:IsMultiSession -ne $true) {
+                        Write-Warning ($localizedData.ChangingMachineCatalogUnsupportedWarning -f $using:Name, 'Session');
                         $recreateMachineCatalog = $true; 
                     }
             
                     if ($recreateMachineCatalog) {
-                        Write-Verbose ($localizedData.RemovingMachineCatalog -f $Name);
-                        Remove-BrokerCatalog -Name $Name;
+                        Write-Verbose ($localizedData.RemovingMachineCatalog -f $using:Name);
+                        Remove-BrokerCatalog -Name $using:Name;
                         $brokerCatalog = $null;
                     }
                     else {
-                        Write-Verbose ($localizedData.UpdatingMachineCatalog -f $Name);
+                        Write-Verbose ($localizedData.UpdatingMachineCatalog -f $using:Name);
                         $setBrokerCatalogParams = @{
-                            Name = $Name;
-                            Description = $Description;
+                            Name = $using:Name;
+                            Description = $using:Description;
                         }
-                        if ($PvsDomain) { $setBrokerCatalogParams['PvsDomain'] = $PvsDomain; }
-                        if ($PvsAddress) { $setBrokerCatalogParams['PvsAddress'] = $PvsAddress; }
+                        if ($using:PvsDomain) { $setBrokerCatalogParams['PvsDomain'] = $using:PvsDomain; }
+                        if ($using:PvsAddress) { $setBrokerCatalogParams['PvsAddress'] = $using:PvsAddress; }
                         Set-BrokerCatalog @setBrokerCatalogParams;
                     }
                 } #end if brokerCatalog
         
                 if (-not $brokerCatalog) {
                     $newBrokerCatalogParams = @{
-                        Name = $Name;
-                        AllocationType = $Allocation;
+                        Name = $using:Name;
+                        AllocationType = $using:Allocation;
                         SessionSupport = 'SingleSession';
-                        ProvisioningType = $Provisioning;
+                        ProvisioningType = $using:Provisioning;
                         PersistUserChanges = 'Discard';
                     }
-                    if ($Provisioning -eq 'Manual') {
+                    if ($using:Provisioning -eq 'Manual') {
                         $newBrokerCatalogParams['MachinesArePhysical'] = $true;
                     }
-                    if ($Description) {
-                        $newBrokerCatalogParams['Description'] = $Description;
+                    if ($using:Description) {
+                        $newBrokerCatalogParams['Description'] = $using:Description;
                     }
-                    if ($PvsAddress) {
-                        $newBrokerCatalogParams['PvsAddress'] = $PvsAddress;
+                    if ($using:PvsAddress) {
+                        $newBrokerCatalogParams['PvsAddress'] = $using:PvsAddress;
                     }
-                    if ($PvsDomain) {
-                        $newBrokerCatalogParams['PvsDomain'] = $PvsDomain;
+                    if ($using:PvsDomain) {
+                        $newBrokerCatalogParams['PvsDomain'] = $using:PvsDomain;
                     }
-                    if ($IsMultiSession) {
+                    if ($using:IsMultiSession) {
                         $newBrokerCatalogParams['SessionSupport'] = 'MultiSession';
                     }
-                    if ($Persistence -eq 'Local') {
+                    if ($using:Persistence -eq 'Local') {
                         $newBrokerCatalogParams['PersistUserChanges'] = 'OnLocal';
                     }
-                    elseif ($Persistence -eq 'PVD') {
+                    elseif ($using:Persistence -eq 'PVD') {
                         $newBrokerCatalogParams['PersistUserChanges'] = 'OnPvd';
                     }
-                    Write-Verbose ($localizedData.CreatingMachineCatalog -f $Name);
+                    Write-Verbose ($using:localizedData.CreatingMachineCatalog -f $using:Name);
                     New-BrokerCatalog @newBrokerCatalogParams;
                 }
             }
             else {
-                Write-Verbose ($localizedData.RemovingMachineCatalog -f $Name);
-                Remove-BrokerCatalog -Name $Name;
+                Write-Verbose ($localizedData.RemovingMachineCatalog -f $using:Name);
+                Remove-BrokerCatalog -Name $using:Name;
             }
         } #end scriptBlock
+
         $invokeCommandParams = @{
             ScriptBlock = $scriptBlock;
-            ArgumentList = @($Name, $Ensure, $Allocation, $Provisioning, $Persistence, $IsMultiSession, $Description, $PvsAddress, $PvsDomain);
             ErrorAction = 'Stop';
         }
-        if ($Credential) {
-            AddInvokeScriptBlockCredentials -Hashtable $invokeCommandParams -Credential $Credential;
-        }
-        Invoke-Command  @invokeCommandParams;
+        if ($Credential) { AddInvokeScriptBlockCredentials -Hashtable $invokeCommandParams -Credential $Credential; }
+        else { $invokeCommandParams['ScriptBlock'] = [System.Management.Automation.ScriptBlock]::Create($scriptBlock.ToString().Replace('$using:','$')); }
+        ## Overwrite the local ComputerName returned by AddInvokeScriptBlockCredentials
+        $invokeCommandParams['ComputerName'] = $ExistingControllerName;
+        Write-Verbose ($localizedData.InvokingScriptBlockWithParams -f [System.String]::Join("','", @($Name, $Ensure, $Allocation, $Provisioning, $Persistence, $IsMultiSession, $Description, $PvsAddress, $PvsDomain)));
+        Invoke-Command @invokeCommandParams;
     } #end process
 } #end function Set-TargetResource
