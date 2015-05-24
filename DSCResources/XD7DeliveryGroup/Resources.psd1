@@ -1,0 +1,11 @@
+﻿<# XD7DeliveryGroup\Resources.psd1 #>
+ConvertFrom-StringData @'
+    XenDesktopSDKNotFoundError = Citrix XenDesktop 7.x Powershell SDK/Snap-in was not found.
+    InvokingScriptBlockWithParams = Invoking script block with parameters: '{0}'.
+    ImmutablePropertyError = Citrix XenDesktop 7.x property '{0}' cannot be modified post-creation. Remove the object and then recreate.
+    AddingDeliveryGroup = Adding Citrix XenDesktop 7.x Delivery Group '{0}'.
+    RemovingDeliveryGroup = Removing Citrix XenDesktop 7.x Delivery Group '{0}'.
+    UpdatingDeliveryGroup = Creating Citrix XenDesktop 7.x Delivery Group '{0}'.
+    ResourceInDesiredState = Citrix XenDesktop 7.x Delivery Group '{0}' is in the desired state.
+    ResourceNotInDesiredState = Citrix XenDesktop 7.x Delivery Group '{0}' is NOT in the desired state.
+'@
