@@ -74,7 +74,7 @@ function Set-TargetResource {
         $installMediaPath = ResolveXDSetupMedia -Role $Role -SourcePath $SourcePath;
         $exitCode = StartWaitProcess -FilePath $installMediaPath -ArgumentList $installarguments -Credential $Credential;
         # Check for reboot
-        if ($exitCode -eq 3010) {
+        if (($exitCode -eq 3010) -or ($Role -eq 'Controller')) {
             $global:DSCMachineStatus = 1;
         }
     } #end process
