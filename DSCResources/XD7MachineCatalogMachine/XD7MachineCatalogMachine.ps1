@@ -16,13 +16,10 @@ function Get-TargetResource {
     }
     process {
         $scriptBlock = {
-            param (
-                [System.String] $Name
-            )
             Add-PSSnapin -Name 'Citrix.Broker.Admin.V2' -ErrorAction Stop;
-            $brokerMachines = Get-BrokerMachine -CatalogName $Name | Select-Object -ExpandProperty DnsName;
+            $brokerMachines = Get-BrokerMachine -CatalogName $using:Name | Select-Object -ExpandProperty DnsName;
             $targetResource = @{
-                Name = $Name;
+                Name = $using:Name;
                 Members = $brokerMachines;
             }
             return $targetResource;
@@ -30,13 +27,11 @@ function Get-TargetResource {
 
         $invokeCommandParams = @{
             ScriptBlock = $scriptBlock;
-            ArgumentList = @($Name);
             ErrorAction = 'Stop';
         }
-        if ($Credential) {
-            AddInvokeScriptBlockCredentials -Hashtable $invokeCommandParams -Credential $Credential;
-        }
-        Write-Verbose ($localizedData.InvokingScriptBlockWithParams -f [System.String]::Join("','", $invokeCommandParams['ArgumentList']));
+        if ($Credential) { AddInvokeScriptBlockCredentials -Hashtable $invokeCommandParams -Credential $Credential; }
+        else { $invokeCommandParams['ScriptBlock'] = [System.Management.Automation.ScriptBlock]::Create($scriptBlock.ToString().Replace('$using:','$')); }
+        Write-Verbose ($localizedData.InvokingScriptBlockWithParams -f [System.String]::Join("','", @($Name)));
         $targetResource = Invoke-Command  @invokeCommandParams;
         $targetResource['Ensure'] = $Ensure;
         $targetResource['Credential'] = $Credential;
@@ -56,38 +51,22 @@ function Test-TargetResource {
     process {
         $targetResource = Get-TargetResource @PSBoundParameters;
         foreach ($member in $Members) {
-            if ($Ensure -eq 'Present') {
-                ## Ensure that the controller is in the list
-                if (-not $member.Contains('.')) {
-                    ## Machines are stored by their FQDN but we don't have a FQDN, check by NetBIOS name
-                    if ($targetResource.Members -notlike "$member*") {
-                        Write-Verbose ($localizedData.MissingMachineCatalogMachine -f $member);
-                        $targetResource['Ensure'] = 'Absent';
-                    }
-                }
-                else {
-                    ## Check for match by FQDN
-                    if ($targetResource.Members -notcontains $member) {
-                        Write-Verbose ($localizedData.MissingMachineCatalogMachine -f $member);
-                        $targetResource['Ensure'] = 'Absent';
-                    }
+            if ($member.Contains('.')) {
+                ## We have a FQDN and need to match based on NetBIOS name
+                $member = $member.Split('.')[0];
+            }
+            if ($targetResource.Members -match "^$member\.") {
+                ## Machine is in the list
+                if ($Ensure -eq 'Absent') {
+                    Write-Verbose ($localizedData.SurplusMachineCatalogMachine -f $member);
+                    $targetResource['Ensure'] = 'Present';
                 }
             }
             else {
-                ## Ensure that the controller is NOT in the list
-                if (-not $member.Contains('.')) {
-                    ## Machines are stored by their FQDN but we don't have a FQDN, check by NetBIOS name
-                    if ($targetResource.Members -like "$member*") {
-                        Write-Verbose ($localizedData.SurplusMachineCatalogMachine -f $member);
-                        $targetResource['Ensure'] = 'Present';
-                    }
-                }
-                else {
-                    ## Check for match by FQDN
-                    if ($targetResource.Members -contains $member) {
-                        Write-Verbose ($localizedData.SurplusMachineCatalogMachine -f $member);
-                        $targetResource['Ensure'] = 'Present';
-                    }
+                ## Machine is NOT in the list
+                if ($Ensure -eq 'Present') {
+                    Write-Verbose ($localizedData.MissingMachineCatalogMachine -f $member);
+                    $targetResource['Ensure'] = 'Absent';
                 }
             }
         } #end foreach member
@@ -117,44 +96,37 @@ function Set-TargetResource {
     }
     process {
         $scriptBlock = {
-            param (
-                [System.String] $Name,
-                [System.String[]] $Members,
-                [System.String] $Ensure
-            )
-            data localizedData {
-                ConvertFrom-StringData @'
-                    AddingMachineCatalogMachine = Adding machine '{0}' to Citrix XenDesktop 7.x Machine Catalog '{1}'.
-                    RemovingMachineCatalogMachine = Removing machine '{0}' from Citrix XenDesktop 7.x Machine Catalog '{1}'.
-'@
-            }
             Add-PSSnapin -Name 'Citrix.Broker.Admin.V2' -ErrorAction Stop;
-            $brokerMachines = Get-BrokerMachine -CatalogName $Name | Select-Object -ExpandProperty DnsName;
-            foreach ($member in $Members) {
-                if ($Ensure -eq 'Present' -and $brokerMachines -notcontains $member) {
-                    if ($member.Contains('.')) { $member = $member.Split('.')[0]; }
-                    if (-not $brokerCatalog) {
-                        $brokerCatalog = Get-BrokerCatalog -Name $Name;
-                    }
-                    Write-Verbose ($localizedData.AddingMachineCatalogMachine -f $member, $Name);
-                    New-BrokerMachine -CatalogUid $brokerCatalog.Uid -MachineName $member -ErrorAction SilentlyContinue;
+            $brokerMachines = Get-BrokerMachine -CatalogName $using:Name | Select-Object -ExpandProperty DnsName;
+            foreach ($member in $using:Members) {
+                if ($member.Contains('.')) { ## We have a FQDN and need to match based on NetBIOS name
+                    $member = $member.Split('.')[0];
                 }
-                elseif ($Ensure -eq 'Absent' -and $brokerMachines -contains $member) {
-                    Write-Verbose ($localizedData.RemovingMachineCatalogMachine -f $member, $Name);
-                    Get-BrokerMachine -CatalogName $Name | Where-Object DNSName -eq $member | Remove-BrokerMachine;
+                if ($brokerMachines -match "^$member\.") { ## Machine is in the list
+                    if ($using:Ensure -eq 'Absent') {
+                        Write-Verbose ('Removing machine ''{0}'' from Citrix XenDesktop 7.x Machine Catalog ''{1}''.' -f $member, $using:Name);
+                        Get-BrokerMachine -CatalogName $using:Name | Where-Object DNSName -match "^$member\." | Remove-BrokerMachine;
+                    }
+                }
+                else { ## Machine is NOT in the list
+                    if ($using:Ensure -eq 'Present') {
+                        if (-not $brokerCatalog) {
+                            $brokerCatalog = Get-BrokerCatalog -Name $using:Name;
+                        }
+                        Write-Verbose ('Adding machine ''{0}'' to Citrix XenDesktop 7.x Machine Catalog ''{1}''.' -f $member, $using:Name);
+                        New-BrokerMachine -CatalogUid $brokerCatalog.Uid -MachineName $member -ErrorAction SilentlyContinue;
+                    }
                 }
             } #end foreach member
         } #end scriptBlock
 
         $invokeCommandParams = @{
             ScriptBlock = $scriptBlock;
-            ArgumentList = @($Name, $Members, $Ensure);
             ErrorAction = 'Stop';
         }
-        if ($Credential) {
-            AddInvokeScriptBlockCredentials -Hashtable $invokeCommandParams -Credential $Credential;
-        }
-        Write-Verbose ($localizedData.InvokingScriptBlockWithParams -f [System.String]::Join("','", $invokeCommandParams['ArgumentList']));
+        if ($Credential) { AddInvokeScriptBlockCredentials -Hashtable $invokeCommandParams -Credential $Credential; }
+        else { $invokeCommandParams['ScriptBlock'] = [System.Management.Automation.ScriptBlock]::Create($scriptBlock.ToString().Replace('$using:','$')); }
+        Write-Verbose ($localizedData.InvokingScriptBlockWithParams -f [System.String]::Join("','", @($Name, $Members, $Ensure)));
         Invoke-Command  @invokeCommandParams;
     } #end process
 } #end function Set-TargetResource

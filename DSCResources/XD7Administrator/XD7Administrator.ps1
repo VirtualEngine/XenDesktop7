@@ -16,34 +16,30 @@ function Get-TargetResource {
     }
     process {
         $scriptBlock = {
-            param (
-                [System.String] $Name,
-                [System.String] $Enabled,
-                [System.String] $Ensure
-            )
             Add-PSSnapin -Name 'Citrix.DelegatedAdmin.Admin.V1' -ErrorAction Stop;
-            $xdAdministrator = Get-AdminAdministrator -Name $Name -ErrorAction SilentlyContinue;
+            try {
+                $xdAdministrator = Get-AdminAdministrator -Name $using:Name -ErrorAction SilentlyContinue;
+            }
+            catch {}
+
             $targetResource = @{
-                Name = $Name;
+                Name = $using:Name;
                 Enabled = [System.Boolean] $xdAdministrator.Enabled;
                 Ensure = 'Absent';
             };
             if ($xdAdministrator) {
                 $targetResource['Ensure'] = 'Present';
             }
-            return [PSCustomObject] $targetResource;
+            return $targetResource;
         } #end scriptblock
-        
         $invokeCommandParams = @{
             ScriptBlock = $scriptBlock;
-            ArgumentList = @($Name, $Enabled, $Ensure);
             ErrorAction = 'Stop';
         }
-        if ($Credential) {
-            AddInvokeScriptBlockCredentials -Hashtable $invokeCommandParams -Credential $Credential;
-        }
-        Write-Verbose ($localizedData.InvokingScriptBlockWithParams -f [System.String]::Join("','", $invokeCommandParams['ArgumentList']));
-        $targetResource = Invoke-Command @invokeCommandParams;
+        if ($Credential) { AddInvokeScriptBlockCredentials -Hashtable $invokeCommandParams -Credential $Credential; }
+        else { $invokeCommandParams['ScriptBlock'] = [System.Management.Automation.ScriptBlock]::Create($scriptBlock.ToString().Replace('$using:','$')); }
+        Write-Verbose ($localizedData.InvokingScriptBlockWithParams -f [System.String]::Join("','", @($Name, $Enabled, $Ensure)));
+        $targetResource = Invoke-Command  @invokeCommandParams;
         return $targetResource;
     } #end process
 } #end function Get-TargetResource
@@ -59,20 +55,21 @@ function Test-TargetResource {
     )
     process {
         $targetResource = Get-TargetResource @PSBoundParameters;
-        $inCompliance = $true;
-        if ($Ensure -ne $targetResource.Ensure) {
-            $inCompliance = $false;
+        $isInCompliance = $true;
+        if ($Ensure -ne $targetResource['Ensure']) {
+            $isInCompliance = $false;
         }
-        elseif ($Ensure -eq 'Absent' -and $Enabled -ne $targetResource.Enabled) {
-            $inCompliance = $false;
+        elseif (($Ensure -eq 'Present')-and ($Enabled -ne $targetResource['Enabled'])) {
+            $isInCompliance = $false;
         }
-        if ($inCompliance) {
+
+        if ($isInCompliance) {
             Write-Verbose ($localizedData.ResourceInDesiredState -f $Name);
         }
         else {
             Write-Verbose ($localizedData.ResourceNotInDesiredState -f $Name);
         }
-        return $inCompliance;
+        return $isInCompliance;
     } #end process
 } #end function Test-TargetResource
 
@@ -91,38 +88,36 @@ function Set-TargetResource {
     }
     process {
         $scriptBlock = {
-            param (
-                [System.String] $Name,
-                [System.Boolean] $Enabled,
-                [System.String] $Ensure
-            )
             Add-PSSnapin -Name 'Citrix.DelegatedAdmin.Admin.V1' -ErrorAction Stop;
-            $xdAdministrator = Get-AdminAdministrator -Name $Name -ErrorAction SilentlyContinue;
-            if ($Ensure -eq 'Present') {
+            try {
+                ## Cmdlet ignores $ErrorActionPreference :@
+                $xdAdministrator = Get-AdminAdministrator -Name $using:Name -ErrorAction SilentlyContinue;
+            }
+            catch {}
+
+            if ($using:Ensure -eq 'Present') {
                 if ($xdAdministrator) {
-                    Write-Verbose ('Updating Citrix XenDesktop 7.x Administrator "{0}".' -f $Name);
-                    Set-AdminAdministrator -Name $Name -Enabled $Enabled;
+                    Write-Verbose ('Updating Citrix XenDesktop 7.x Administrator "{0}".' -f $using:Name);
+                    Set-AdminAdministrator -Name $using:Name -Enabled $using:Enabled;
                 }
                 else {
-                    Write-Verbose ('Creating Citrix XenDesktop 7.x Administrator "{0}".' -f $Name);
-                    New-AdminAdministrator -Name $Name -Enabled $Enabled;                        
+                    Write-Verbose ('Creating Citrix XenDesktop 7.x Administrator "{0}".' -f $using:Name);
+                    New-AdminAdministrator -Name $using:Name -Enabled $using:Enabled;                        
                 }
             }
             else {
                 if ($xdAdministrator) {
-                    Write-Verbose ('Removing Citrix XenDesktop 7.x Administrator "{0}".' -f $Name);
-                    Remove-AdminAdministrator -Name $Name;
+                    Write-Verbose ('Removing Citrix XenDesktop 7.x Administrator "{0}".' -f $using:Name);
+                    Remove-AdminAdministrator -Name $using:Name;
                 }
             }
         } #end scriptblock
         $invokeCommandParams = @{
             ScriptBlock = $scriptBlock;
-            ArgumentList = @($Name, $Enabled, $Ensure);
             ErrorAction = 'Stop';
         }
-        if ($Credential) {
-            AddInvokeScriptBlockCredentials -Hashtable $invokeCommandParams -Credential $Credential;
-        }
-        Invoke-Command @invokeCommandParams;
-    } #end process
+        if ($Credential) { AddInvokeScriptBlockCredentials -Hashtable $invokeCommandParams -Credential $Credential; }
+        else { $invokeCommandParams['ScriptBlock'] = [System.Management.Automation.ScriptBlock]::Create($scriptBlock.ToString().Replace('$using:','$')); }
+        Write-Verbose ($localizedData.InvokingScriptBlockWithParams -f [System.String]::Join("','", @($Name, $Enabled, $Ensure)));
+        Invoke-Command  @invokeCommandParams;    } #end process
 } #end function Set-TargetResource

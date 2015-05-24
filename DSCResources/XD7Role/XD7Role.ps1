@@ -17,36 +17,28 @@ function Get-TargetResource {
     }
     process {
         $scriptBlock = {
-            param (
-                [System.String] $Name,
-                [System.String] $RoleScope,
-                [System.String[]] $Members,
-                [System.String] $Ensure
-            )
             $VerbosePreference = 'Continue';
             Add-PSSnapin -Name 'Citrix.DelegatedAdmin.Admin.V1' -ErrorAction Stop;
             $xdAdminRoleMembers = Get-AdminAdministrator |
                 Select-Object -Property Name -ExpandProperty Rights |
-                    Where-Object { $_.RoleName -eq $Name -and $_.ScopeName -eq $RoleScope } |
-                        Select-Object -ExpandProperty Name;
+                    Where-Object { $_.RoleName -eq $using:Name -and $_.ScopeName -eq $using:RoleScope } |
+                        ForEach { $_.Name };
             $targetResource = @{
-                Name = $Name;
-                Scope = $RoleScope;
-                Members = ,$xdAdminRoleMembers;
-                Ensure = $Ensure;
+                Name = $using:Name;
+                Scope = $using:RoleScope;
+                Members = $xdAdminRoleMembers;
+                Ensure = $using:Ensure;
             };
-            return [PSCustomObject] $targetResource;
+            return $targetResource;
         } #end scriptblock
         $invokeCommandParams = @{
             ScriptBlock = $scriptBlock;
-            ArgumentList = @($Name, $RoleScope, $Members, $Ensure);
             ErrorAction = 'Stop';
         }
-        if ($Credential) {
-            AddInvokeScriptBlockCredentials -Hashtable $invokeCommandParams -Credential $Credential;
-        }
-        Write-Verbose ($localizedData.InvokingScriptBlockWithParams -f [System.String]::Join("','", $invokeCommandParams['ArgumentList']));
-        $targetResource = Invoke-Command @invokeCommandParams;
+        if ($Credential) { AddInvokeScriptBlockCredentials -Hashtable $invokeCommandParams -Credential $Credential; }
+        else { $invokeCommandParams['ScriptBlock'] = [System.Management.Automation.ScriptBlock]::Create($scriptBlock.ToString().Replace('$using:','$')); }
+        Write-Verbose ($localizedData.InvokingScriptBlockWithParams -f [System.String]::Join("','", @($Name, $RoleScope, $Members, $Ensure)));
+        $targetResource = Invoke-Command  @invokeCommandParams;
         return $targetResource;
     } #end process
 } #end function Get-TargetResource
@@ -63,26 +55,27 @@ function Test-TargetResource {
     )
     process {
         $targetResource = Get-TargetResource @PSBoundParameters;
-        if ($Ensure -eq 'Present') {
-            foreach ($member in $Members) {
-                ## Ensure that the controller is in the list
-                if ($targetResource.Members -notcontains $member) {
-                    Write-Verbose ($localizedData.MissingRoleMember -f $member);
-
-                    $targetResource.Ensure = 'Absent';
-                }
-            } #end foreach member
-        }
-        else {
-            foreach ($member in $Members) {
-                ## Ensure that the controller is NOT in the list
-                if ($targetResource.Members -contains $member) {
+        foreach ($member in $Members) {
+            if ($targetResource.Members -contains $member) {
+                if ($Ensure -eq 'Absent') {
                     Write-Verbose ($localizedData.SurplusRoleMember -f $member);
-                    $targetResource.Ensure = 'Present';
+                    $targetResource['Ensure'] = 'Present';
                 }
-            } #end foreach member
-        }
-        if ($targetResource.Ensure -eq $Ensure) {
+            }
+            elseif ($targetResource.Members -match '^\S+\\{0}$' -f $member) {
+                if ($Ensure -eq 'Absent') {
+                    Write-Verbose ($localizedData.SurplusRoleMember -f $member);
+                    $targetResource['Ensure'] = 'Present';
+                }
+            }
+            else {
+                if ($Ensure -eq 'Present') {
+                    Write-Verbose ($localizedData.MissingRoleMember -f $member);
+                    $targetResource['Ensure'] = 'Absent';
+                }
+            }
+        } #end foreach member
+        if ($targetResource['Ensure'] -eq $Ensure) {
             Write-Verbose ($localizedData.ResourceInDesiredState -f $Name);
             return $true;
         }
@@ -109,43 +102,32 @@ function Set-TargetResource {
     }
     process {
         $scriptBlock = {
-            param (
-                [System.String] $Name,
-                [System.String] $RoleScope,
-                [System.String] $Members,
-                [System.String] $Ensure
-            )
             Add-PSSnapin -Name 'Citrix.DelegatedAdmin.Admin.V1' -ErrorAction Stop;
-            data localizedData {
-                ConvertFrom-StringData @'
-                    AddingRoleMember = Adding Citrix XenDesktop 7.x Administrator '{0}' to role '{1}'.
-                    RemovingRoleMember = Adding Citrix XenDesktop 7.x Administrator '{0}' to role '{1}'.
-'@
-            }
-            if ($Ensure -eq 'Present') {
-                foreach ($member in $Members) {
-                    Write-Verbose ($localizedData.AddingRoleMember -f $member, $Name);
-                    Add-AdminRight -Administrator $member -Role $Name -Scope $RoleScope;
+            if ($using:Ensure -eq 'Present') {
+                foreach ($member in $using:Members) {
+                    $addingRoleMember = 'Adding Citrix XenDesktop 7.x Administrator ''{0}'' to role ''{1}''.';
+                    Write-Verbose ($addingRoleMember -f $member, $using:Name);
+                    Add-AdminRight -Administrator $member -Role $using:Name -Scope $using:RoleScope;
                 }
             }
             else {
-                foreach ($member in $Members) {
-                    $hasAdminRights = Get-AdminAdministrator -Name $member | Select-Object -ExpandProperty Rights | Where-Object { $_.RoleName -eq $Name -and $_.ScopeName -eq $RoleScope };
+                foreach ($member in $using:Members) {
+                    $hasAdminRights = Get-AdminAdministrator -Name $member | Select-Object -ExpandProperty Rights | Where-Object { $_.RoleName -eq $using:Name -and $_.ScopeName -eq $using:RoleScope };
                     if ($hasAdminRights) {
-                        Write-Verbose ($localizedData.RemovingRoleMember -f $member, $Name);
-                        Remove-AdminRight -Administrator $member -Role $Name -Scope $RoleScope;
+                        $removingRoleMember = 'Removing Citrix XenDesktop 7.x Administrator ''{0}'' from role ''{1}''.';
+                        Write-Verbose ($removingRoleMember -f $member, $using:Name);
+                        Remove-AdminRight -Administrator $member -Role $using:Name -Scope $using:RoleScope;
                     }
                 }
             }
         } #end scriptblock
         $invokeCommandParams = @{
             ScriptBlock = $scriptBlock;
-            ArgumentList = @($Name, $RoleScope, $Members, $Ensure);
             ErrorAction = 'Stop';
         }
-        if ($Credential) {
-            AddInvokeScriptBlockCredentials -Hashtable $invokeCommandParams -Credential $Credential;
-        }
-        Invoke-Command @invokeCommandParams;
+        if ($Credential) { AddInvokeScriptBlockCredentials -Hashtable $invokeCommandParams -Credential $Credential; }
+        else { $invokeCommandParams['ScriptBlock'] = [System.Management.Automation.ScriptBlock]::Create($scriptBlock.ToString().Replace('$using:','$')); }
+        Write-Verbose ($localizedData.InvokingScriptBlockWithParams -f [System.String]::Join("','", @($Name, $RoleScope, $Members, $Ensure)));
+        $targetResource = Invoke-Command  @invokeCommandParams;
     } #end process
 } #end function Set-TargetResource
