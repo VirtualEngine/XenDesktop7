@@ -12,7 +12,7 @@ function Get-TargetResource {
     )
     begin {
         if (-not (TestXDModule)) {
-            ThrowInvalidProgramException -ErrorId 'Citrix.XenDesktop.Admin module not found.' -ErrorMessage $localizedData.XenDesktopSDKNotFoundError;
+            ThrowInvalidProgramException -ErrorId 'Citrix.XenDesktop.Admin' -ErrorMessage $localizedData.XenDesktopSDKNotFoundError;
         }
     }
     process {
@@ -103,11 +103,10 @@ function TestXDSite {
             try {
                 $xdSite = Get-XDSite -AdminAddress $using:ExistingControllerName -ErrorAction SilentlyContinue;
             }
-            catch {
-                # Get-XDSite doesn't support $ErrorActionPreference :@
-            }
+            catch { } # Get-XDSite doesn't support $ErrorActionPreference :@
             return $xdSite.Name
         } #end scriptBlock
+        
         $invokeCommandParams = @{
             ScriptBlock = $scriptBlock;
             ErrorAction = 'Stop';
@@ -115,8 +114,6 @@ function TestXDSite {
         if ($Credential) { AddInvokeScriptBlockCredentials -Hashtable $invokeCommandParams -Credential $Credential; }
         else { $scriptBlock = [System.Management.Automation.ScriptBlock]::Create($scriptBlock.ToString().Replace('$using:','$')); }
         Write-Verbose $localizedData.InvokingScriptBlock;
-        $xdSiteName = Invoke-Command @invokeCommandParams;
-        return $xdSiteName;
+        return Invoke-Command @invokeCommandParams;
     } #end process
-
 } #end function TestXDSite
