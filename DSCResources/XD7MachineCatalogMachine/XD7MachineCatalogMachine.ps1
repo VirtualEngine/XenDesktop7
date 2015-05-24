@@ -11,7 +11,7 @@ function Get-TargetResource {
     )
     begin {
         if (-not (TestXDModule -Name 'Citrix.Broker.Admin.V2' -IsSnapin)) {
-            ThrowInvalidProgramException -ErrorId 'Citrix.DelegatedAdmin.Admin.V1 module not found.' -ErrorMessage $localizedData.XenDesktopSDKNotFoundError;
+            ThrowInvalidProgramException -ErrorId 'Citrix.Broker.Admin.V2' -ErrorMessage $localizedData.XenDesktopSDKNotFoundError;
         }
     }
     process {
@@ -50,27 +50,7 @@ function Test-TargetResource {
     )
     process {
         $targetResource = Get-TargetResource @PSBoundParameters;
-        foreach ($member in $Members) {
-            if ($member.Contains('.')) {
-                ## We have a FQDN and need to match based on NetBIOS name
-                $member = $member.Split('.')[0];
-            }
-            if ($targetResource.Members -match "^$member\.") {
-                ## Machine is in the list
-                if ($Ensure -eq 'Absent') {
-                    Write-Verbose ($localizedData.SurplusMachineCatalogMachine -f $member);
-                    $targetResource['Ensure'] = 'Present';
-                }
-            }
-            else {
-                ## Machine is NOT in the list
-                if ($Ensure -eq 'Present') {
-                    Write-Verbose ($localizedData.MissingMachineCatalogMachine -f $member);
-                    $targetResource['Ensure'] = 'Absent';
-                }
-            }
-        } #end foreach member
-        if ($Ensure -eq $targetResource['Ensure']) {
+        if (TestXDMachineMembership -RequiredMembers $Members -ExistingMembers $targetResource.Members -Ensure $Ensure) {
             Write-Verbose ($localizedData.ResourceInDesiredState -f $Name);
             return $true;
         }
@@ -91,31 +71,28 @@ function Set-TargetResource {
     )
     begin {
         if (-not (TestXDModule -Name 'Citrix.Broker.Admin.V2' -IsSnapin)) {
-            ThrowInvalidProgramException -ErrorId 'Citrix.DelegatedAdmin.Admin.V1 module not found.' -ErrorMessage $localizedData.XenDesktopSDKNotFoundError;
+            ThrowInvalidProgramException -ErrorId 'Citrix.Broker.Admin.V2' -ErrorMessage $localizedData.XenDesktopSDKNotFoundError;
         }
     }
     process {
         $scriptBlock = {
             Add-PSSnapin -Name 'Citrix.Broker.Admin.V2' -ErrorAction Stop;
+            Import-Module "$env:ProgramFiles\WindowsPowerShell\Modules\cCitrixXenDesktop7\DSCResources\XD7Common\XD7Common.psd1";
+            
             $brokerMachines = Get-BrokerMachine -CatalogName $using:Name | Select-Object -ExpandProperty DnsName;
             foreach ($member in $using:Members) {
-                if ($member.Contains('.')) { ## We have a FQDN and need to match based on NetBIOS name
-                    $member = $member.Split('.')[0];
-                }
-                if ($brokerMachines -match "^$member\.") { ## Machine is in the list
+                if (TestXDMachineIsExistingMember -MachineName $member -ExistingMembers $brokerMachines) {
                     if ($using:Ensure -eq 'Absent') {
-                        Write-Verbose ('Removing machine ''{0}'' from Citrix XenDesktop 7.x Machine Catalog ''{1}''.' -f $member, $using:Name);
-                        Get-BrokerMachine -CatalogName $using:Name | Where-Object DNSName -match "^$member\." | Remove-BrokerMachine;
+                        Write-Verbose ($using:localizedData.RemovinfMachineCatalogMachine -f $member, $using:Name);
+                        ResolveXDBrokerMachine -MachineName $member -BrokerMachines $brokerMachines | Remove-Brokermachine -Force;
                     }
                 }
-                else { ## Machine is NOT in the list
-                    if ($using:Ensure -eq 'Present') {
-                        if (-not $brokerCatalog) {
-                            $brokerCatalog = Get-BrokerCatalog -Name $using:Name;
-                        }
-                        Write-Verbose ('Adding machine ''{0}'' to Citrix XenDesktop 7.x Machine Catalog ''{1}''.' -f $member, $using:Name);
-                        New-BrokerMachine -CatalogUid $brokerCatalog.Uid -MachineName $member -ErrorAction SilentlyContinue;
+                elseif ($using:Ensure -eq 'Present') {
+                    if (-not $brokerCatalog) {
+                        $brokerCatalog = Get-BrokerCatalog -Name $using:Name;
                     }
+                    Write-Verbose ($using:localizedData.AddingMachineCatalogMachine -f $member, $using:Name);
+                    New-BrokerMachine -CatalogUid $brokerCatalog.Uid -MachineName $member -ErrorAction SilentlyContinue;
                 }
             } #end foreach member
         } #end scriptBlock
