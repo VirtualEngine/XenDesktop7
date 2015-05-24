@@ -11,7 +11,7 @@ function Get-TargetResource {
     )
     begin {
         if (-not (TestXDModule -Name 'Citrix.DelegatedAdmin.Admin.V1' -IsSnapin)) {
-            ThrowInvalidProgramException -ErrorId 'Citrix.DelegatedAdmin.Admin.V1 module not found.' -ErrorMessage $localizedData.XenDesktopSDKNotFoundError;
+            ThrowInvalidProgramException -ErrorId 'Citrix.DelegatedAdmin.Admin.V1' -ErrorMessage $localizedData.XenDesktopSDKNotFoundError;
         }
     }
     process {
@@ -83,31 +83,29 @@ function Set-TargetResource {
     )
     begin {
         if (-not (TestXDModule -Name 'Citrix.DelegatedAdmin.Admin.V1' -IsSnapin)) {
-            ThrowInvalidProgramException -ErrorId 'Citrix.DelegatedAdmin.Admin.V1 module not found.' -ErrorMessage $localizedData.XenDesktopSDKNotFoundError;
+            ThrowInvalidProgramException -ErrorId 'Citrix.DelegatedAdmin.Admin.V1' -ErrorMessage $localizedData.XenDesktopSDKNotFoundError;
         }
     }
     process {
         $scriptBlock = {
             Add-PSSnapin -Name 'Citrix.DelegatedAdmin.Admin.V1' -ErrorAction Stop;
-            try {
-                ## Cmdlet ignores $ErrorActionPreference :@
+            try { ## Cmdlet ignores $ErrorActionPreference :@
                 $xdAdministrator = Get-AdminAdministrator -Name $using:Name -ErrorAction SilentlyContinue;
             }
             catch {}
-
             if ($using:Ensure -eq 'Present') {
                 if ($xdAdministrator) {
-                    Write-Verbose ('Updating Citrix XenDesktop 7.x Administrator "{0}".' -f $using:Name);
+                    Write-Verbose ($using:localizedData.UpdatingAdministrator -f $using:Name);
                     Set-AdminAdministrator -Name $using:Name -Enabled $using:Enabled;
                 }
                 else {
-                    Write-Verbose ('Creating Citrix XenDesktop 7.x Administrator "{0}".' -f $using:Name);
+                    Write-Verbose ($using:localizedData.AddingAdministrator -f $using:Name);
                     New-AdminAdministrator -Name $using:Name -Enabled $using:Enabled;                        
                 }
             }
             else {
                 if ($xdAdministrator) {
-                    Write-Verbose ('Removing Citrix XenDesktop 7.x Administrator "{0}".' -f $using:Name);
+                    Write-Verbose ($using:localizedData.RemovingAdministrator -f $using:Name);
                     Remove-AdminAdministrator -Name $using:Name;
                 }
             }
@@ -119,5 +117,6 @@ function Set-TargetResource {
         if ($Credential) { AddInvokeScriptBlockCredentials -Hashtable $invokeCommandParams -Credential $Credential; }
         else { $invokeCommandParams['ScriptBlock'] = [System.Management.Automation.ScriptBlock]::Create($scriptBlock.ToString().Replace('$using:','$')); }
         Write-Verbose ($localizedData.InvokingScriptBlockWithParams -f [System.String]::Join("','", @($Name, $Enabled, $Ensure)));
-        Invoke-Command  @invokeCommandParams;    } #end process
+        Invoke-Command  @invokeCommandParams;
+    } #end process
 } #end function Set-TargetResource
