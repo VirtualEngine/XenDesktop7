@@ -1,3 +1,5 @@
+Import-LocalizedData -BindingVariable localizedData -FileName Resources.psd1;
+
 #region Private Functions
 
 function AddInvokeScriptBlockCredentials {
@@ -149,6 +151,136 @@ function TestXDModule {
         return $false;
     } #end process
 } #end TestModule
+
+function GetXDBrokerMachine {
+    <#
+        Searches for a registered Citrix XenDesktop machine by name.
+    #>
+    param (
+        [Parameter(Mandatory)] [System.String] $MachineName
+    )
+    if ($MachineName.Contains('.')) {
+        ## Attempt to locate the machine by FQDN
+        $brokerMachine = Get-BrokerMachine -DNSName $MachineName -ErrorAction SilentlyContinue;
+    }
+    elseif ($MachineName.Contains('\')) {
+        ## Otherwise attempt to locate the machine by DomainName\NetBIOSName
+        $brokerMachine = Get-BrokerMachine -MachineName $MachineName -ErrorAction SilentlyContinue;
+    }
+    else {
+        ## Failing all else, perform a wildcard search
+        $brokerMachine = Get-BrokerMachine -MachineName "*\$MachineName" -ErrorAction SilentlyContinue;
+    }
+
+    if ($brokerMachine -eq $null) {
+        Write-Error -ErrorId 'MachineNotFound' -Message ($localizedData.MachineNotFoundError -f $member);
+        return;
+    }
+    elseif ($brokerMachine.Count -gt 1) {
+        Write-Error -ErrorId 'AmbiguousMachineReference' -Message ($localizedData.AmbiguousMachineReferenceError -f $member);
+        return;
+    }
+    else {
+        return $brokerMachine;
+    }
+}
+
+function TestXDMachineIsExistingMember {
+    <#
+        Tests whether a machine is an existing member of a list of FQDN machine members.
+    #>
+    param (
+        [Parameter(Mandatory)] [System.String] $MachineName,
+        [Parameter()] [System.String[]] $ExistingMembers
+    )
+    if ((-not $MachineName.Contains('\')) -and (-not $MachineName.Contains('.'))) {
+        Write-Warning -Message ($localizedData.MachineNameNotFullyQualifiedWarning -f $MachineName);
+        $netBIOSName = $MachineName;
+    }
+    elseif ($MachineName.Contains('\')) {
+        $netBIOSName = $MachineName.Split('\')[1];
+    }
+            
+    if ($ExistingMembers -contains $MachineName) {
+        return $true;
+    }
+    elseif ($ExistingMembers -like '{0}.*' -f $netBIOSName) {
+        return $true;
+    }
+    else {
+        return $false;
+    }
+} #end function TestXDMachine
+
+function TestXDMachineMembership {
+    <#
+        Provides a centralised function to test whether machine membership of a Machine Catalog or
+        Delivery Group are correct - evaluating FQDNs, DOMAINNAME\NETBIOS and NETBIOS name formats.
+    #>
+    param (
+        [Parameter(Mandatory)] [System.String[]] $RequiredMembers,
+        [Parameter(Mandatory)] [ValidateSet('Present','Absent')] [System.String] $Ensure,
+        [Parameter()] [System.String[]] $ExistingMembers
+    )
+    process {
+        $isInCompliance = $true;
+        foreach ($member in $RequiredMembers) {
+            if (TestXDMachineIsExistingMember -MachineName $member -ExistingMembers $ExistingMembers) {
+                if ($Ensure -eq 'Absent') {
+                    Write-Verbose ($localizedData.SurplusMachineReference -f $member);
+                    $isInCompliance = $false;
+                }
+            }
+            else {
+                if ($Ensure -eq 'Present') {
+                    Write-Verbose ($localizedData.MissingMachineReference -f $member);
+                    $isInCompliance = $false;
+                }
+            }
+        } #end foreach member
+        return $isInCompliance;
+    } #end process
+} #end function TestXDMachineMembers
+
+function ResolveXDBrokerMachine {
+    <#
+        Returns a machine machine from an existing collection of Citrix XenDesktop
+        machines assigned to a Machine Catalog or Delivery Group
+    #>
+    param (
+        [Parameter(Mandatory)] [System.String] $MachineName,
+        [Parameter(Mandatory)] [System.Object[]] $BrokerMachines
+    )
+    $brokerMachine = $null;
+    foreach ($machine in $brokerMachines) {
+        ## Try matching on DNS name
+        if (($machine.DNSName -eq $MachineName) -or ($machine.MachineName -eq $MachineName)) {
+            return $machine;
+        }
+        elseif ((-not $MachineName.Contains('\')) -and ($machine.MachineName -match '^\S+\\{0}$' -f $MachineName)) {
+            ## Try matching based on DOMAIN\NETBIOS name
+            return $machine
+        }
+    } #end foreach machine
+    return $null;
+} #end function ResolveXDBrokerMachine
+
+
+function ThrowInvalidOperationException {
+    <#
+    .SYNOPSIS
+        Throws terminating error of category NotInstalled with specified errorId and errorMessage.
+    #>
+    param(
+        [Parameter(Mandatory)] [System.String] $ErrorId,
+        [Parameter(Mandatory)] [System.String] $ErrorMessage
+    )
+    $errorCategory = [System.Management.Automation.ErrorCategory]::InvalidArgument;
+    $exception = New-Object -TypeName 'System.InvalidOperationException' -ArgumentList $ErrorMessage;
+    $errorRecord = New-Object -TypeName 'System.Management.Automation.ErrorRecord' -ArgumentList $exception, $ErrorId, $errorCategory, $null;
+    throw $errorRecord;
+
+}
 
 function ThrowInvalidProgramException {
     <#
