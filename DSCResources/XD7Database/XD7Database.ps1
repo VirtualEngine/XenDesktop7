@@ -8,7 +8,7 @@ function Get-TargetResource {
         [Parameter(Mandatory)] [ValidateSet('Site','Logging','Monitor')] [System.String] $DataStore,
         [Parameter(Mandatory)] [ValidateNotNullOrEmpty()] [System.String] $DatabaseServer,
         [Parameter(Mandatory)] [ValidateNotNullOrEmpty()] [System.String] $DatabaseName,
-        [Parameter(Mandatory)] [ValidateNotNull()] [System.Management.Automation.PSCredential] $Credential
+        [Parameter()] [AllowNull()] [System.Management.Automation.PSCredential] $Credential
     )
     process {
         $targetResource = @{
@@ -33,7 +33,7 @@ function Test-TargetResource {
         [Parameter(Mandatory)] [ValidateSet('Site','Logging','Monitor')] [System.String] $DataStore,
         [Parameter(Mandatory)] [ValidateNotNullOrEmpty()] [System.String] $DatabaseServer,
         [Parameter(Mandatory)] [ValidateNotNullOrEmpty()] [System.String] $DatabaseName,
-        [Parameter(Mandatory)] [ValidateNotNull()] [System.Management.Automation.PSCredential] $Credential
+        [Parameter()] [AllowNull()] [System.Management.Automation.PSCredential] $Credential
     )
     process {
         $targetResource = Get-TargetResource @PSBoundParameters;
@@ -57,37 +57,38 @@ function Set-TargetResource {
         [Parameter(Mandatory)] [ValidateSet('Site','Logging','Monitor')] [System.String] $DataStore,
         [Parameter(Mandatory)] [ValidateNotNullOrEmpty()] [System.String] $DatabaseServer,
         [Parameter(Mandatory)] [ValidateNotNullOrEmpty()] [System.String] $DatabaseName,
-        [Parameter(Mandatory)] [ValidateNotNull()] [System.Management.Automation.PSCredential] $Credential
+        [Parameter()] [AllowNull()] [System.Management.Automation.PSCredential] $Credential
     )
     begin {
         if (-not (TestXDModule)) {
-            ThrowInvalidProgramException -ErrorId 'Citrix.XenDesktop.Admin module not found.' -ErrorMessage $localizedData.XenDesktopSDKNotFoundError;
+            ThrowInvalidProgramException -ErrorId 'Citrix.XenDesktop.Admin' -ErrorMessage $localizedData.XenDesktopSDKNotFoundError;
         }
     } #end begin
     process {
-        Write-Verbose ($localizedData.CreatingXDDatabase -f $DataStore, $DatabaseName, $DatabaseServer);
-        ## The New-XDDatabase cmdlet needs to be run with domain credentials :(
         $scriptBlock = {
-            param (
-                [System.Management.Automation.PSCredential] $DatabaseCredentials,
-                [System.String] $SiteName,
-                [System.String] $DatabaseServer,
-                [System.String] $DataStore,
-                [System.String] $DatabaseName
-            )
-            Import-Module 'C:\Program Files\Citrix\XenDesktopPoshSdk\Module\Citrix.XenDesktop.Admin.V1\Citrix.XenDesktop.Admin\Citrix.XenDesktop.Admin.psd1';
-            New-XDDatabase -DatabaseServer $DatabaseServer -DatabaseName $DatabaseName -DataStore $DataStore -SiteName $SiteName -DatabaseCredentials $DatabaseCredentials;
+            $VerbosePreference = 'SilentlyContinue';
+            Import-Module "$env:ProgramFiles\Citrix\XenDesktopPoshSdk\Module\Citrix.XenDesktop.Admin.V1\Citrix.XenDesktop.Admin\Citrix.XenDesktop.Admin.psd1";
+            $VerbosePreference = 'Continue';
+            
+            $newXDDatabaseParams = @{
+                DatabaseServer = $using:DatabaseServer;
+                DatabaseName = $using:DatabaseName;
+                DataStore = $using:DataStore;
+                SiteName = $using:SiteName;
+                DatabaseCredentials = $using:DatabaseCredentials;
+            }
+            Write-Verbose ($using:localizedData.CreatingXDDatabase -f $using:DataStore, $using:DatabaseName, $using:DatabaseServer);
+            New-XDDatabase @newXDDatabaseParams;
         } #end scriptBlock
+
         $invokeCommandParams = @{
             ScriptBlock = $scriptBlock;
-            ArgumentList = @($Credential, $SiteName, $DatabaseServer, $DataStore, $DatabaseName);
             ErrorAction = 'Stop';
         }
-        if ($Credential) {
-            AddInvokeScriptBlockCredentials -Hashtable $invokeCommandParams -Credential $Credential;
-        }
-        Write-Verbose ($localizedData.InvokingScriptBlock -f [System.String]::Join("','", $invokeCommandParams['ArgumentList']));
-        $invokeCommandResult = Invoke-Command @invokeCommandParams;
+        if ($Credential) { AddInvokeScriptBlockCredentials -Hashtable $invokeCommandParams -Credential $Credential; }
+        else { $invokeCommandParams['ScriptBlock'] = [System.Management.Automation.ScriptBlock]::Create($scriptBlock.ToString().Replace('$using:','$')); }
+        Write-Verbose ($localizedData.InvokingScriptBlockWithParams -f [System.String]::Join("','", @($Credential, $SiteName, $DatabaseServer, $DataStore, $DatabaseName)));
+        Invoke-Command @invokeCommandParams;
     } #end process
 } #end function Test-TargetResource
 
@@ -107,18 +108,14 @@ function TestMSSQLDatabase {
     )
     process {
         $scriptBlock = {
-            param (
-                [System.String] $DatabaseServer,
-                [System.String] $DatabaseName
-            )
             $sqlConnection = New-Object -TypeName 'System.Data.SqlClient.SqlConnection';
-            $sqlConnection.ConnectionString = 'Server="{0}";Integrated Security=SSPI;' -f $DatabaseServer;
+            $sqlConnection.ConnectionString = 'Server="{0}";Integrated Security=SSPI;' -f $using:DatabaseServer;
             $sqlCommand = $sqlConnection.CreateCommand();
-            $sqlCommand.CommandText = "SELECT name FROM master.sys.databases WHERE name = N'$DatabaseName'";
+            $sqlCommand.CommandText = "SELECT name FROM master.sys.databases WHERE name = N'$using:DatabaseName'";
             $sqlDataAdapter = New-Object -TypeName System.Data.SqlClient.SqlDataAdapter -ArgumentList $sqlCommand;
             $dataSet = New-Object -TypeName System.Data.DataSet;
             try {
-                [ref]$null = $sqlDataAdapter.Fill($dataSet);
+                [ref] $null = $sqlDataAdapter.Fill($dataSet);
                 if ($dataSet.Tables.Name) { return $true; } else { return $false; }
             }
             catch [System.Data.SqlClient.SqlException] {
@@ -130,15 +127,14 @@ function TestMSSQLDatabase {
                 $sqlConnection.Close();
             }
         } #end scriptblock
+        
         $invokeCommandParams = @{
             ScriptBlock = $scriptBlock;
-            ArgumentList = @($DatabaseServer, $DatabaseName);
             ErrorAction = 'Stop';
         }
-        if ($Credential) {
-            AddInvokeScriptBlockCredentials -Hashtable $invokeCommandParams -Credential $Credential;
-        }
-        Write-Verbose ($localizedData.InvokingScriptBlockWithParams -f [System.String]::Join("','", $invokeCommandParams['ArgumentList']));
+        if ($Credential) { AddInvokeScriptBlockCredentials -Hashtable $invokeCommandParams -Credential $Credential; }
+        else { $invokeCommandParams['ScriptBlock'] = [System.Management.Automation.ScriptBlock]::Create($scriptBlock.ToString().Replace('$using:','$')); }
+        Write-Verbose ($localizedData.InvokingScriptBlockWithParams -f [System.String]::Join("','", @($DatabaseServer, $DatabaseName)));
         return Invoke-Command @invokeCommandParams;
     } #end process
 } #end function TestMSSQLDatabase
