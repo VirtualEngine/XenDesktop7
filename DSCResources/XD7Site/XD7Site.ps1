@@ -13,13 +13,14 @@ function Get-TargetResource {
     )
     begin {
         if (-not (TestXDModule)) {
-            ThrowInvalidProgramException -ErrorId 'Citrix.XenDesktop.Admin module not found.' -ErrorMessage $localizedData.XenDesktopSDKNotFoundError;
+            ThrowInvalidProgramException -ErrorId 'Citrix.XenDesktop.Admin' -ErrorMessage $localizedData.XenDesktopSDKNotFoundError;
         }
     } #end begin
     process {
         $scriptBlock = {
             $VerbosePreference = 'SilentlyContinue';
-            Import-Module 'C:\Program Files\Citrix\XenDesktopPoshSdk\Module\Citrix.XenDesktop.Admin.V1\Citrix.XenDesktop.Admin\Citrix.XenDesktop.Admin.psd1';
+            Import-Module "$env:ProgramFiles\Citrix\XenDesktopPoshSdk\Module\Citrix.XenDesktop.Admin.V1\Citrix.XenDesktop.Admin\Citrix.XenDesktop.Admin.psd1";
+            $VerbosePreference = 'Continue';
             try {
                 $xdSite = Get-XDSite;
             }
@@ -33,14 +34,13 @@ function Get-TargetResource {
             };
             return $xdCustomSite;
         };
+
         $invokeCommandParams = @{
             ScriptBlock = $scriptBlock;
-            ArgumentList = @($Name, $RoleScope, $Members, $Ensure);
             ErrorAction = 'Stop';
         }
-        if ($Credential) {
-            AddInvokeScriptBlockCredentials -Hashtable $invokeCommandParams -Credential $Credential;
-        }
+        if ($Credential) { AddInvokeScriptBlockCredentials -Hashtable $invokeCommandParams -Credential $Credential; }
+        else { $invokeCommandParams['ScriptBlock'] = [System.Management.Automation.ScriptBlock]::Create($scriptBlock.ToString().Replace('$using:','$')); }
         Write-Verbose $localizedData.InvokingScriptBlock;
         $targetResource = Invoke-Command @invokeCommandParams;
         return $targetResource;
@@ -87,38 +87,32 @@ function Set-TargetResource {
     )
     begin {
         if (-not (TestXDModule)) {
-            ThrowInvalidProgramException -ErrorId 'Citrix.XenDesktop.Admin module not found.' -ErrorMessage $localizedData.XenDesktopSDKNotFoundError;
+            ThrowInvalidProgramException -ErrorId 'Citrix.XenDesktop.Admin' -ErrorMessage $localizedData.XenDesktopSDKNotFoundError;
         }
     } #end begin
     process {
         $scriptBlock = {
-            param (
-                [System.String] $SiteName,
-                [System.String] $DatabaseServer,
-                [System.String] $SiteDatabaseName,
-                [System.String] $LoggingDatabaseName,
-                [System.String] $MonitorDatabaseName
-            )
             $VerbosePreference = 'SilentlyContinue';
-            Import-Module 'C:\Program Files\Citrix\XenDesktopPoshSdk\Module\Citrix.XenDesktop.Admin.V1\Citrix.XenDesktop.Admin\Citrix.XenDesktop.Admin.psd1';
+            Import-Module "$env:ProgramFiles\Citrix\XenDesktopPoshSdk\Module\Citrix.XenDesktop.Admin.V1\Citrix.XenDesktop.Admin\Citrix.XenDesktop.Admin.psd1";
+            $VerbosePreference = 'Continue';
+
             $newXDSiteParams = @{
-                SiteName = $SiteName;
-                DatabaseServer = $DatabaseServer;
-                SiteDatabaseName = $SiteDatabaseName;
-                LoggingDatabaseName = $LoggingDatabaseName;
-                MonitorDatabaseName = $MonitorDatabaseName;
+                SiteName = $using:SiteName;
+                DatabaseServer = $using:DatabaseServer;
+                SiteDatabaseName = $using:SiteDatabaseName;
+                LoggingDatabaseName = $using:LoggingDatabaseName;
+                MonitorDatabaseName = $using:MonitorDatabaseName;
             }
             $xdSite = New-XDSite @newXDSiteParams -ErrorAction SilentlyContinue;
         } #end scriptBlock
+
         $invokeCommandParams = @{
             ScriptBlock = $scriptBlock;
-            ArgumentList = @($SiteName, $DatabaseServer, $SiteDatabaseName, $LoggingDatabaseName, $MonitorDatabaseName);
             ErrorAction = 'Stop';
         }
-        if ($Credential) {
-            AddInvokeScriptBlockCredentials -Hashtable $invokeCommandParams -Credential $Credential;
-        }
-        Write-Verbose ($localizedData.InvokingScriptBlockWithParams -f [System.String]::Join("','", $invokeCommandParams['ArgumentList']));
-        $invokeCommandResult = Invoke-Command @invokeCommandParams;
+        if ($Credential) { AddInvokeScriptBlockCredentials -Hashtable $invokeCommandParams -Credential $Credential; }
+        else { $invokeCommandParams['ScriptBlock'] = [System.Management.Automation.ScriptBlock]::Create($scriptBlock.ToString().Replace('$using:','$')); }
+        Write-Verbose ($localizedData.InvokingScriptBlockWithParams -f [System.String]::Join("','", @($SiteName, $DatabaseServer, $SiteDatabaseName, $LoggingDatabaseName, $MonitorDatabaseName));
+        Invoke-Command  @invokeCommandParams;
     } #end process
 } #end function Test-TargetResource
