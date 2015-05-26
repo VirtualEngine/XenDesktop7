@@ -21,26 +21,24 @@ function Get-TargetResource {
         [Parameter()] [AllowNull()] [System.Management.Automation.PSCredential] $Credential
     )
     begin {
-        if (-not (TestXDModule)) {
-            ThrowInvalidProgramException -ErrorId 'Citrix.XenDesktop.Admin' -ErrorMessage $localizedData.XenDesktopSDKNotFoundError;
+        if (-not (TestXDModule -Name 'Citrix.Broker.Admin.V2' -IsSnapin)) {
+            ThrowInvalidProgramException -ErrorId 'Citrix.Broker.Admin.V2' -ErrorMessage $localizedData.XenDesktopSDKNotFoundError;
         }
     }
     process {
         $scriptBlock = {
-            $VerbosePreference = 'SilentlyContinue';
-            Import-Module 'C:\Program Files\Citrix\XenDesktopPoshSdk\Module\Citrix.XenDesktop.Admin.V1\Citrix.XenDesktop.Admin\Citrix.XenDesktop.Admin.psd1';
-            $VerbosePreference = 'Continue';
+            Add-PSSnapin -Name 'Citrix.Broker.Admin.V2' -ErrorAction Stop;
         
             $deliveryGroup = Get-BrokerDesktopGroup -Name $usin:Name -ErrorAction SilentlyContinue;
             $targetResource = @{
                 Name = $using:Name;
                 IsMultiSession = $deliveryGroup.SessionSupport -eq 'MultiSession';
-                DeliveryType = $deliveryGroup.DeliveryType;
+                DeliveryType = [System.String] $deliveryGroup.DeliveryType;
                 Description = $deliveryGroup.Description;
                 DisplayName = $deliveryGroup.PublishedName;
-                DesktopType = $deliveryGroup.DesktopKind;
+                DesktopType = [System.String] $deliveryGroup.DesktopKind;
                 Enabled = $deliveryGroup.Enabled;
-                ColorDepth = $deliveryGroup.ColorDepth;
+                ColorDepth = [System.String] $deliveryGroup.ColorDepth;
                 IsMaintenanceMode = $deliveryGroup.InMaintenanceMode;
                 IsRemotePC = $deliveryGroup.IsRemotePC;
                 IsSecureICA = $deliveryGroup.SecureIcaRequired;
@@ -59,7 +57,8 @@ function Get-TargetResource {
         }
         if ($Credential) { AddInvokeScriptBlockCredentials -Hashtable $invokeCommandParams -Credential $Credential; }
         else { $invokeCommandParams['ScriptBlock'] = [System.Management.Automation.ScriptBlock]::Create($scriptBlock.ToString().Replace('$using:','$')); }
-        Write-Verbose ($localizedData.InvokingScriptBlockWithParams -f [System.String]::Join("','", @($Name, $Members, $Ensure)));
+        $scriptBlockParams = @($Name,$Description,$DeliveryType,$PublishedName,$ColorDepth,$Enabled,$IsMaintenanceMode,$IsRemotePC,$IsSecureIca,$ShutdownDesktopsAfterUse,$TurnOnAddedMachine);
+        Write-Verbose ($localizedData.InvokingScriptBlockWithParams -f [System.String]::Join("','", $scriptBlockParams));
         $targetResource = Invoke-Command  @invokeCommandParams;
         return $targetResource;
     } #end process
@@ -92,8 +91,8 @@ function Test-TargetResource {
         elseif ($targetResource['IsMultiSession'] -ne $IsMultiSession) { $isInCompliance = $false; }
         elseif ($targetResource['DeliveryType'] -ne $DeliveryType) { $isInCompliance = $false; }
         elseif ($targetResource['Description'] -ne $Description) { $isInCompliance = $false; }
-        elseif ($targetResource['PublishedName'] -ne $DisplayName) { $isInCompliance = $false; }
         elseif ($targetResource['DesktopType'] -ne $DesktopType) { $isInCompliance = $false; }
+        elseif ($targetResource['DisplayName'] -ne $DisplayName) { $isInCompliance = $false; }
         elseif ($targetResource['Enabled'] -ne $Enabled) { $isInCompliance = $false; }
         elseif ($targetResource['ColorDepth'] -ne $ColorDepth) { $isInCompliance = $false; }
         elseif ($targetResource['IsMaintenanceMode'] -ne $IsMaintenanceMode) { $isInCompliance = $false; }
@@ -132,14 +131,14 @@ function Set-TargetResource {
         [Parameter()] [AllowNull()] [System.Management.Automation.PSCredential] $Credential
     )
     begin {
-        if (-not (TestXDModule)) {
-            ThrowInvalidProgramException -ErrorId 'Citrix.XenDesktop.Admin' -ErrorMessage $localizedData.XenDesktopSDKNotFoundError;
+        if (-not (TestXDModule -Name 'Citrix.Broker.Admin.V2' -IsSnapin)) {
+            ThrowInvalidProgramException -ErrorId 'Citrix.Broker.Admin.V2' -ErrorMessage $localizedData.XenDesktopSDKNotFoundError;
         }
     }
     process {
         $scriptBlock = {
             $VerbosePreference = 'SilentlyContinue';
-            Import-Module 'C:\Program Files\Citrix\XenDesktopPoshSdk\Module\Citrix.XenDesktop.Admin.V1\Citrix.XenDesktop.Admin\Citrix.XenDesktop.Admin.psd1';
+            Add-PSSnapin -Name 'Citrix.Broker.Admin.V2' -ErrorAction Stop;
             Import-Module "$env:ProgramFiles\WindowsPowerShell\Modules\cCitrixXenDesktop7\DSCResources\XD7Common\XD7Common.psd1";
             $VerbosePreference = 'Continue';
         
@@ -191,7 +190,7 @@ function Set-TargetResource {
         }
         if ($Credential) { AddInvokeScriptBlockCredentials -Hashtable $invokeCommandParams -Credential $Credential; }
         else { $invokeCommandParams['ScriptBlock'] = [System.Management.Automation.ScriptBlock]::Create($scriptBlock.ToString().Replace('$using:','$')); }
-        $scriptBlockParams = @($Name,$Description,$DeliveryType,$PublishedName,$ColorDepth,$Enabled,$InMaintenanceMode,$IsRemotePC,$SecureIcaRequired,$ShutdownDesktopsAfterUse,$TurnOnAddedMachine);
+        $scriptBlockParams = @($Name,$Description,$DeliveryType,$PublishedName,$ColorDepth,$Enabled,$IsMaintenanceMode,$IsRemotePC,$IsSecureIca,$ShutdownDesktopsAfterUse,$TurnOnAddedMachine);
         Write-Verbose ($localizedData.InvokingScriptBlockWithParams -f [System.String]::Join("','", $scriptBlockParams));
         Invoke-Command  @invokeCommandParams;
     } #end process
