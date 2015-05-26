@@ -20,7 +20,7 @@ function Get-TargetResource {
             Import-Module "$env:ProgramFiles\Citrix\XenDesktopPoshSdk\Module\Citrix.XenDesktop.Admin.V1\Citrix.XenDesktop.Admin\Citrix.XenDesktop.Admin.psd1";
             $VerbosePreference = 'Continue';
 
-            $xdSite = Get-XDSite -AdminAddress $using:AdminAddress -ErrorAction Stop;
+            $xdSite = Get-XDSite -AdminAddress $using:ExistingControllerName -ErrorAction Stop;
             $xdCustomSite = [PSCustomObject] @{
                 SiteName = $xdSite.Name;
                 Controllers = $xdSite | Select-Object -ExpandProperty Controllers;
@@ -102,10 +102,10 @@ function Set-TargetResource {
             
             if ($using:Ensure -eq 'Present') {
                 $addXDControllerParams = @{
-                    AdminAddress = $using:ControllerName;
-                    SiteControllerAddress = $using:AdminAddress;
+                    AdminAddress = $using:localHostName;
+                    SiteControllerAddress = $using:ExistingControllerName;
                 }
-                Write-Verbose ($using:localizedData.AddingXDController -f $localHostName, $using:SiteName);
+                Write-Verbose ($using:localizedData.AddingXDController -f $using:localHostName, $using:SiteName);
                 Add-XDController @addXDControllerParams -ErrorAction Stop;
             }
             else {
