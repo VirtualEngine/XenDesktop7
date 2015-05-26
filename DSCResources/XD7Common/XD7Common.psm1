@@ -249,7 +249,7 @@ function ResolveXDBrokerMachine {
     #>
     param (
         [Parameter(Mandatory)] [System.String] $MachineName,
-        [Parameter(Mandatory)] [System.Object[]] $BrokerMachines
+        [Parameter(Mandatory)] [AllowNull()] [System.Object[]] $BrokerMachines
     )
     $brokerMachine = $null;
     foreach ($machine in $brokerMachines) {
