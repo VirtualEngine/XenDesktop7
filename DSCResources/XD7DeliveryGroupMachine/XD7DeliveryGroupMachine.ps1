@@ -49,7 +49,9 @@ function Test-TargetResource {
         [Parameter()] [ValidateSet('Present','Absent')] [System.String] $Ensure = 'Present'
     )
     process {
+        $VerbosePreference = 'SilentlyContinue';
         Import-Module "$env:ProgramFiles\WindowsPowerShell\Modules\cCitrixXenDesktop7\DSCResources\XD7Common\XD7Common.psd1";
+        $VerbosePreference = 'Continue';
         
         $targetResource = Get-TargetResource @PSBoundParameters;
         if (TestXDMachineMembership -RequiredMembers $Members -ExistingMembers $targetResource.Members -Ensure $Ensure) {
@@ -78,8 +80,10 @@ function Set-TargetResource {
     }
     process {
         $scriptBlock = {
+            $VerbosePreference = 'SilentlyContinue';
             Add-PSSnapin -Name 'Citrix.Broker.Admin.V2';
             Import-Module "$env:ProgramFiles\WindowsPowerShell\Modules\cCitrixXenDesktop7\DSCResources\XD7Common\XD7Common.psd1";
+            $VerbosePreference = 'Continue';
 
             $brokerMachines = Get-BrokerMachine -DesktopGroupName $using:Name;
             foreach ($member in $using:Members) {
