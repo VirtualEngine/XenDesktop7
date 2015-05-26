@@ -75,7 +75,7 @@ function Set-TargetResource {
                 DatabaseName = $using:DatabaseName;
                 DataStore = $using:DataStore;
                 SiteName = $using:SiteName;
-                DatabaseCredentials = $using:DatabaseCredentials;
+                DatabaseCredentials = $using:Credential;
             }
             Write-Verbose ($using:localizedData.CreatingXDDatabase -f $using:DataStore, $using:DatabaseName, $using:DatabaseServer);
             New-XDDatabase @newXDDatabaseParams;
