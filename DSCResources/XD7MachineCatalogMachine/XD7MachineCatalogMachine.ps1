@@ -76,8 +76,10 @@ function Set-TargetResource {
     }
     process {
         $scriptBlock = {
+            $VerbosePreference = 'SilentlyContinue';
             Add-PSSnapin -Name 'Citrix.Broker.Admin.V2' -ErrorAction Stop;
             Import-Module "$env:ProgramFiles\WindowsPowerShell\Modules\cCitrixXenDesktop7\DSCResources\XD7Common\XD7Common.psd1";
+            $VerbosePreference = 'Continue';
             
             $brokerMachines = Get-BrokerMachine -CatalogName $using:Name | Select-Object -ExpandProperty DnsName;
             foreach ($member in $using:Members) {
