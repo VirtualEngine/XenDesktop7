@@ -103,7 +103,7 @@ function Set-TargetResource {
                 ProductEdition = $using:LicenseEdition;
                 LicensingModel = $using:LicenseModel;
             }
-            Write-Verbose ($localizedData.SettingLicenseServerProperties -f $using:LicenseServer, $using:LicenseServerPort, $using:Edition);
+            Write-Verbose ($using:localizedData.SettingLicenseServerProperties -f $using:LicenseServer, $using:LicenseServerPort, $using:LicenseEdition);
             $xdConfigSite = Set-ConfigSite @setConfigSiteParams;
         } #end scriptBlock
         
