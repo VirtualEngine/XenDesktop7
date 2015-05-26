@@ -112,7 +112,7 @@ function Set-TargetResource {
         }
         if ($Credential) { AddInvokeScriptBlockCredentials -Hashtable $invokeCommandParams -Credential $Credential; }
         else { $invokeCommandParams['ScriptBlock'] = [System.Management.Automation.ScriptBlock]::Create($scriptBlock.ToString().Replace('$using:','$')); }
-        Write-Verbose ($localizedData.InvokingScriptBlockWithParams -f [System.String]::Join("','", @($SiteName, $DatabaseServer, $SiteDatabaseName, $LoggingDatabaseName, $MonitorDatabaseName));
+        Write-Verbose ($localizedData.InvokingScriptBlockWithParams -f [System.String]::Join("','", @($SiteName, $DatabaseServer, $SiteDatabaseName, $LoggingDatabaseName, $MonitorDatabaseName)));
         Invoke-Command  @invokeCommandParams;
     } #end process
 } #end function Test-TargetResource
