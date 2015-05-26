@@ -23,6 +23,7 @@ function Get-TargetResource {
     process {
         $scriptBlock = {
             Add-PSSnapin -Name 'Citrix.Broker.Admin.V2' -ErrorAction Stop;
+
             $brokerCatalog = Get-BrokerCatalog -Name $using:Name -ErrorAction SilentlyContinue;
             $targetResource = @{
                 Name = $brokerCatalog.Name;
@@ -32,6 +33,8 @@ function Get-TargetResource {
                 PvsAddress = $brokerCatalog.PvsAddress;
                 PvsDomain = $brokerCatalog.PvsDomain;
                 IsMultiSession = $brokerCatalog.SessionSupport -eq 'MultiSession';
+                Credential = $using:Credential;
+                Ensure = $using:Ensure;
             }
             switch ($brokerCatalog.PersistUserChanges) {
                 'OnLocal' { $targetResource['Persistence'] = 'Local'; }
@@ -47,12 +50,8 @@ function Get-TargetResource {
         }
         if ($Credential) { AddInvokeScriptBlockCredentials -Hashtable $invokeCommandParams -Credential $Credential; }
         else { $invokeCommandParams['ScriptBlock'] = [System.Management.Automation.ScriptBlock]::Create($scriptBlock.ToString().Replace('$using:','$')); }
-        ## Overwrite the local ComputerName returned by AddInvokeScriptBlockCredentials
-        $invokeCommandParams['ComputerName'] = $ExistingControllerName;
         Write-Verbose ($localizedData.InvokingScriptBlockWithParams -f [System.String]::Join("','", @($Name)));
         $targetResource = Invoke-Command @invokeCommandParams;
-        $targetResource['Ensure'] = $Ensure;
-        $targetResource['Credential'] = $Credential;
         return $targetResource;
     } #end process
 } #end function Get-TargetResource
@@ -198,8 +197,6 @@ function Set-TargetResource {
         }
         if ($Credential) { AddInvokeScriptBlockCredentials -Hashtable $invokeCommandParams -Credential $Credential; }
         else { $invokeCommandParams['ScriptBlock'] = [System.Management.Automation.ScriptBlock]::Create($scriptBlock.ToString().Replace('$using:','$')); }
-        ## Overwrite the local ComputerName returned by AddInvokeScriptBlockCredentials
-        $invokeCommandParams['ComputerName'] = $ExistingControllerName;
         Write-Verbose ($localizedData.InvokingScriptBlockWithParams -f [System.String]::Join("','", @($Name, $Ensure, $Allocation, $Provisioning, $Persistence, $IsMultiSession, $Description, $PvsAddress, $PvsDomain)));
         Invoke-Command @invokeCommandParams;
     } #end process
