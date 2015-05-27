@@ -118,6 +118,6 @@ function Set-TargetResource {
         if ($Credential) { AddInvokeScriptBlockCredentials -Hashtable $invokeCommandParams -Credential $Credential; }
         else { $invokeCommandParams['ScriptBlock'] = [System.Management.Automation.ScriptBlock]::Create($scriptBlock.ToString().Replace('$using:','$')); }
         Write-Verbose ($localizedData.InvokingScriptBlockWithParams -f [System.String]::Join("','", @($Name, $Enabled, $Ensure)));
-        Invoke-Command  @invokeCommandParams;
+        Invoke-Command @invokeCommandParams;
     } #end process
 } #end function Set-TargetResource
