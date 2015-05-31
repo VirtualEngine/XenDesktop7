@@ -156,6 +156,7 @@ function GetXDBrokerMachine {
     <#
         Searches for a registered Citrix XenDesktop machine by name.
     #>
+    [CmdletBinding()]
     param (
         [Parameter(Mandatory)] [System.String] $MachineName
     )
@@ -171,13 +172,12 @@ function GetXDBrokerMachine {
         ## Failing all else, perform a wildcard search
         $brokerMachine = Get-BrokerMachine -MachineName "*\$MachineName" -ErrorAction SilentlyContinue;
     }
-
     if ($brokerMachine -eq $null) {
-        Write-Error -ErrorId 'MachineNotFound' -Message ($localizedData.MachineNotFoundError -f $member);
+        Write-Error -ErrorId 'MachineNotFound' -Message ($localizedData.MachineNotFoundError -f $Machine);
         return;
     }
-    elseif ($brokerMachine.Count -gt 1) {
-        Write-Error -ErrorId 'AmbiguousMachineReference' -Message ($localizedData.AmbiguousMachineReferenceError -f $member);
+    elseif (($brokerMachine).Count -gt 1) {
+        Write-Error -ErrorId 'AmbiguousMachineReference' -Message ($localizedData.AmbiguousMachineReferenceError -f $MachineName);
         return;
     }
     else {
@@ -189,6 +189,7 @@ function TestXDMachineIsExistingMember {
     <#
         Tests whether a machine is an existing member of a list of FQDN machine members.
     #>
+    [CmdletBinding()]
     param (
         [Parameter(Mandatory)] [System.String] $MachineName,
         [Parameter()] [System.String[]] $ExistingMembers
@@ -264,7 +265,6 @@ function ResolveXDBrokerMachine {
     } #end foreach machine
     return $null;
 } #end function ResolveXDBrokerMachine
-
 
 function ThrowInvalidOperationException {
     <#

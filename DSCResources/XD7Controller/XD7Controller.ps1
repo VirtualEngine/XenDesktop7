@@ -16,16 +16,20 @@ function Get-TargetResource {
     } #end begin
     process {
         $scriptBlock = {
-            $VerbosePreference = 'SilentlyContinue';
-            Import-Module "$env:ProgramFiles\Citrix\XenDesktopPoshSdk\Module\Citrix.XenDesktop.Admin.V1\Citrix.XenDesktop.Admin\Citrix.XenDesktop.Admin.psd1";
-            $VerbosePreference = 'Continue';
+            Import-Module "$env:ProgramFiles\Citrix\XenDesktopPoshSdk\Module\Citrix.XenDesktop.Admin.V1\Citrix.XenDesktop.Admin\Citrix.XenDesktop.Admin.psd1" -Verbose:$false;
 
             $xdSite = Get-XDSite -AdminAddress $using:ExistingControllerName -ErrorAction Stop;
-            $xdCustomSite = [PSCustomObject] @{
+            $targetResource = @{
                 SiteName = $xdSite.Name;
-                Controllers = $xdSite | Select-Object -ExpandProperty Controllers;
+                ExistingControllerName = $using:ExistingControllerName;
+                Credential = $using:Credential;
+                Ensure = 'Absent';
             }
-            return $xdCustomSite;
+            $localHostName = GetHostName;
+            if (($xdSite.Name -eq $using:SiteName) -and ($xdSite.Controllers.DnsName -contains $localHostName)) {
+                $targetResource['Ensure'] = 'Present';
+            }
+            return $targetResource;
         } #end scriptBlock
         
         $invokeCommandParams = @{
@@ -37,22 +41,7 @@ function Get-TargetResource {
         ## Overwrite the local ComputerName returned by AddInvokeScriptBlockCredentials
         $invokeCommandParams['ComputerName'] = $ExistingControllerName;
         Write-Verbose ($localizedData.InvokingScriptBlockWithParams -f [System.String]::Join("','", @($ExistingControllerName)));
-        $xdSite = Invoke-Command @invokeCommandParams;
-        $targetResource = @{
-            SiteName = $xdSite.SiteName;
-            ControllerName = $ExistingControllerName;
-            Credential = $Credential;
-            Ensure = 'Absent';
-        }
-        $localHostName = GetHostName;
-        if ($xdSite.Controllers.DnsName -contains $localHostName) {
-            Write-Verbose ($localizedData.ControllerDoesExist -f $localHostName, $xdSite.SiteName);
-            $targetResource['Ensure'] = 'Present';
-        }
-        else {
-            Write-Verbose ($localizedData.ControllerDoesNotExist -f $localHostName, $xdSite.SiteName);
-        }
-        return $targetResource;
+        return Invoke-Command @invokeCommandParams;
     } #end process
 } #end function Get-TargetResource
 
@@ -69,10 +58,12 @@ function Test-TargetResource {
         $xdSite = Get-TargetResource @PSBoundParameters;
         $localHostName = GetHostName;
         if ($xdSite.SiteName -eq $SiteName -and $xdSite.Ensure -eq $Ensure) {
+            Write-Verbose ($localizedData.ControllerDoesExist -f $localHostName, $SiteName);
             Write-Verbose ($localizedData.ResourceInDesiredState -f $localHostName);
             return $true;
         }
         else {
+            Write-Verbose ($localizedData.ControllerDoesNotExist -f $localHostName, $SiteName);
             Write-Verbose ($localizedData.ResourceNotInDesiredState -f $localHostName);
             return $false;
         }
@@ -95,29 +86,28 @@ function Set-TargetResource {
     } #end begin
     process {
         $scriptBlock = {
-            $VerbosePreference = 'SilentlyContinue';
-            Import-Module "$env:ProgramFiles\Citrix\XenDesktopPoshSdk\Module\Citrix.XenDesktop.Admin.V1\Citrix.XenDesktop.Admin\Citrix.XenDesktop.Admin.psd1";
+            Import-Module "$env:ProgramFiles\Citrix\XenDesktopPoshSdk\Module\Citrix.XenDesktop.Admin.V1\Citrix.XenDesktop.Admin\Citrix.XenDesktop.Admin.psd1" -Verbose:$false;
             Remove-Variable -Name CitrxHLSSdkContext -Force -ErrorAction SilentlyContinue;
-            $VerbosePreference = 'Continue';
             
+            $localHostName = GetHostName;
             if ($using:Ensure -eq 'Present') {
                 $addXDControllerParams = @{
-                    AdminAddress = $using:localHostName;
+                    AdminAddress = $localHostName;
                     SiteControllerAddress = $using:ExistingControllerName;
                 }
-                Write-Verbose ($using:localizedData.AddingXDController -f $using:localHostName, $using:SiteName);
+                Write-Verbose ($using:localizedData.AddingXDController -f $localHostName, $using:SiteName);
                 Add-XDController @addXDControllerParams -ErrorAction Stop;
             }
             else {
                 $removeXDControllerParams = @{
                     ControllerName = $using:ExistingControllerName;
                 }
-                Write-Verbose ($using:localizedData.RemovingXDController -f $using:localHostName, $using:SiteName);
+                Write-Verbose ($using:localizedData.RemovingXDController -f $localHostName, $using:SiteName);
                 Remove-XDController @removeXDControllerParams -ErrorAction Stop;
             }
         } #end scriptBlock
         
-        $localHostName = (GetHostName);
+        
         $invokeCommandParams = @{
             ScriptBlock = $scriptBlock;
             ErrorAction = 'Stop';

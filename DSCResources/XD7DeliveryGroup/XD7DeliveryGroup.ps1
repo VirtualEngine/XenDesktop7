@@ -137,10 +137,8 @@ function Set-TargetResource {
     }
     process {
         $scriptBlock = {
-            $VerbosePreference = 'SilentlyContinue';
             Add-PSSnapin -Name 'Citrix.Broker.Admin.V2' -ErrorAction Stop;
-            Import-Module "$env:ProgramFiles\WindowsPowerShell\Modules\cCitrixXenDesktop7\DSCResources\XD7Common\XD7Common.psd1";
-            $VerbosePreference = 'Continue';
+            Import-Module "$env:ProgramFiles\WindowsPowerShell\Modules\cCitrixXenDesktop7\DSCResources\XD7Common\XD7Common.psd1" -Verbose:$false;
         
             $deliveryGroup = Get-BrokerDesktopGroup -Name $using:Name -ErrorAction SilentlyContinue;
             if ($using:Ensure -eq 'Present') {

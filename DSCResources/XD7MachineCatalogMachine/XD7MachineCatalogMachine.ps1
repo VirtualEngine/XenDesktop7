@@ -21,6 +21,8 @@ function Get-TargetResource {
             $targetResource = @{
                 Name = $using:Name;
                 Members = $brokerMachines;
+                Ensure = $using:Ensure;
+                Credential = $using:Credential;
             }
             return $targetResource;
         } #end scriptBlock
@@ -32,10 +34,7 @@ function Get-TargetResource {
         if ($Credential) { AddInvokeScriptBlockCredentials -Hashtable $invokeCommandParams -Credential $Credential; }
         else { $invokeCommandParams['ScriptBlock'] = [System.Management.Automation.ScriptBlock]::Create($scriptBlock.ToString().Replace('$using:','$')); }
         Write-Verbose ($localizedData.InvokingScriptBlockWithParams -f [System.String]::Join("','", @($Name)));
-        $targetResource = Invoke-Command  @invokeCommandParams;
-        $targetResource['Ensure'] = $Ensure;
-        $targetResource['Credential'] = $Credential;
-        return $targetResource;
+        return Invoke-Command  @invokeCommandParams;
     } #end process
 } #end function Get-TargetResource
 
@@ -76,11 +75,10 @@ function Set-TargetResource {
     }
     process {
         $scriptBlock = {
-            $VerbosePreference = 'SilentlyContinue';
             Add-PSSnapin -Name 'Citrix.Broker.Admin.V2' -ErrorAction Stop;
-            Import-Module "$env:ProgramFiles\WindowsPowerShell\Modules\cCitrixXenDesktop7\DSCResources\XD7Common\XD7Common.psd1";
-            $VerbosePreference = 'Continue';
+            Import-Module "$env:ProgramFiles\WindowsPowerShell\Modules\cCitrixXenDesktop7\DSCResources\XD7Common\XD7Common.psd1" -Verbose:$false;
             
+            <#
             $brokerMachines = Get-BrokerMachine -CatalogName $using:Name | Select-Object -ExpandProperty DnsName;
             foreach ($member in $using:Members) {
                 if (TestXDMachineIsExistingMember -MachineName $member -ExistingMembers $brokerMachines) {
@@ -90,11 +88,29 @@ function Set-TargetResource {
                     }
                 }
                 elseif ($using:Ensure -eq 'Present') {
-                    if (-not $brokerCatalog) {
-                        $brokerCatalog = Get-BrokerCatalog -Name $using:Name;
-                    }
+                    
                     Write-Verbose ($using:localizedData.AddingMachineCatalogMachine -f $member, $using:Name);
                     New-BrokerMachine -CatalogUid $brokerCatalog.Uid -MachineName $member -ErrorAction SilentlyContinue;
+                }
+            } #end foreach member
+            #>
+
+            $brokerMachines = Get-BrokerMachine -CatalogName $using:Name;
+            $brokerCatalog = Get-BrokerCatalog -Name $using:Name;
+            foreach ($member in $using:Members) {
+                $brokerMachine = ResolveXDBrokerMachine -MachineName $member -BrokerMachines $brokerMachines;
+                if (($using:Ensure -eq 'Absent') -and ($brokerMachine.CatalogName -eq $using:Name)) {
+                    Write-Verbose ($using:localizedData.RemovingMachineCatalogMachine -f $member, $using:Name);
+                    $brokerMachine | Remove-BrokerMachine -CatalogName $using:Name -Force;
+                }
+                elseif (($using:Ensure -eq 'Present') -and ($brokerMachine.CatalogName -ne $using:Name)) {
+                    if ($brokerMachine -eq $null) {
+                        ThrowInvalidOperationException -ErrorId 'MachineNotFound' -Message ($localizedData.MachineNotFoundError -f $member);
+                    }
+                    else {
+                        Write-Verbose ($using:localizedData.AddingMachineCatalogMachine -f $member, $using:Name);
+                        $brokerMachine | New-BrokerMachine $brokerCatalog.Uid;
+                    }
                 }
             } #end foreach member
         } #end scriptBlock

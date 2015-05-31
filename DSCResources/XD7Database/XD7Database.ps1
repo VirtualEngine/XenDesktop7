@@ -66,9 +66,7 @@ function Set-TargetResource {
     } #end begin
     process {
         $scriptBlock = {
-            $VerbosePreference = 'SilentlyContinue';
-            Import-Module "$env:ProgramFiles\Citrix\XenDesktopPoshSdk\Module\Citrix.XenDesktop.Admin.V1\Citrix.XenDesktop.Admin\Citrix.XenDesktop.Admin.psd1";
-            $VerbosePreference = 'Continue';
+            Import-Module "$env:ProgramFiles\Citrix\XenDesktopPoshSdk\Module\Citrix.XenDesktop.Admin.V1\Citrix.XenDesktop.Admin\Citrix.XenDesktop.Admin.psd1" -Verbose:$false;
             
             $newXDDatabaseParams = @{
                 DatabaseServer = $using:DatabaseServer;
