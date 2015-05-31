@@ -1,50 +1,147 @@
-$here = Split-Path -Parent $MyInvocation.MyCommand.Path;
-$sut = (Split-Path -Leaf $MyInvocation.MyCommand.Path).Replace(".Tests.", ".");
-. "$here\$sut";
+$here = Split-Path -Parent $MyInvocation.MyCommand.Path
+$sut = (Split-Path -Leaf $MyInvocation.MyCommand.Path).Replace('.Tests.ps1', '.psm1')
+Import-Module (Join-Path $here -ChildPath $sut) -Force;
 
-## Dot source XD7Common functions
-$moduleParent = Split-Path -Path $here -Parent;
-Get-ChildItem -Path "$moduleParent\XD7Common" -Include *.ps1 -Exclude '*.Tests.ps1' -Recurse |
-    ForEach-Object { . $_.FullName; }
+InModuleScope 'XD7Controller' {
+    
+    function Get-XDSite { }
+    function Add-XDController { param ( $AdminAddress, $SiteControllerAddress ) }
+    function Remove-XDController { param ( $ControllerName ) }
 
-function Get-XDSite {
-    param ( $AdminAddress )
-};
+    Describe 'XD7Controller' {
 
-Describe 'XD7Controller\Get-TargetResource' {
-
-    Mock -CommandName TestXDModule { return $true; }
-    Mock -CommandName FindXDModule { return (Get-PSDrive -Name TestDrive).Root; };
-    Mock -CommandName Import-Module { };
-
-    It 'returns a System.Collections.Hashtable.' {
-        $testSiteName = 'TestSite';
         $testControllerName = 'TestController';
-        Mock -CommandName Get-XDSite -ParameterFilter { $AdminAddress -eq $testControllerName } -MockWith {
-            return @{
-                Name = $testSiteName;
-                Controllers = @( @{ DnsName = $testControllerName; }; )
+        $testSite =  [PSCustomObject] @{ Name = 'TestSite'; Controllers = @( @{ DnsName = $testControllerName; }; ); }
+        $testSiteControllerNonExistent =  [PSCustomObject] @{ Name = 'TestSite'; Controllers = @( @{ DnsName = "$($testControllerName)2"; }; ); }
+        $testController = @{ SiteName = 'TestSite'; ExistingControllerName = $testControllerName; Ensure = 'Present'; }
+        $testControllerNonExistent =  @{ SiteName = 'TestSite'; ExistingControllerName = $testControllerName; Ensure = 'Absent'; }
+        $testControllerSiteNonExistent =  @{ SiteName = $null; ExistingControllerName = $testControllerName; Ensure = 'Absent'; }
+        $testCredentials = New-Object System.Management.Automation.PSCredential 'DummyUser', (ConvertTo-SecureString 'DummyPassword' -AsPlainText -Force);
+
+        Context 'Get-TargetResource' {
+            Mock -CommandName TestXDModule -MockWith { return $true; }
+            Mock -CommandName Import-Module { };
+            Mock -CommandName GetHostName -MockWith { return $testControllerName; }
+            
+            It 'Returns a System.Collections.Hashtable type' {
+                Mock -CommandName Get-XDSite { return $testSite; }
+                Mock -CommandName Invoke-Command -MockWith { & $ScriptBlock; }
+                (Get-TargetResource @testController) -is [System.Collections.Hashtable] | Should Be $true;
             }
-        }
-        $targetResource = Get-TargetResource -SiteName $testSiteName -ControllerName $testControllerName;
-        $targetResource -is [System.Collections.Hashtable] | Should Be $true;
-        Assert-MockCalled -CommandName Get-XDSite -Exactly 1;
-    }
 
-} #end describe XD7Controller\Get-TargetResource
+            It 'Returns "Present" when controller exists and "Ensure" = "Present" is specified' {
+                Mock -CommandName Get-XDSite { return $testSite; }
+                Mock -CommandName Invoke-Command -MockWith { & $ScriptBlock; }
+                $targetResource = Get-TargetResource @testController;
+                $targetResource['Ensure'] | Should Be 'Present';
+            }
 
-<#
-ControllerState    : Active
-ControllerVersion  : 7.6.0.5024
-DesktopsRegistered : 1
-DnsName            : XD76XC.lab.local
-LastActivityTime   : 11/05/2015 09:55:18
-LastStartTime      : 07/05/2015 15:29:53
-MachineName        : LAB\XD76XC
-OSType             : Windows 2012 R2
-OSVersion          : 6.2.9200.0
-Sid                : S-1-5-21-4119761346-2640891843-1747844263-1110
+            It 'Returns "Absent" when controller does not exist and "Ensure" = "Present" is specified' {
+                Mock -CommandName Get-XDSite { return $testSiteControllerNonExistent; }
+                Mock -CommandName Invoke-Command -MockWith { & $ScriptBlock; }
+                $targetResource = Get-TargetResource @testController;
+                $targetResource['Ensure'] | Should Be 'Absent';
+            }
 
--ParameterFilter { $AdminAddress -eq 'TestController' } 
--ParameterFilter { $SiteName -eq $testSiteName -and $ControllerName -eq $testControllerName }
-#>
+            It 'Returns "Present" when controller exists and "Ensure" = "Absent" is specified' {
+                Mock -CommandName Get-XDSite { return $testSite; }
+                Mock -CommandName Invoke-Command -MockWith { & $ScriptBlock; }
+                $targetResource = Get-TargetResource @testControllerNonExistent;
+                $targetResource['Ensure'] | Should Be 'Present';
+            }
+
+            It 'Returns "Absent" when controller does not exist and "Ensure" = "Absent" is specified' {
+                Mock -CommandName Get-XDSite { return $testSiteControllerNonExistent; }
+                Mock -CommandName Invoke-Command -MockWith { & $ScriptBlock; }
+                $targetResource = Get-TargetResource @testControllerNonExistent;
+                $targetResource['Ensure'] | Should Be 'Absent';
+            }
+            
+            It 'Invokes script block without credentials by default' {
+                Mock -CommandName Invoke-Command -ParameterFilter { $Credential -eq $null -and $Authentication -eq $null } { }
+                Get-TargetResource @testController;
+                Assert-MockCalled Invoke-Command -ParameterFilter { $Credential -eq $null -and $Authentication -eq $null } -Exactly 1 -Scope It;
+            }
+
+            It 'Invokes script block with credentials and CredSSP when specified' {
+                Mock -CommandName Invoke-Command -ParameterFilter { $Credential -eq $testCredentials -and $Authentication -eq 'CredSSP' } { }
+                $testControllerWithCredentials = $testController.Clone();
+                $testControllerWithCredentials['Credential'] = $testCredentials;
+                Get-TargetResource @testControllerWithCredentials;
+                Assert-MockCalled Invoke-Command -ParameterFilter { $Credential -eq $testCredentials -and $Authentication -eq 'CredSSP' } -Exactly 1 -Scope It;
+            }
+            
+            It 'Throws when Citrix.XenDesktop.Admin is not registered' {
+                Mock -CommandName TestXDModule -MockWith { return $false; }
+                { Get-TargetResource @testController } | Should Throw;
+            }
+            
+        } #end context Get-TargetResource
+
+        Context 'Test-TargetResource' {
+            Mock -CommandName GetHostName -MockWith { return $testControllerName; }
+
+            It 'Returns a System.Boolean type' {
+                Mock -CommandName Get-TargetResource -MockWith { return $testController; }
+                (Test-TargetResource @testController) -is [System.Boolean] | Should Be $true;
+            }
+
+             It 'Returns True when controller exists in site' {
+                Mock -CommandName Get-TargetResource -MockWith { return $testController; }
+                Test-TargetResource @testController | Should Be $true;
+            }
+
+            It 'Returns False when site does not exist' {
+                Mock -CommandName Get-TargetResource -MockWith { return $testControllerSiteNonExistent; }
+                Test-TargetResource @testController | Should Be $false;
+            }
+
+            It 'Returns False when controller does not exist in site' {
+                Mock -CommandName Get-TargetResource -MockWith { return $testControllerNonExistent; }
+                Test-TargetResource @testController | Should Be $false;
+            }
+            
+        } #end context Test-TargetResource
+
+        Context 'Set-TargetResource' {
+            Mock -CommandName TestXDModule -MockWith { return $true; }
+            Mock -CommandName Import-Module { };
+            Mock -CommandName GetHostName -MockWith { return $testControllerName; }
+
+            It 'Calls Add-XDController when "Ensure" = "Present"' {
+                Mock -CommandName Add-XDController -ParameterFilter { $AdminAddress -eq $testControllerName } -MockWith { }
+                Mock -CommandName Invoke-Command -MockWith { & $ScriptBlock; }
+                Set-TargetResource @testController;
+                Assert-MockCalled -CommandName Add-XDController -ParameterFilter { $AdminAddress -eq $testControllerName } -Exactly 1 -Scope It;
+            }
+
+            It 'Calls Remove-XDController when "Ensure" = "Absent"' {
+                Mock -CommandName Remove-XDController -ParameterFilter { $ControllerName -eq $testControllerName } -MockWith { }
+                Mock -CommandName Invoke-Command -MockWith { & $ScriptBlock; }
+                Set-TargetResource @testControllerNonExistent;
+                Assert-MockCalled -CommandName Remove-XDController -ParameterFilter { $ControllerName -eq $testControllerName } -Exactly 1 -Scope It;
+            }
+
+            It 'Invokes script block without credentials by default' {
+                Mock -CommandName Invoke-Command -ParameterFilter { $Credential -eq $null -and $Authentication -eq $null } { }
+                Set-TargetResource @testController;
+                Assert-MockCalled Invoke-Command -ParameterFilter { $Credential -eq $null -and $Authentication -eq $null } -Exactly 1 -Scope It;
+            }
+
+            It 'Invokes script block with credentials and CredSSP when specified' {
+                Mock -CommandName Invoke-Command -ParameterFilter { $Credential -eq $testCredentials -and $Authentication -eq 'CredSSP' } { }
+                $testControllerWithCredentials = $testController.Clone();
+                $testControllerWithCredentials['Credential'] = $testCredentials;
+                Set-TargetResource @testControllerWithCredentials;
+                Assert-MockCalled Invoke-Command -ParameterFilter { $Credential -eq $testCredentials -and $Authentication -eq 'CredSSP' } -Exactly 1 -Scope It;
+            }
+
+            It 'Throws when Citrix.XenDesktop.Admin is not registered' {
+                Mock -CommandName TestXDModule -MockWith { return $false; }
+                { Set-TargetResource @testController } | Should Throw;
+            }
+
+        } #end context Set-TargetResource
+    
+    } #end describe XD7Controller
+} #end inmodulescope

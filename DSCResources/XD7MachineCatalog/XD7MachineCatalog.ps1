@@ -23,7 +23,6 @@ function Get-TargetResource {
     process {
         $scriptBlock = {
             Add-PSSnapin -Name 'Citrix.Broker.Admin.V2' -ErrorAction Stop;
-
             $brokerCatalog = Get-BrokerCatalog -Name $using:Name -ErrorAction SilentlyContinue;
             $targetResource = @{
                 Name = $brokerCatalog.Name;
@@ -51,8 +50,7 @@ function Get-TargetResource {
         if ($Credential) { AddInvokeScriptBlockCredentials -Hashtable $invokeCommandParams -Credential $Credential; }
         else { $invokeCommandParams['ScriptBlock'] = [System.Management.Automation.ScriptBlock]::Create($scriptBlock.ToString().Replace('$using:','$')); }
         Write-Verbose ($localizedData.InvokingScriptBlockWithParams -f [System.String]::Join("','", @($Name)));
-        $targetResource = Invoke-Command @invokeCommandParams;
-        return $targetResource;
+        return Invoke-Command @invokeCommandParams;
     } #end process
 } #end function Get-TargetResource
 
