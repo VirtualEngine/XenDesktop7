@@ -55,13 +55,21 @@ function Test-TargetResource {
     process {
         $targetResource = Get-TargetResource @PSBoundParameters;
         foreach ($member in $Members) {
+            $netBIOSName = $member;
+            if ($member.Contains('\')) {
+                $netBIOSName = $member.Split('\')[1];
+            }
+            
+            ## Try a direct match
             if ($targetResource.Members -contains $member) {
                 if ($Ensure -eq 'Absent') {
                     Write-Verbose ($localizedData.SurplusRoleMember -f $member);
                     $targetResource['Ensure'] = 'Present';
                 }
             }
-            elseif ($targetResource.Members -match '^\S+\\{0}$' -f $member) {
+            ## If not, try a *\UserName or *\GroupName match
+            elseif ($targetResource.Members -match '^\S+\\{0}$' -f $netBIOSName) {
+                Write-Warning -Message ($localizedData.UserNameNotFullyQualifiedWarning -f $member);
                 if ($Ensure -eq 'Absent') {
                     Write-Verbose ($localizedData.SurplusRoleMember -f $member);
                     $targetResource['Ensure'] = 'Present';
