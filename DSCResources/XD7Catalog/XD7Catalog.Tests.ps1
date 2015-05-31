@@ -2,11 +2,11 @@ $here = Split-Path -Parent $MyInvocation.MyCommand.Path
 $sut = (Split-Path -Leaf $MyInvocation.MyCommand.Path).Replace('.Tests.ps1', '.psm1')
 Import-Module (Join-Path $here -ChildPath $sut) -Force;
 
-InModuleScope 'XD7MachineCatalog' {
+InModuleScope 'XD7Catalog' {
 
     function Get-BrokerCatalog { }
 
-    Describe 'XD7MachineCatalog' {
+    Describe 'XD7Catalog' {
 
         $testCatalog = @{
             Name = 'Test Catalog';
@@ -66,6 +66,6 @@ InModuleScope 'XD7MachineCatalog' {
 
         } #end context Get-TargetResource
 
-    } #end describe XD7MachineCatalog
+    } #end describe XD7Catalog
 
 } #end inmodulescope
