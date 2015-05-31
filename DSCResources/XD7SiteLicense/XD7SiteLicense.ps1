@@ -9,6 +9,7 @@ function Get-TargetResource {
         [Parameter()] [ValidateNotNull()] [System.Int16] $LicenseServerPort = 27000,
         [Parameter()] [ValidateSet('PLT','ENT','APP')] [System.String] $LicenseEdition = 'PLT',
         [Parameter()] [ValidateSet('UserDevice','Concurrent')] [System.String] $LicenseModel = 'UserDevice',
+        [Parameter()] [System.Boolean] $TrustLicenseServerCertificate = $true,
         [Parameter()] [AllowNull()] [System.Management.Automation.PSCredential] $Credential
     )
     begin {
@@ -18,20 +19,20 @@ function Get-TargetResource {
     }
     process {
         $scriptBlock = {
-            $VerbosePreference = 'Continue';
             Add-PSSnapin -Name 'Citrix.Configuration.Admin.V2' -ErrorAction Stop;
             try {
                 $xdSiteConfig = Get-ConfigSite;
             }
             catch { }
-            $xdCurrentSite = @{
+            $targetResource = @{
                 LicenseServer = $xdSiteConfig.LicenseServerName;
                 LicenseServerPort = $xdSiteConfig.LicenseServerPort;
                 LicenseEdition = $xdSiteConfig.ProductEdition;
                 LicenseModel = $xdSiteConfig.LicensingModel;
+                TrustLicenseServerCertificate = !([System.String]::IsNullOrEmpty($xdSiteConfig.MetaDataMap.CertificateHash));
                 Ensure = $using:Ensure;
             };
-            return $xdCurrentSite;
+            return $targetResource;
         } #end scriptblock
 
         $invokeCommandParams = @{
@@ -50,11 +51,12 @@ function Test-TargetResource {
     [OutputType([System.Boolean])]
     param (
         [Parameter(Mandatory)] [ValidateNotNullOrEmpty()] [System.String] $LicenseServer,
-        [Parameter()] [AllowNull()] [System.Management.Automation.PSCredential] $Credential,
         [Parameter()] [ValidateSet('Present','Absent')] [System.String] $Ensure = 'Present',
         [Parameter()] [ValidateNotNull()] [System.Int16] $LicenseServerPort = 27000,
         [Parameter()] [ValidateSet('PLT','ENT','APP')] [System.String] $LicenseEdition = 'PLT',
-        [Parameter()] [ValidateSet('UserDevice','Concurrent')] [System.String] $LicenseModel = 'UserDevice'
+        [Parameter()] [ValidateSet('UserDevice','Concurrent')] [System.String] $LicenseModel = 'UserDevice',
+        [Parameter()] [System.Boolean] $TrustLicenseServerCertificate = $true,
+        [Parameter()] [AllowNull()] [System.Management.Automation.PSCredential] $Credential
     )
     process {
         $isInDesiredState = $true;
@@ -66,8 +68,9 @@ function Test-TargetResource {
             $targetResource = Get-TargetResource @PSBoundParameters;
             if ($LicenseServer -ne $targetResource['LicenseServer']) { $isInDesiredState = $false }
             elseif ($LicenseServerPort -ne $targetResource['LicenseServerPort']) { $isInDesiredState = $false }
-            elseif ($LicenseEdition-ne $targetResource['LicenseEdition']) { $isInDesiredState = $false }
+            elseif ($LicenseEdition -ne $targetResource['LicenseEdition']) { $isInDesiredState = $false }
             elseif ($LicenseModel -ne $targetResource['LicenseModel']) { $isInDesiredState = $false }
+            elseif ($TrustLicenseServerCertificate -ne $targetResource['TrustLicenseServerCertificate']) { $isInDesiredState = $false }
             if ($isInDesiredState) {
                 Write-Verbose $localizedData.ResourceInDesiredState;
             }
@@ -83,15 +86,19 @@ function Set-TargetResource {
     [CmdletBinding()]
     param (
         [Parameter(Mandatory)] [ValidateNotNullOrEmpty()] [System.String] $LicenseServer,
-        [Parameter()] [AllowNull()] [System.Management.Automation.PSCredential] $Credential,
         [Parameter()] [ValidateSet('Present','Absent')] [System.String] $Ensure = 'Present',
         [Parameter()] [ValidateNotNull()] [System.Int16] $LicenseServerPort = 27000,
         [Parameter()] [ValidateSet('PLT','ENT','APP')] [System.String] $LicenseEdition = 'PLT',
-        [Parameter()] [ValidateSet('UserDevice','Concurrent')] [System.String] $LicenseModel = 'UserDevice'
+        [Parameter()] [ValidateSet('UserDevice','Concurrent')] [System.String] $LicenseModel = 'UserDevice',
+        [Parameter()] [System.Boolean] $TrustLicenseServerCertificate = $true,
+        [Parameter()] [AllowNull()] [System.Management.Automation.PSCredential] $Credential
     )
     begin {
         if (-not (TestXDModule -Name 'Citrix.Configuration.Admin.V2' -IsSnapin)) {
             ThrowInvalidProgramException -ErrorId 'Citrix.Configuration.Admin.V2' -ErrorMessage $localizedData.XenDesktopSDKNotFoundError;
+        }
+        elseif ($TrustLicenseServerCertificate -and (-not (TestXDModule -Name 'Citrix.Licensing.Admin.V1' -IsSnapin))) {
+            ThrowInvalidProgramException -ErrorId 'Citrix.Licensing.Admin.V1' -ErrorMessage $localizedData.XenDesktopSDKNotFoundError;
         }
     }
     process {
@@ -104,7 +111,12 @@ function Set-TargetResource {
                 LicensingModel = $using:LicenseModel;
             }
             Write-Verbose ($using:localizedData.SettingLicenseServerProperties -f $using:LicenseServer, $using:LicenseServerPort, $using:LicenseEdition);
-            $xdConfigSite = Set-ConfigSite @setConfigSiteParams;
+            Set-ConfigSite @setConfigSiteParams;
+            if ($TrustLicenseServerCertificate) {
+                Add-PSSnapin -Name 'Citrix.Licensing.Admin.V1' -ErrorAction Stop;
+                $licenseServerCertificateHash = (Get-LicCertificate -AdminAddress $using:LicenseServer).CertHash;
+                Set-ConfigSiteMetadata -Name 'CertificateHash' -Value $licenseServerCertificateHash;
+            }
         } #end scriptBlock
         
         $invokeCommandParams = @{
