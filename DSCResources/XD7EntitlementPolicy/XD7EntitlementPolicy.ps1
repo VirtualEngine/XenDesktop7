@@ -7,7 +7,7 @@ function Get-TargetResource {
         [Parameter(Mandatory)] [System.String] $DeliveryGroup, # Delivery Group Name
         [Parameter(Mandatory)] [ValidateSet('Desktop','Application')] [System.String] $EntitlementType, # BrokerEntitlementPolicyRule | BrokerAppEntitlementPolicyRule
         [Parameter()] [System.Boolean] $Enabled = $true,
-        [Parameter()] [System.String] $Name, # Name example: <DeliveryGroupName>_Direct or <DeliveryGroupName>_AG
+        [Parameter()] [AllowNull()] [System.String] $Name = $null,
         [Parameter()] [AllowNull()] [System.String] $Description = $null,
         [Parameter()] [ValidateNotNull()] [System.String[]] $IncludeUsers = @(), # IncludedUserFilterEnabled/IncludedUsers
         [Parameter()] [ValidateNotNull()] [System.String[]] $ExcludeUsers = @(), # ExcludedUserFilterEnabled/ExcludedUsers
@@ -21,7 +21,7 @@ function Get-TargetResource {
         if ([System.String]::IsNullOrEmpty($Name)) {
             $Name = '{0}_{1}' -f $DeliveryGroup, $EntitlementType;
         }
-    }
+    } #end begin
     process {
         $scriptBlock = {
             Add-PSSnapin -Name 'Citrix.Broker.Admin.V2' -ErrorAction Stop;
@@ -30,7 +30,7 @@ function Get-TargetResource {
                 $entitlementPolicy = Get-BrokerEntitlementPolicyRule -Name $using:Name -DesktopGroupUid $desktopGroup.Uid -ErrorAction SilentlyContinue;
             }
             elseif ($using:EntitlementType -eq 'Application') {
-                $entitlementPolicy = Get-AppBrokerEntitlementPolicyRule -Name $using:Name -DesktopGroupUid $desktopGroup.Uid -ErrorAction SilentlyContinue;
+                $entitlementPolicy = Get-BrokerAppEntitlementPolicyRule -Name $using:Name -DesktopGroupUid $desktopGroup.Uid -ErrorAction SilentlyContinue;
             }
             $targetResource = @{
                 DeliveryGroup = $using:DeliveryGroup;
@@ -59,7 +59,7 @@ function Get-TargetResource {
         else { $invokeCommandParams['ScriptBlock'] = [System.Management.Automation.ScriptBlock]::Create($scriptBlock.ToString().Replace('$using:','$')); }
         Write-Verbose ($localizedData.InvokingScriptBlockWithParams -f [System.String]::Join("','", @($Name, $Enabled, $Ensure)));
         return Invoke-Command  @invokeCommandParams;
-    }
+    } #end process
 } #end function Get-TargetResource
 
 function Test-TargetResource {
@@ -69,7 +69,7 @@ function Test-TargetResource {
         [Parameter(Mandatory)] [System.String] $DeliveryGroup, # Delivery Group Name
         [Parameter(Mandatory)] [ValidateSet('Desktop','Application')] [System.String] $EntitlementType, # BrokerEntitlementPolicyRule | BrokerAppEntitlementPolicyRule
         [Parameter()] [System.Boolean] $Enabled = $true,
-        [Parameter()] [System.String] $Name, # Name example: <DeliveryGroupName>_Direct or <DeliveryGroupName>_AG
+        [Parameter()] [AllowNull()] [System.String] $Name = $null,
         [Parameter()] [AllowNull()] [System.String] $Description = $null,
         [Parameter()] [ValidateNotNull()] [System.String[]] $IncludeUsers = @(), # IncludedUserFilterEnabled/IncludedUsers
         [Parameter()] [ValidateNotNull()] [System.String[]] $ExcludeUsers = @(), # ExcludedUserFilterEnabled/ExcludedUsers
@@ -79,17 +79,19 @@ function Test-TargetResource {
     begin {
         if ([System.String]::IsNullOrEmpty($Name)) {
             $Name = '{0}_{1}' -f $DeliveryGroup, $EntitlementType;
+            $PSBoundParameters['Name'] = $Name;
         }
     } #end begin
     process {
+        
         $targetResource = Get-TargetResource @PSBoundParameters;
         $isInCompliance = $true;
-        if ($targetResource['Ensure'] -ne $Ensure) { Write-Host "1"; $isInCompliance = $false; }
-        elseif ($targetResource['Enabled'] -ne $Enabled) { Write-Host "2";$isInCompliance = $false; }
-        elseif ($targetResource['Name'] -ne $Name) { Write-Host "3";$isInCompliance = $false; }
-        elseif ($targetResource['Description'] -ne $Description) {  Write-Host "5a"; $isInCompliance = $false; }
-        elseif (Compare-Object -ReferenceObject $ExcludeUsers -DifferenceObject $targetResource['ExcludeUsers']) { Write-Host "4"; $isInCompliance = $false; }
-        elseif (Compare-Object -ReferenceObject $IncludeUsers -DifferenceObject $targetResource['IncludeUsers']) { Write-Host "5"; $isInCompliance = $false; }
+        if ($targetResource['Ensure'] -ne $Ensure) { $isInCompliance = $false; }
+        elseif ($targetResource['Enabled'] -ne $Enabled) { $isInCompliance = $false; }
+        elseif ($targetResource['Name'] -ne $Name) { $isInCompliance = $false; }
+        elseif ($targetResource['Description'] -ne ([System.String] $Description)) { $isInCompliance = $false; }
+        elseif (Compare-Object -ReferenceObject $ExcludeUsers -DifferenceObject $targetResource['ExcludeUsers']) { $isInCompliance = $false; }
+        elseif (Compare-Object -ReferenceObject $IncludeUsers -DifferenceObject $targetResource['IncludeUsers']) { $isInCompliance = $false; }
         if ($isInCompliance) {
             Write-Verbose ($localizedData.ResourceInDesiredState -f $Name);
         }
@@ -106,7 +108,7 @@ function Set-TargetResource {
         [Parameter(Mandatory)] [System.String] $DeliveryGroup, # Delivery Group Name
         [Parameter(Mandatory)] [ValidateSet('Desktop','Application')] [System.String] $EntitlementType, # BrokerEntitlementPolicyRule | BrokerAppEntitlementPolicyRule
         [Parameter()] [System.Boolean] $Enabled = $true,
-        [Parameter()] [System.String] $Name, # Name example: <DeliveryGroupName>_Direct or <DeliveryGroupName>_AG
+        [Parameter()] [AllowNull()] [System.String] $Name = $null,
         [Parameter()] [AllowNull()] [System.String] $Description = $null,
         [Parameter()] [ValidateNotNull()] [System.String[]] $IncludeUsers = @(), # IncludedUserFilterEnabled/IncludedUsers
         [Parameter()] [ValidateNotNull()] [System.String[]] $ExcludeUsers = @(), # ExcludedUserFilterEnabled/ExcludedUsers
@@ -184,9 +186,13 @@ function Set-TargetResource {
                 }
             }
             else {
-                if ($desktopGroupAccessPolicy) {
+                if ($entitlementPolicy -and ($using:EntitlementType -eq 'Desktop')) {
                     Write-Verbose ($using:localizedData.RemovingEntitlementPolicy -f $using:Name);
-                    $desktopGroupAccessPolicy | Remove-BrokerAccessPolicyRule;
+                    $entitlementPolicy | Remove-BrokerEntitlementPolicyRule;
+                }
+                elseif ($entitlementPolicy) {
+                    Write-Verbose ($using:localizedData.RemovingEntitlementPolicy -f $using:Name);
+                    $entitlementPolicy | Remove-BrokerAppEntitlementPolicyRule;
                 }
             }
 

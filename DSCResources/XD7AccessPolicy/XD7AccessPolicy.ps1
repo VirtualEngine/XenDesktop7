@@ -32,7 +32,7 @@ function Get-TargetResource {
             $desktopGroupAccessPolicy = Get-BrokerAccessPolicyRule -Name $using:Name -DesktopGroupUid $desktopGroup.Uid -ErrorAction SilentlyContinue;
             $targetResource = @{
                 DeliveryGroup = $using:DeliveryGroup;
-                AccessTpye = 'Direct';
+                AccessType = 'Direct';
                 Enabled = $desktopGroupAccessPolicy.Enabled;
                 AllowRestart = $desktopGroupAccessPolicy.AllowRestart;
                 Protocol = [System.String[]] $desktopGroupAccessPolicy.AllowedProtocols;
@@ -140,7 +140,7 @@ function Set-TargetResource {
             $desktopGroupAccessPolicy = Get-BrokerAccessPolicyRule -Name $using:Name -DesktopGroupUid $desktopGroup.Uid -ErrorAction SilentlyContinue;
             
             if ($using:Ensure -eq 'Present') {
-                if ($AccessType -eq 'AccessGateway') { $allowedConnections = 'ViaAG'; }
+                if ($using:AccessType -eq 'AccessGateway') { $allowedConnections = 'ViaAG'; }
                 else { $allowedConnections = 'NotViaAG'; }
                 $accessPolicyParams = @{
                     Enabled = $using:Enabled;
@@ -154,7 +154,7 @@ function Set-TargetResource {
                     ExcludedUsers = @();
                 }
 
-                if ($IncludeUsers.Count -ge 1) {
+                if ($using:IncludeUsers.Count -ge 1) {
                     $accessPolicyParams['IncludedUserFilterEnabled'] = $true;
                     foreach ($user in $using:IncludeUsers) {
                         $brokerUser = Get-BrokerUser -FullName $user -ErrorAction SilentlyContinue;
@@ -163,7 +163,7 @@ function Set-TargetResource {
                     }
                 }
 
-                if ($ExcludeUsers.Count -ge 1) {
+                if ($using:ExcludeUsers.Count -ge 1) {
                     $accessPolicyParams['ExcludedUserFilterEnabled'] = $true;
                     foreach ($user in $using:ExcludeUsers) {
                         $brokerUser = Get-BrokerUser -FullName $user -ErrorAction SilentlyContinue;

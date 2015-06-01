@@ -29,7 +29,7 @@ function Get-TargetResource {
         $scriptBlock = {
             Add-PSSnapin -Name 'Citrix.Broker.Admin.V2' -ErrorAction Stop;
         
-            $deliveryGroup = Get-BrokerDesktopGroup -Name $usin:Name -ErrorAction SilentlyContinue;
+            $deliveryGroup = Get-BrokerDesktopGroup -Name $using:Name -ErrorAction SilentlyContinue;
             $targetResource = @{
                 Name = $using:Name;
                 IsMultiSession = $deliveryGroup.SessionSupport -eq 'MultiSession';

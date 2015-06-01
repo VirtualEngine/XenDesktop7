@@ -86,7 +86,7 @@ InModuleScope 'XD7Controller' {
                 (Test-TargetResource @testController) -is [System.Boolean] | Should Be $true;
             }
 
-             It 'Returns True when controller exists in site' {
+            It 'Returns True when controller exists in site' {
                 Mock -CommandName Get-TargetResource -MockWith { return $testController; }
                 Test-TargetResource @testController | Should Be $true;
             }

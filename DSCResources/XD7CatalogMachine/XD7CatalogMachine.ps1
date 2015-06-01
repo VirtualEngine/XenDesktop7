@@ -77,23 +77,6 @@ function Set-TargetResource {
         $scriptBlock = {
             Add-PSSnapin -Name 'Citrix.Broker.Admin.V2' -ErrorAction Stop;
             Import-Module "$env:ProgramFiles\WindowsPowerShell\Modules\cCitrixXenDesktop7\DSCResources\XD7Common\XD7Common.psd1" -Verbose:$false;
-            
-            <#
-            $brokerMachines = Get-BrokerMachine -CatalogName $using:Name | Select-Object -ExpandProperty DnsName;
-            foreach ($member in $using:Members) {
-                if (TestXDMachineIsExistingMember -MachineName $member -ExistingMembers $brokerMachines) {
-                    if ($using:Ensure -eq 'Absent') {
-                        Write-Verbose ($using:localizedData.RemovinfMachineCatalogMachine -f $member, $using:Name);
-                        ResolveXDBrokerMachine -MachineName $member -BrokerMachines $brokerMachines | Remove-Brokermachine -Force;
-                    }
-                }
-                elseif ($using:Ensure -eq 'Present') {
-                    
-                    Write-Verbose ($using:localizedData.AddingMachineCatalogMachine -f $member, $using:Name);
-                    New-BrokerMachine -CatalogUid $brokerCatalog.Uid -MachineName $member -ErrorAction SilentlyContinue;
-                }
-            } #end foreach member
-            #>
 
             $brokerMachines = Get-BrokerMachine -CatalogName $using:Name;
             $brokerCatalog = Get-BrokerCatalog -Name $using:Name;
@@ -105,11 +88,8 @@ function Set-TargetResource {
                 }
                 elseif (($using:Ensure -eq 'Present') -and ($brokerMachine.CatalogName -ne $using:Name)) {
                     if ($brokerMachine -eq $null) {
-                        ThrowInvalidOperationException -ErrorId 'MachineNotFound' -Message ($localizedData.MachineNotFoundError -f $member);
-                    }
-                    else {
                         Write-Verbose ($using:localizedData.AddingMachineCatalogMachine -f $member, $using:Name);
-                        $brokerMachine | New-BrokerMachine $brokerCatalog.Uid;
+                        New-BrokerMachine -MachineName $member -CatalogUid $brokerCatalog.Uid -ErrorAction Stop;
                     }
                 }
             } #end foreach member

@@ -112,7 +112,7 @@ function Set-TargetResource {
             }
             Write-Verbose ($using:localizedData.SettingLicenseServerProperties -f $using:LicenseServer, $using:LicenseServerPort, $using:LicenseEdition);
             Set-ConfigSite @setConfigSiteParams;
-            if ($TrustLicenseServerCertificate) {
+            if ($using:TrustLicenseServerCertificate) {
                 Add-PSSnapin -Name 'Citrix.Licensing.Admin.V1' -ErrorAction Stop;
                 $licenseServerCertificateHash = (Get-LicCertificate -AdminAddress $using:LicenseServer).CertHash;
                 Set-ConfigSiteMetadata -Name 'CertificateHash' -Value $licenseServerCertificateHash;

@@ -25,13 +25,13 @@ function Get-TargetResource {
                 Credential = $using:Credential;
                 Ensure = 'Absent';
             }
-            $localHostName = GetHostName;
-            if (($xdSite.Name -eq $using:SiteName) -and ($xdSite.Controllers.DnsName -contains $localHostName)) {
+            if (($xdSite.Name -eq $using:SiteName) -and ($xdSite.Controllers.DnsName -contains $using:localHostName)) {
                 $targetResource['Ensure'] = 'Present';
             }
             return $targetResource;
         } #end scriptBlock
         
+        $localHostName = GetHostName;
         $invokeCommandParams = @{
             ScriptBlock = $scriptBlock;
             ErrorAction = 'Stop';
@@ -89,25 +89,24 @@ function Set-TargetResource {
             Import-Module "$env:ProgramFiles\Citrix\XenDesktopPoshSdk\Module\Citrix.XenDesktop.Admin.V1\Citrix.XenDesktop.Admin\Citrix.XenDesktop.Admin.psd1" -Verbose:$false;
             Remove-Variable -Name CitrxHLSSdkContext -Force -ErrorAction SilentlyContinue;
             
-            $localHostName = GetHostName;
             if ($using:Ensure -eq 'Present') {
                 $addXDControllerParams = @{
-                    AdminAddress = $localHostName;
+                    AdminAddress = $using:localHostName;
                     SiteControllerAddress = $using:ExistingControllerName;
                 }
-                Write-Verbose ($using:localizedData.AddingXDController -f $localHostName, $using:SiteName);
+                Write-Verbose ($using:localizedData.AddingXDController -f $using:localHostName, $using:SiteName);
                 Add-XDController @addXDControllerParams -ErrorAction Stop;
             }
             else {
                 $removeXDControllerParams = @{
                     ControllerName = $using:ExistingControllerName;
                 }
-                Write-Verbose ($using:localizedData.RemovingXDController -f $localHostName, $using:SiteName);
+                Write-Verbose ($using:localizedData.RemovingXDController -f $using:localHostName, $using:SiteName);
                 Remove-XDController @removeXDControllerParams -ErrorAction Stop;
             }
         } #end scriptBlock
         
-        
+        $localHostName = GetHostName;
         $invokeCommandParams = @{
             ScriptBlock = $scriptBlock;
             ErrorAction = 'Stop';
