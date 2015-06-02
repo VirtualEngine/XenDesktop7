@@ -13,7 +13,7 @@ function Get-TargetResource {
         if (-not (TestXDModule -Name 'Citrix.Broker.Admin.V2' -IsSnapin)) {
             ThrowInvalidProgramException -ErrorId 'Citrix.Broker.Admin.V2' -ErrorMessage $localizedData.XenDesktopSDKNotFoundError;
         }
-    }
+    } #end begin
     process {
         $scriptBlock = {
             Add-PSSnapin -Name 'Citrix.Broker.Admin.V2';
@@ -34,9 +34,8 @@ function Get-TargetResource {
         if ($Credential) { AddInvokeScriptBlockCredentials -Hashtable $invokeCommandParams -Credential $Credential; }
         else { $invokeCommandParams['ScriptBlock'] = [System.Management.Automation.ScriptBlock]::Create($scriptBlock.ToString().Replace('$using:','$')); }
         Write-Verbose ($localizedData.InvokingScriptBlockWithParams -f [System.String]::Join("','", @($Name, $Members, $Ensure)));
-        $targetResource = Invoke-Command  @invokeCommandParams;
-        return $targetResource;
-    }
+        return Invoke-Command @invokeCommandParams;
+    } #end process
 } #end function Get-TargetResource
 
 function Test-TargetResource {
@@ -87,12 +86,12 @@ function Set-TargetResource {
                     $brokerMachine | Remove-BrokerMachine -DesktopGroup $using:Name -Force;
                 }
                 elseif (($using:Ensure -eq 'Present') -and ($brokerMachine.DesktopGroupName -ne $using:Name)) {
-                    Write-Verbose ($using:localizedData.AddingDeliveryGroupMachine -f $member, $using:Name);
                     $brokerMachine = GetXDBrokerMachine -MachineName $member;
                     if ($brokerMachine -eq $null) {
                         ThrowInvalidOperationException -ErrorId 'MachineNotFound' -Message ($localizedData.MachineNotFoundError -f $member);
                     }
                     else {
+                        Write-Verbose ($using:localizedData.AddingDeliveryGroupMachine -f $member, $using:Name);
                         $brokerMachine | Add-BrokerMachine -DesktopGroup $using:Name;
                     }
                 }

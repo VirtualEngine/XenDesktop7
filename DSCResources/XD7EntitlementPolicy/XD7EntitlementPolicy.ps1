@@ -83,7 +83,6 @@ function Test-TargetResource {
         }
     } #end begin
     process {
-        
         $targetResource = Get-TargetResource @PSBoundParameters;
         $isInCompliance = $true;
         if ($targetResource['Ensure'] -ne $Ensure) { $isInCompliance = $false; }
