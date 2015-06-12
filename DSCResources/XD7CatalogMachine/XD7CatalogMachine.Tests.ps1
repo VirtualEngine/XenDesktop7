@@ -2,14 +2,14 @@ $here = Split-Path -Parent $MyInvocation.MyCommand.Path
 $sut = (Split-Path -Leaf $MyInvocation.MyCommand.Path).Replace('.Tests.ps1', '.psm1')
 Import-Module (Join-Path $here -ChildPath $sut) -Force;
 
-InModuleScope 'XD7MachineCatalogMachine' {
+InModuleScope 'XD7CatalogMachine' {
 
     function Get-BrokerCatalog { }
     function Get-BrokerMachine { }
     function New-BrokerMachine { }
     function Remove-BrokerMachine { }
 
-    Describe 'XD7MachineCatalogMachine' {
+    Describe 'XD7CatalogMachine' {
 
         $testMachineCatalogName = 'TestGroup';
         $testMachineCatalogMembers = @('TestMachine.local');
