@@ -312,8 +312,6 @@ function ThrowOperationCanceledException {
     throw $errorRecord;
 } #end function ThrowOperationCanceledException
 
-#endregion Private Functions
-
 function TestXDInstalledRole {
     <#
     .SYNOPSIS

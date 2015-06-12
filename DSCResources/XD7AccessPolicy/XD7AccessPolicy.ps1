@@ -147,7 +147,7 @@ function Set-TargetResource {
                     Description = $using:Description;
                     AllowRestart = $using:AllowRestart;
                     AllowedConnections = $allowedConnections;
-                    AllowedProtocols = $Protocol;
+                    AllowedProtocols = $using:Protocol;
                     IncludedUserFilterEnabled = $false;
                     IncludedUsers = @();
                     ExcludedUserFilterEnabled = $false;
