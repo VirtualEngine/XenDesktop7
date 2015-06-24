@@ -343,7 +343,7 @@ function GetXDInstalledRole {
         [Parameter(Mandatory)] [ValidateSet('Controller','Studio','Storefront','Licensing','Director','DesktopVDA','SessionVDA')] [System.String] $Role
     )
     process {
-        $installedProducts = Get-ItemProperty 'HKLM:\SOFTWARE\Classes\Installer\Products\*' |
+        $installedProducts = Get-ItemProperty 'HKLM:\SOFTWARE\Classes\Installer\Products\*' -ErrorAction SilentlyContinue |
             Where-Object { $_.ProductName -like '*Citrix*' -and $_.ProductName -notlike '*snap-in' } |
                 Select-Object -ExpandProperty ProductName;
         switch ($Role) {
