@@ -76,7 +76,7 @@ function Set-TargetResource {
     process {
         $scriptBlock = {
             Add-PSSnapin -Name 'Citrix.Broker.Admin.V2';
-            Import-Module "$env:ProgramFiles\WindowsPowerShell\Modules\cCitrixXenDesktop7\DSCResources\XD7Common\XD7Common.psd1" -Verbose:$false;
+            Import-Module "$env:ProgramFiles\WindowsPowerShell\Modules\CitrixXenDesktop7\DSCResources\XD7Common\XD7Common.psd1" -Verbose:$false;
 
             $brokerMachines = Get-BrokerMachine -DesktopGroupName $using:Name;
             foreach ($member in $using:Members) {
