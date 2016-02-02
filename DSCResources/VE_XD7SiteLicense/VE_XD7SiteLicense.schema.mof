@@ -1,0 +1,12 @@
+﻿
+[ClassVersion("1.0.0"), FriendlyName("XD7SiteLicense")]
+class VE_XD7SiteLicense : OMI_BaseResource
+{
+    [Key, Description("Citrix XenDesktop 7 site licensing server name.")] String LicenseServer;
+    [Write, ValueMap{"Present", "Absent"}, Values{"Present", "Absent"}] String Ensure;
+    [Write, Description("Citrix XenDesktop 7 site licensing server port.")] Uint16 LicenseServerPort;
+    [Write, Description("Citrix XenDesktop 7 site licensing edition."), ValueMap{"PLT", "ENT", "APP"}, Values{"PLT", "ENT", "VDI"}] String LicenseEdition;
+    [Write, Description("Citrix XenDesktop 7 site licensing model."), ValueMap{"UserDevice", "Concurrent"}, Values{"UserDevice", "Concurrent"}] String LicenseModel;
+    [Write, Description("Add the Citrix XenDesktop 7 site licensing server certificate hash.")] Boolean TrustLicenseServerCertificate;
+    [Write, EmbeddedInstance("MSFT_Credential"), Description("Specifies a user account that has permission to install the role.")] String Credential;
+};

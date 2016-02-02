@@ -1,0 +1,10 @@
+﻿
+[ClassVersion("1.0.0"), FriendlyName("XD7WaitForSite")]
+class VE_XD7WaitForSite : OMI_BaseResource
+{
+    [Required, Description("Citrix XenDesktop 7 site name.")] String SiteName;
+    [Key, Description("Citrix XenDesktop 7 site controller.")] String ExistingControllerName;
+    [Write, EmbeddedInstance("MSFT_Credential"), Description("User account that has permission to connect to the site.")] String Credential;
+    [Write, Description("Interval between retries in seconds.")] Uint64 RetryIntervalSec;
+    [Write, Description("Retry count before timing out.")] Uint32 RetryCount;
+};

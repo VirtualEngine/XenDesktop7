@@ -1,0 +1,9 @@
+﻿
+[ClassVersion("1.0.0"), FriendlyName("XD7Feature")]
+class VE_XD7Feature : OMI_BaseResource
+{
+    [Key, Description("Citrix XenDesktop 7 feature to install."), ValueMap{"Controller","Studio","Storefront","Licensing","Director"},Values{"Controller","Studio","Storefront","Licensing","Director"}] String Role;
+    [Required, Description("Citrix XenDesktop 7 installation media source path.")] String SourcePath;
+    [Write, EmbeddedInstance("MSFT_Credential"), Description("Specifies a user account that has permission to install the feature.")] String Credential;
+    [Write,ValueMap{"Present", "Absent"},Values{"Present", "Absent"}] String Ensure;
+};

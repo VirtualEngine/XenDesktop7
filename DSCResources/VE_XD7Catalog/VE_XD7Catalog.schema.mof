@@ -1,0 +1,15 @@
+﻿
+[ClassVersion("1.0.0"), FriendlyName("XD7Catalog")]
+class VE_XD7Catalog : OMI_BaseResource
+{
+    [Key, Description("Citrix XenDesktop 7 machine catalog name.")] String Name;
+    [Write, Description("Citrix XenDesktop 7 machine catalog description")] String Description;
+    [Required, Description("Citrix XenDesktop 7 machine catalog allocation type."), ValueMap{"Permanent","Random","Static"}, Values{"Permanent","Random","Static"}] String Allocation;
+    [Required, Description("Citrix XenDesktop 7 machine catalog provisioning type."), ValueMap{"Manual","PVS","MCS"}, Values{"Manual","PVS","MCS"}] String Provisioning;
+    [Required, Description("Citrix XenDesktop 7 machine catalog persistence type."), ValueMap{"Discard","Local","PVD"}, Values{"Discard","Local","PVD"}] String Persistence;
+    [Write, Description("Citrix XenDesktop 7 machine catalog is multi-session.")] Boolean IsMultiSession;
+    [Write, Description("Citrix XenDesktop 7 machine catalog PVS address")] String PvsAddress;
+    [Write, Description("Citrix XenDesktop 7 machine catalog PVS domain")] String PvsDomain;
+    [Write, EmbeddedInstance("MSFT_Credential"), Description("Specifies a user account that has permission to install the feature.")] String Credential;
+    [Write,ValueMap{"Present", "Absent"},Values{"Present", "Absent"}] String Ensure;
+};

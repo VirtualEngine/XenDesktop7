@@ -1,0 +1,16 @@
+﻿
+[ClassVersion("1.0.0"), FriendlyName("XD7AccessPolicy")]
+class VE_XD7AccessPolicy : OMI_BaseResource
+{
+    [Key, Description("Citrix XenDesktop 7 delivery group name.")] String DeliveryGroup;
+    [Key, Description("Citrix XenDesktop 7 access policy type."), ValueMap{"AccessGateway", "Direct"}, Values{"AccessGateway", "Direct"}] String AccessType;
+    [Write, Description("Citrix XenDesktop 7 access policy is enabled.")] Boolean Enabled;
+    [Write, Description("Citrix XenDesktop 7 access policy allow restart.")] Boolean AllowRestart;
+    [Write, Description("Citrix XenDesktop 7 access policy name.")] String Name;
+    [Write, Description("Citrix XenDesktop 7 access policy description.")] String Description;
+    [Write, Description("Citrix XenDesktop 7 access policy permitted protocols."), ValueMap{"HDX","RDP"}, Values{"HDX","RDP"}] String Protocol[];
+    [Write, Description("Citrix XenDesktop 7 access policy included users.")] String IncludeUsers[];
+    [Write, Description("Citrix XenDesktop 7 access policy excluded users.")] String ExcludeUsers[];
+    [Write, EmbeddedInstance("MSFT_Credential"), Description("Specifies a user account that has permission to install the role.")] String Credential;
+    [Write, ValueMap{"Present", "Absent"}, Values{"Present", "Absent"}] String Ensure;
+};

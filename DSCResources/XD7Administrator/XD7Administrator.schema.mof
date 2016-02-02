@@ -1,9 +1,0 @@
-﻿
-[ClassVersion("1.0.0"), FriendlyName("XD7Administrator")]
-class XD7Administrator : OMI_BaseResource
-{
-    [Key, Description("Citrix XenDesktop 7 administrator Active Directory user/group name.")] String Name;
-    [Write, ValueMap{"Present", "Absent"}, Values{"Present", "Absent"}] String Ensure;
-    [Write, EmbeddedInstance("MSFT_Credential"), Description("Specifies a user account that has permission to create the administrator.")] String Credential;
-    [Write, Description("Citrix XenDesktop 7 administrator state.")] Boolean Enabled;
-};

@@ -1,0 +1,9 @@
+﻿
+[ClassVersion("1.0.0"), FriendlyName("XD7Controller")]
+class VE_XD7Controller : OMI_BaseResource
+{
+    [Key, Description("Citrix XenDesktop 7 site name.")] String SiteName;
+    [Required, Description("Existing XenDesktop 7 controller used to join/remove the controller to/from the site.")] String ExistingControllerName;
+    [Write, EmbeddedInstance("MSFT_Credential"), Description("Specifies a user account that has permission to install the role.")] String Credential;
+    [Write, ValueMap{"Present", "Absent"}, Values{"Present", "Absent"}] String Ensure;
+};

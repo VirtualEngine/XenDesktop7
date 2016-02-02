@@ -1,0 +1,7 @@
+﻿
+[ClassVersion("1.0.0"), FriendlyName("XD7VDAController")]
+class VE_XD7VDAController : OMI_BaseResource
+{
+    [Key, Description("Citrix XenDesktop 7 delivery controller name.")] String Name;
+    [Write, ValueMap{"Present", "Absent"}, Values{"Present", "Absent"}] String Ensure;
+};

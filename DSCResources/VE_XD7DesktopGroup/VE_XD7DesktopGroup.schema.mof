@@ -1,0 +1,20 @@
+﻿
+[ClassVersion("1.0.0"), FriendlyName("XD7DesktopGroup")]
+class VE_XD7DesktopGroup : OMI_BaseResource
+{
+    [Key, Description("Citrix XenDesktop 7 desktop group name.")] String Name;
+    [Required, Description("Citrix XenDesktop 7 desktop group is multi-session.")] Boolean IsMultiSession;
+    [Required, Description("Citrix XenDesktop 7 desktop group delivery type."),ValueMap{"AppsOnly","DesktopsOnly","DesktopsAndApps"},Values{"AppsOnly","DesktopsOnly","DesktopsAndApps"}] String DeliveryType;
+    [Required, Description("Citrix XenDesktop 7 desktop group desktop type."),ValueMap{"Shared","Private"},Values{"Shared","Private"}] String DesktopType;
+    [Write, Description("Citrix XenDesktop 7 desktop group description.")] String Description;
+    [Write, Description("Citrix XenDesktop 7 desktop group display name.")] String DisplayName;
+    [Write, Description("Citrix XenDesktop 7 desktop group is enabled.")] Boolean Enabled;
+    [Write, Description("Citrix XenDesktop 7 desktop group color depth."),ValueMap{"FourBit","EightBit","SixteenBit","TwentyFourBit"},Values{"FourBit","EightBit","SixteenBit","TwentyFourBit"}] String ColorDepth;
+    [Write, Description("Citrix XenDesktop 7 desktop group is in maintenance mode.")] Boolean IsMaintenanceMode;
+    [Write, Description("Citrix XenDesktop 7 desktop group is Remote PC.")] Boolean IsRemotePC;
+    [Write, Description("Citrix XenDesktop 7 desktop group uses Secure ICA.")] Boolean IsSecureIca;
+    [Write, Description("Citrix XenDesktop 7 desktop group shuts down desktops after use.")] Boolean ShutdownDesktopsAfterUse;
+    [Write, Description("Citrix XenDesktop 7 desktop group powers new machines added to the group.")] Boolean TurnOnAddedMachine;
+    [Write, EmbeddedInstance("MSFT_Credential"), Description("Specifies a user account that has permission to create the delivery group.")] String Credential;
+    [Write, ValueMap{"Present", "Absent"}, Values{"Present", "Absent"}] String Ensure;
+};
