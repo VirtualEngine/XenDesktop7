@@ -1,14 +1,15 @@
-$here = Split-Path -Parent $MyInvocation.MyCommand.Path
-$sut = (Split-Path -Leaf $MyInvocation.MyCommand.Path).Replace('.Tests.ps1', '.psm1')
-Import-Module (Join-Path $here -ChildPath $sut) -Force;
+$here = Split-Path -Parent $MyInvocation.MyCommand.Path;
+$sut = (Split-Path -Leaf $MyInvocation.MyCommand.Path).Replace('.Tests.ps1', '')
+$moduleRoot = Split-Path -Path (Split-Path -Path $here -Parent) -Parent;
+Import-Module (Join-Path $moduleRoot -ChildPath "\DSCResources\$sut\$sut.psm1") -Force;
 
-InModuleScope 'VE_XD7Controller' {
+InModuleScope $sut {
     
     function Get-XDSite { }
     function Add-XDController { param ( $AdminAddress, $SiteControllerAddress ) }
     function Remove-XDController { param ( $ControllerName ) }
 
-    Describe 'VE_XD7Controller' {
+    Describe 'XenDesktop7\VE_XD7Controller' {
 
         $testControllerName = 'TestController';
         $testSite =  [PSCustomObject] @{ Name = 'TestSite'; Controllers = @( @{ DnsName = $testControllerName; }; ); }

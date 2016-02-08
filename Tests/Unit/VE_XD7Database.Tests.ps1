@@ -1,12 +1,13 @@
-$here = Split-Path -Parent $MyInvocation.MyCommand.Path
-$sut = (Split-Path -Leaf $MyInvocation.MyCommand.Path).Replace('.Tests.ps1', '.psm1')
-Import-Module (Join-Path $here -ChildPath $sut) -Force;
+$here = Split-Path -Parent $MyInvocation.MyCommand.Path;
+$sut = (Split-Path -Leaf $MyInvocation.MyCommand.Path).Replace('.Tests.ps1', '')
+$moduleRoot = Split-Path -Path (Split-Path -Path $here -Parent) -Parent;
+Import-Module (Join-Path $moduleRoot -ChildPath "\DSCResources\$sut\$sut.psm1") -Force;
 
-InModuleScope 'VE_XD7Database' {
+InModuleScope $sut {
 
     function New-XDDatabase { }
     
-    Describe 'VE_XD7Database' {
+    Describe 'XenDesktop7\VE_XD7Database' {
 
         $testSiteDatabase = @{ SiteName = 'TestSite'; DataStore = 'Site'; DatabaseServer = 'TestServer'; DatabaseName = 'Site'; }
         $testLoggingDatabase = @{ SiteName = 'TestSite'; DataStore = 'Logging'; DatabaseServer = 'TestServer'; DatabaseName = 'Logging'; }

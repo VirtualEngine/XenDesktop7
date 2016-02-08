@@ -13,7 +13,7 @@ InModuleScope $sut {
     function Get-CtxIcon { }
     function New-BrokerIcon { }
     
-    Describe "XenDesktop7\VE_XD7DesktopGroupApplication" {
+    Describe 'XenDesktop7\VE_XD7DesktopGroupApplication' {
 
         $testDesktopGroupName = 'TestGroup';
         $fakeBrokerGroup = @{

@@ -1,15 +1,16 @@
-$here = Split-Path -Parent $MyInvocation.MyCommand.Path
-$sut = (Split-Path -Leaf $MyInvocation.MyCommand.Path).Replace('.Tests.ps1', '.psm1')
-Import-Module (Join-Path $here -ChildPath $sut) -Force;
+$here = Split-Path -Parent $MyInvocation.MyCommand.Path;
+$sut = (Split-Path -Leaf $MyInvocation.MyCommand.Path).Replace('.Tests.ps1', '')
+$moduleRoot = Split-Path -Path (Split-Path -Path $here -Parent) -Parent;
+Import-Module (Join-Path $moduleRoot -ChildPath "\DSCResources\$sut\$sut.psm1") -Force;
 
-InModuleScope 'VE_XD7SiteLicense' {
+InModuleScope $sut {
 
     function Get-SiteConfig { }
     function Set-ConfigSite { param ( $LicenseServerName, $LicenseServerPort, $ProductEdition, $LicensingModel ) }
     function Get-LicCertificate { }
     function Set-ConfigSiteMetadata { param ( $Name, $Value ) }
 
-    Describe 'VE_XD7SiteLicense' {
+    Describe 'XenDesktop7\VE_XD7SiteLicense' {
 
         $testSiteLicense = @{
             LicenseServer = 'TestLicenseServer';

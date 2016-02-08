@@ -1,12 +1,13 @@
-$here = Split-Path -Parent $MyInvocation.MyCommand.Path
+$here = Split-Path -Parent $MyInvocation.MyCommand.Path;
 $sut = (Split-Path -Leaf $MyInvocation.MyCommand.Path).Replace('.Tests.ps1', '')
-Import-Module (Join-Path $here -ChildPath "$sut.psm1") -Force;
+$moduleRoot = Split-Path -Path (Split-Path -Path $here -Parent) -Parent;
+Import-Module (Join-Path $moduleRoot -ChildPath "\DSCResources\$sut\$sut.psm1") -Force;
 
-InModuleScope 'VE_XD7Common' {
+InModuleScope $sut {
 
     function Get-BrokerMachine { }
 
-    Describe 'VE_XD7Common' {
+    Describe 'XenDesktop7\VE_XD7Common' {
 
         Context 'AddInvokeScriptBlockCredentials' {
             $testCredentials = New-Object System.Management.Automation.PSCredential 'DummyUser', (ConvertTo-SecureString 'DummyPassword' -AsPlainText -Force);

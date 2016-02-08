@@ -1,15 +1,16 @@
-$here = Split-Path -Parent $MyInvocation.MyCommand.Path
+$here = Split-Path -Parent $MyInvocation.MyCommand.Path;
 $sut = (Split-Path -Leaf $MyInvocation.MyCommand.Path).Replace('.Tests.ps1', '')
-Import-Module (Join-Path $here -ChildPath "$sut.psm1") -Force;
+$moduleRoot = Split-Path -Path (Split-Path -Path $here -Parent) -Parent;
+Import-Module (Join-Path $moduleRoot -ChildPath "\DSCResources\$sut\$sut.psm1") -Force;
 
-InModuleScope 'VE_XD7Administrator' {
+InModuleScope $sut {
     
     function Get-AdminAdministrator { }
     function New-AdminAdministrator { }
     function Set-AdminAdministrator { }
     function Remove-AdminAdministrator { }
 
-    Describe 'VE_XD7Administrator' {
+    Describe 'XenDesktop7\VE_XD7Administrator' {
 
         $testAdmin = @{ Name = 'Test Administrator'; Ensure = 'Present'; Enabled = $true; }
         $testAdminDisabled = @{ Name = 'Test Administrator'; Ensure = 'Present'; Enabled = $false; }
