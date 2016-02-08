@@ -79,7 +79,10 @@ function Test-TargetResource {
         [System.Boolean] $InstallDesktopExperience = $true,
         
         [Parameter()] [ValidateNotNull()]
-        [System.Boolean] $EnableRealTimeTransport = $false
+        [System.Boolean] $EnableRealTimeTransport = $false,
+        
+        [Parameter()] [ValidateNotNullOrEmpty()]
+        [System.String] $LogPath = (Join-Path -Path $env:TMP -ChildPath '\Citrix\XenDesktop Installer')
     )
     process {
         $targetResource = Get-TargetResource @PSBoundParameters;

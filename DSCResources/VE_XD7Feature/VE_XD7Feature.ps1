@@ -13,8 +13,8 @@ function Get-TargetResource {
         [Parameter()] [AllowNull()]
         [System.Management.Automation.PSCredential] $Credential,
         
-        [Parameter()] [ValidateNotNullOrEmpty()]
-        [ValidateSet('Present','Absent')] $Ensure = 'Present'
+        [Parameter()] [ValidateSet('Present','Absent')]
+        [System.String] $Ensure = 'Present'
     )
     process {
         $targetResource = @{
@@ -43,8 +43,11 @@ function Test-TargetResource {
         [Parameter()] [AllowNull()]
         [System.Management.Automation.PSCredential] $Credential,
         
+        [Parameter()] [ValidateSet('Present','Absent')]
+        [System.String] $Ensure = 'Present',
+        
         [Parameter()] [ValidateNotNullOrEmpty()]
-        [ValidateSet('Present','Absent')] $Ensure = 'Present'
+        [System.String] $LogPath = (Join-Path -Path $env:TMP -ChildPath '\Citrix\XenDesktop Installer')
     )
     process {
         $targetResource = Get-TargetResource @PSBoundParameters;
@@ -71,8 +74,8 @@ function Set-TargetResource {
         [Parameter()] [AllowNull()]
         [System.Management.Automation.PSCredential] $Credential,
         
-        [Parameter()] [ValidateNotNullOrEmpty()]
-        [ValidateSet('Present','Absent')] $Ensure = 'Present',
+        [Parameter()] [ValidateSet('Present','Absent')]
+        [System.String] $Ensure = 'Present',
         
         [Parameter()] [ValidateNotNullOrEmpty()]
         [System.String] $LogPath = (Join-Path -Path $env:TMP -ChildPath '\Citrix\XenDesktop Installer')

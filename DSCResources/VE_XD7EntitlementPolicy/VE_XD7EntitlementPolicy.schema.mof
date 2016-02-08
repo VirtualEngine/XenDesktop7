@@ -1,4 +1,4 @@
-﻿
+
 [ClassVersion("1.0.0"), FriendlyName("XD7EntitlementPolicy")]
 class VE_XD7EntitlementPolicy : OMI_BaseResource
 {

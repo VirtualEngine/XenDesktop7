@@ -1,4 +1,4 @@
-﻿
+
 [ClassVersion("1.0.0"), FriendlyName("XD7Administrator")]
 class VE_XD7Administrator : OMI_BaseResource
 {

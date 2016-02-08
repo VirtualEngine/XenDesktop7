@@ -129,7 +129,6 @@ function Test-TargetResource {
 
 function Set-TargetResource {
     [CmdletBinding()]
-    [OutputType([System.Boolean])]
     param (
         [Parameter(Mandatory)] [ValidateNotNullOrEmpty()]
         [System.String] $Name,
@@ -192,7 +191,7 @@ function Set-TargetResource {
             
                     if ($recreateMachineCatalog) {
                         Write-Verbose ($localizedData.RemovingMachineCatalog -f $using:Name);
-                        Remove-BrokerCatalog -Name $using:Name;
+                        [ref] $null = Remove-BrokerCatalog -Name $using:Name;
                         $brokerCatalog = $null;
                     }
                     else {
@@ -203,7 +202,7 @@ function Set-TargetResource {
                         }
                         if ($using:PvsDomain) { $setBrokerCatalogParams['PvsDomain'] = $using:PvsDomain; }
                         if ($using:PvsAddress) { $setBrokerCatalogParams['PvsAddress'] = $using:PvsAddress; }
-                        Set-BrokerCatalog @setBrokerCatalogParams;
+                        [ref] $null = Set-BrokerCatalog @setBrokerCatalogParams;
                     }
                 } #end if brokerCatalog
         
@@ -237,12 +236,12 @@ function Set-TargetResource {
                         $newBrokerCatalogParams['PersistUserChanges'] = 'OnPvd';
                     }
                     Write-Verbose ($using:localizedData.CreatingMachineCatalog -f $using:Name);
-                    New-BrokerCatalog @newBrokerCatalogParams;
+                    [ref] $null = New-BrokerCatalog @newBrokerCatalogParams;
                 }
             }
             else {
                 Write-Verbose ($localizedData.RemovingMachineCatalog -f $using:Name);
-                Remove-BrokerCatalog -Name $using:Name;
+                [ref] $null = Remove-BrokerCatalog -Name $using:Name;
             }
         } #end scriptBlock
 

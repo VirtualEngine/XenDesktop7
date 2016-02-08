@@ -1,4 +1,4 @@
-﻿
+
 [ClassVersion("1.0.0"), FriendlyName("XD7VDAFeature")]
 class VE_XD7VDAFeature : OMI_BaseResource
 {
@@ -11,4 +11,5 @@ class VE_XD7VDAFeature : OMI_BaseResource
     [Write, Description("Optimize the VDA installation for a virtual desktop.")] Boolean Optimize;
     [Write, Description("Enable the Desktop Experience feature.")] Boolean InstallDesktopExperience;
     [Write, Description("Enable UDP Real-time transport feature.")] Boolean EnableRealTimeTransport;
+    [Write, Description("Installation log path")] String LogPath;
 };

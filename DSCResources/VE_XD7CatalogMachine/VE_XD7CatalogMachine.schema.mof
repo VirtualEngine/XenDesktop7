@@ -1,4 +1,4 @@
-﻿
+
 [ClassVersion("1.0.0"), FriendlyName("XD7CatalogMachine")]
 class VE_XD7CatalogMachine : OMI_BaseResource
 {

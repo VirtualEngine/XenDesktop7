@@ -47,7 +47,7 @@ function Get-TargetResource {
 
 function Test-TargetResource {
     [CmdletBinding()]
-    [OutputType([System.Collections.Hashtable])]
+    [OutputType([System.Boolean])]
     param (
         [Parameter(Mandatory)] [ValidateNotNullOrEmpty()]
         [System.String] $Name,
@@ -109,7 +109,7 @@ function Set-TargetResource {
                 }
                 elseif (($using:Ensure -eq 'Present') -and ($brokerMachine.CatalogName -ne $using:Name)) {
                     #if ($brokerMachine -ne $null) {
-                        New-BrokerMachine -MachineName $member -CatalogUid $brokerCatalog.Uid -ErrorAction Stop;
+                        [ref] $null = New-BrokerMachine -MachineName $member -CatalogUid $brokerCatalog.Uid -ErrorAction Stop;
                     #}
                 }
             } #end foreach member

@@ -1,4 +1,4 @@
-﻿
+
 [ClassVersion("1.0.0"), FriendlyName("XD7AccessPolicy")]
 class VE_XD7AccessPolicy : OMI_BaseResource
 {

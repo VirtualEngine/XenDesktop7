@@ -1,4 +1,4 @@
-﻿
+
 [ClassVersion("1.0.0"), FriendlyName("XD7DesktopGroup")]
 class VE_XD7DesktopGroup : OMI_BaseResource
 {

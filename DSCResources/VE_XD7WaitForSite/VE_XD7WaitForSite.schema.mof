@@ -1,4 +1,4 @@
-﻿
+
 [ClassVersion("1.0.0"), FriendlyName("XD7WaitForSite")]
 class VE_XD7WaitForSite : OMI_BaseResource
 {

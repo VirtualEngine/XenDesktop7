@@ -90,7 +90,6 @@ function Test-TargetResource {
 
 function Set-TargetResource {
     [CmdletBinding()]
-    [OutputType([System.Boolean])]
     param (
         [Parameter(Mandatory)] [ValidateNotNullOrEmpty()]
         [System.String] $SiteName,
@@ -122,7 +121,7 @@ function Set-TargetResource {
                     SiteControllerAddress = $using:ExistingControllerName;
                 }
                 Write-Verbose ($using:localizedData.AddingXDController -f $using:localHostName, $using:SiteName);
-                Add-XDController @addXDControllerParams -ErrorAction Stop;
+                [ref] $null = Add-XDController @addXDControllerParams -ErrorAction Stop;
             }
             else {
                 $removeXDControllerParams = @{

@@ -10,10 +10,10 @@ function Get-TargetResource {
         [Parameter()] [ValidateSet('Present','Absent')]
         [System.String] $Ensure = 'Present',
         
-        [Parameter()] [ValidateNotNull()] [System.Int16]
+        [Parameter()] [ValidateNotNull()] [System.UInt16]
         $LicenseServerPort = 27000,
         
-        [Parameter()] [ValidateSet('PLT','ENT','APP')] [System.String]
+        [Parameter()] [ValidateSet('PLT','ENT','ADV')] [System.String]
         $LicenseEdition = 'PLT',
         
         [Parameter()] [ValidateSet('UserDevice','Concurrent')]
@@ -69,10 +69,10 @@ function Test-TargetResource {
         [Parameter()] [ValidateSet('Present','Absent')]
         [System.String] $Ensure = 'Present',
         
-        [Parameter()] [ValidateNotNull()] [System.Int16]
+        [Parameter()] [ValidateNotNull()] [System.UInt16]
         $LicenseServerPort = 27000,
         
-        [Parameter()] [ValidateSet('PLT','ENT','APP')] [System.String]
+        [Parameter()] [ValidateSet('PLT','ENT','ADV')] [System.String]
         $LicenseEdition = 'PLT',
         
         [Parameter()] [ValidateSet('UserDevice','Concurrent')]
@@ -117,10 +117,10 @@ function Set-TargetResource {
         [Parameter()] [ValidateSet('Present','Absent')]
         [System.String] $Ensure = 'Present',
         
-        [Parameter()] [ValidateNotNull()] [System.Int16]
+        [Parameter()] [ValidateNotNull()] [System.UInt16]
         $LicenseServerPort = 27000,
         
-        [Parameter()] [ValidateSet('PLT','ENT','APP')] [System.String]
+        [Parameter()] [ValidateSet('PLT','ENT','ADV')] [System.String]
         $LicenseEdition = 'PLT',
         
         [Parameter()] [ValidateSet('UserDevice','Concurrent')]

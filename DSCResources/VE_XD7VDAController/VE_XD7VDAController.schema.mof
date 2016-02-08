@@ -1,4 +1,4 @@
-﻿
+
 [ClassVersion("1.0.0"), FriendlyName("XD7VDAController")]
 class VE_XD7VDAController : OMI_BaseResource
 {
