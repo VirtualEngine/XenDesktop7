@@ -8,6 +8,7 @@ Included Resources
 * XD7Database
 * XD7DesktopGroup
 * XD7DesktopGroupMember
+* XD7DesktopGroupApplication
 * XD7EntitlementPolicy
 * XD7Feature
 * XD7Role
@@ -34,7 +35,7 @@ XD7AccessPolicy [string]
     [Protocol = [string[]] { HDX | RDP }
     [IncludeUsers = [string[]]
     [ExcludeUsers = [string[]]
-    [Ensure = [string]] { Present | Absent }
+    [Ensure = [string] { Present | Absent }]
     [Credential = [PSCredential]]
 }
 ```
@@ -78,7 +79,7 @@ XD7Administrator [string]
 {
     Name = [string]
     Enabled = [bool]
-    [Ensure = [string]] { Present | Absent }
+    [Ensure = [string] { Present | Absent }]
     [Credential = [PSCredential]]
 }
 ```
@@ -115,7 +116,7 @@ XD7Catalog [string]
     [IsMultiSession = [bool]]
     [PvsAddress = [stirng]]
     [PvsDomain = [string]]
-    [Ensure = [string]] { Present | Absent }
+    [Ensure = [string] { Present | Absent }]
     [Credential = [PSCredential]]
 }
 ```
@@ -154,7 +155,7 @@ XD7CatalogMachine [string]
 {
     Name = [string]
     Members = [string[]]
-    [Ensure = [string]] { Present | Absent }
+    [Ensure = [string] { Present | Absent }]
     [Credential = [PSCredential]]
 }
 ```
@@ -184,7 +185,7 @@ XD7Controller [string]
 {
     SiteName = [string]
     ExistingControllerName = [string]
-    [Ensure = [string]] { Present | Absent }
+    [Ensure = [string] { Present | Absent }]
     [Credential = [PSCredential]]
 }
 ```
@@ -253,13 +254,13 @@ XD7DesktopGroup [string]
     [Description = [string]
     [DisplayName = [string]]
     [Enabled = [bool]]
-    [ColorDepth = [string]] { FourBit | EightBit | SixteenBit | TwentyFourBit }
+    [ColorDepth = [string] { FourBit | EightBit | SixteenBit | TwentyFourBit }]
     [IsMaintenanceMode = [bool]]
     [IsRemotePC = [bool]]
     [IsSecureIca = [bool]]
     [ShutdownDesktopsAfterUse = [bool]]
     [TurnOnAddedMachine = [bool]]
-    [Ensure = [string]] { Present | Absent }
+    [Ensure = [string] { Present | Absent }]
     [Credential = [PSCredential]]
 }
 ```
@@ -301,7 +302,7 @@ XD7DesktopGroupMember [string]
 {
     Name = [string]
     Members = [string[]]
-    [Ensure = [string]] { Present | Absent }
+    [Ensure = [string] { Present | Absent }]
     [Credential = [PSCredential]]
 }
 ```
@@ -322,6 +323,59 @@ Configuration XD7DesktopGroupMemberExample {
     }
 }
 ```
+XD7DesktopGroupApplication
+==========================
+Adds or removes published applications to or from a Citrix XenDesktop 7 desktop/delivery group.
+###Syntax
+```
+XD7DesktopGroupApplication [string]
+{
+    Name = [string]
+    DesktopGroupName = [string]
+    Path = [string]
+    [ApplicationType = [string] { HostedOnDesktop, InstalledOnClient }]
+    [WorkingDirectory = [string]]
+    [Arguments = [string]]
+    [Description = [string]]
+    [DisplayName = [string]]
+    [Enabled = [bool]]
+    [Visible = [bool]]
+    [Ensure = [string]] { Present | Absent }
+    [Credential = [PSCredential]]
+}
+```
+###Properties
+* **Name**: Name of the desktop application to publish.
+* **DesktopGroupName**: Name of the desktop/delivery group to publish the application.
+* **Path**: Path to the application executable.
+* **ApplicationType**: Specifies the type of application.
+ * If not specified, this value defaults to HostedOnDesktop (published).
+ * __NOTE: It is not possible to change the application type after it's created.__
+* **WorkingDirectory**: Working directory of the application.
+* **Arguments**: Command line arguments of the application.
+* **Description**: Application description.
+* **DisplayName**: Name of the application displayed to the user.
+* **Enabled**: Specifies whether the application is enabled.
+ * If not specifed, this value defaults to $true.
+* **Visible**: Specifies whether the application is visible to the user.
+ * If not specifed, this value defaults to $true.
+* **Ensure**: Specifies whether the specified application is published in the desktop delivery group or not.
+ * If not specified, this value defaults to Present.
+* **Credential**: Specifies optional credential of a user which has permissions to modify the desktop group. __This property is required for Powershell 4.0.__
+
+###Configuration
+```
+Configuration XD7DesktopGroupApplicationExample {
+    Import-DscResource -ModuleName XenDesktop7
+    XD7DesktopGroupApplication XD7DesktopGroupApplicationExample {
+        Name = 'Adobe Reader DC'
+        DesktopGroupName = 'My Desktop Group'
+        Path = 'C:\Program Files (x86)\Adobe\Acrobat Reader DC\Reader\AcroRd32.exe'
+        WorkingDirectory = 'C:\Program Files (x86)\Adobe\Acrobat Reader DC\Reader'
+        Ensure = 'Present'
+    }
+}
+```
 XD7EntitlementPolicy
 ====================
 Grants Active Directory users/groups access to a Citrix XenDesktop 7 desktop group.
@@ -336,7 +390,7 @@ XD7EntitlementPolicy [string]
     [Description = [string]]
     [IncludeUsers = [string[]]]
     [ExcludeUsers = [string[]]]
-    [Ensure = [string]] { Present | Absent }
+    [Ensure = [string] { Present | Absent }]
     [Credential = [PSCredential]]
 }
 ```
@@ -371,7 +425,7 @@ XD7Feature [string]
 {
     Role = [string] { Controller | Licensing | Storefront | Studio | Director }
     SourcePath = [string]
-    [Ensure = [string]]
+    [[Ensure = [string] { Present | Absent }]
     [Credential = [PSCredential]]
 }
 ```
@@ -403,7 +457,7 @@ XD7Role [string]
     Name = [string]
     Members = string[]
     RoleScope = [string[
-    [Ensure = [string]]
+    [Ensure = [string] { Present | Absent }]
     [Credential = [PSCredential]]
 }
 ```
@@ -471,8 +525,8 @@ XD7SiteLicense [string]
 {
     LicenseServer = [string]]
     [LicenseServerPort = [uint16]]
-    [LicenseEdition [string]] { PLT | ENT | VDI }
-    [LicenseModel = [string]] { UserDevice | Concurrent }
+    [LicenseEdition [string] { PLT | ENT | VDI }]
+    [LicenseModel = [string] { UserDevice | Concurrent }]
     [TrustLicenseServerCertificate = [bool]]
     [Credential = [PSCredential]]
 }
@@ -502,7 +556,7 @@ Assigns a Citrix XenDesktop Controller to a Citrix Virtual Delivery Agent (VDA).
 XD7VDAController [string]
 {
     Name = [string]
-    Ensure = [string] { Present | Absent } 
+    [Ensure = [string] { Present | Absent }]
 }
 ```
 ###Properties
@@ -535,7 +589,7 @@ XD7VDAFeature [string]
     [Optimize = [bool]]
     [InstallDesktopExperience = [bool]]
     [EnableRealTimeTransport = [bool]]
-    [Ensure = [string]]
+    [Ensure = [string] { Present | Absent }]
 }
 ```
 ###Properties

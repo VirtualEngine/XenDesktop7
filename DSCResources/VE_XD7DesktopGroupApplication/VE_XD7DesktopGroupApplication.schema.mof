@@ -1,0 +1,17 @@
+
+[ClassVersion("1.0.0"), FriendlyName("XD7DesktopGroupApplication")]
+class VE_XD7DesktopGroupApplication : OMI_BaseResource
+{
+    [Key, Description("Citrix XenDesktop 7 application name")] String Name;
+    [Key, Description("Citrix XenDesktop 7 desktop delivery group name")] String DesktopGroupName;
+    [Required, Description("Citrix XenDesktop 7 application executable path")] String Path;
+    [Write, Description("Citrix XenDesktop 7 application type"), ValueMap{"HostedOnDesktop", "InstalledOnClient"}, Values{"HostedOnDesktop", "InstalledOnClient"}] String ApplicationType;
+    [Write, Description("Citrix XenDesktop 7 application arguments")] String Arguments;
+    [Write, Description("Citrix XenDesktop 7 application working directory")] String WorkingDirectory;
+    [Write, Description("Citrix XenDesktop 7 application description")] String Description;
+    [Write, Description("Citrix XenDesktop 7 application display name")] String DisplayName;
+    [Write, Description("Citrix XenDesktop 7 application is enabled")] Boolean Enabled;
+    [Write, Description("Citrix XenDesktop 7 application is visible")] Boolean Visible;
+    [Write, EmbeddedInstance("MSFT_Credential"), Description("Specifies a user account that has permission to create the delivery group.")] String Credential;
+    [Write, ValueMap{"Present", "Absent"}, Values{"Present", "Absent"}] String Ensure;
+};
