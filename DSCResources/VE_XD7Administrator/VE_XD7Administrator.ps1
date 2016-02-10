@@ -44,8 +44,12 @@ function Get-TargetResource {
             ScriptBlock = $scriptBlock;
             ErrorAction = 'Stop';
         }
-        if ($Credential) { AddInvokeScriptBlockCredentials -Hashtable $invokeCommandParams -Credential $Credential; }
-        else { $invokeCommandParams['ScriptBlock'] = [System.Management.Automation.ScriptBlock]::Create($scriptBlock.ToString().Replace('$using:','$')); }
+        if ($Credential) {
+            AddInvokeScriptBlockCredentials -Hashtable $invokeCommandParams -Credential $Credential;
+        }
+        else {
+            $invokeCommandParams['ScriptBlock'] = [System.Management.Automation.ScriptBlock]::Create($scriptBlock.ToString().Replace('$using:','$'));
+        }
         Write-Verbose ($localizedData.InvokingScriptBlockWithParams -f [System.String]::Join("','", @($Name, $Enabled, $Ensure)));
         $targetResource = Invoke-Command  @invokeCommandParams;
         return $targetResource;
@@ -111,10 +115,11 @@ function Set-TargetResource {
     process {
         $scriptBlock = {
             Add-PSSnapin -Name 'Citrix.DelegatedAdmin.Admin.V1' -ErrorAction Stop;
-            try { ## Cmdlet ignores $ErrorActionPreference :@
+            try {
+                ## Cmdlet ignores $ErrorActionPreference :@
                 $xdAdministrator = Get-AdminAdministrator -Name $using:Name -ErrorAction SilentlyContinue;
             }
-            catch {}
+            catch { }
             if ($using:Ensure -eq 'Present') {
                 if ($xdAdministrator) {
                     Write-Verbose ($using:localizedData.UpdatingAdministrator -f $using:Name);
@@ -136,8 +141,12 @@ function Set-TargetResource {
             ScriptBlock = $scriptBlock;
             ErrorAction = 'Stop';
         }
-        if ($Credential) { AddInvokeScriptBlockCredentials -Hashtable $invokeCommandParams -Credential $Credential; }
-        else { $invokeCommandParams['ScriptBlock'] = [System.Management.Automation.ScriptBlock]::Create($scriptBlock.ToString().Replace('$using:','$')); }
+        if ($Credential) {
+            AddInvokeScriptBlockCredentials -Hashtable $invokeCommandParams -Credential $Credential;
+        }
+        else {
+            $invokeCommandParams['ScriptBlock'] = [System.Management.Automation.ScriptBlock]::Create($scriptBlock.ToString().Replace('$using:','$'));
+        }
         Write-Verbose ($localizedData.InvokingScriptBlockWithParams -f [System.String]::Join("','", @($Name, $Enabled, $Ensure)));
         Invoke-Command @invokeCommandParams;
     } #end process

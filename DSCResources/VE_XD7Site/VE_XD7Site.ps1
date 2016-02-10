@@ -48,8 +48,12 @@ function Get-TargetResource {
             ScriptBlock = $scriptBlock;
             ErrorAction = 'Stop';
         }
-        if ($Credential) { AddInvokeScriptBlockCredentials -Hashtable $invokeCommandParams -Credential $Credential; }
-        else { $invokeCommandParams['ScriptBlock'] = [System.Management.Automation.ScriptBlock]::Create($scriptBlock.ToString().Replace('$using:','$')); }
+        if ($Credential) {
+            AddInvokeScriptBlockCredentials -Hashtable $invokeCommandParams -Credential $Credential;
+        }
+        else {
+            $invokeCommandParams['ScriptBlock'] = [System.Management.Automation.ScriptBlock]::Create($scriptBlock.ToString().Replace('$using:','$'));
+        }
         Write-Verbose $localizedData.InvokingScriptBlock;
         return Invoke-Command @invokeCommandParams;
     } #end process
@@ -80,10 +84,18 @@ function Test-TargetResource {
     process {
         $targetResource = Get-TargetResource @PSBoundParameters;
         $inCompliance = $true;
-        if ($targetResource.SiteName -ne $SiteName) { $inCompliance = $false; }
-        elseif ($targetResource.SiteDatabaseName -ne $SiteDatabaseName) { $inCompliance = $false; }
-        elseif ($targetResource.LoggingDatabaseName -ne $LoggingDatabaseName) { $inCompliance = $false; }
-        elseif ($targetResource.MonitorDatabaseName -ne $MonitorDatabaseName) { $inCompliance = $false; }
+        if ($targetResource.SiteName -ne $SiteName) {
+            $inCompliance = $false;
+        }
+        elseif ($targetResource.SiteDatabaseName -ne $SiteDatabaseName) {
+            $inCompliance = $false;
+        }
+        elseif ($targetResource.LoggingDatabaseName -ne $LoggingDatabaseName) {
+            $inCompliance = $false;
+        }
+        elseif ($targetResource.MonitorDatabaseName -ne $MonitorDatabaseName) {
+            $inCompliance = $false;
+        }
         if ($inCompliance) {
             Write-Verbose ($localizedData.ResourceInDesiredState -f $SiteName);
         }
@@ -138,9 +150,14 @@ function Set-TargetResource {
             ScriptBlock = $scriptBlock;
             ErrorAction = 'Stop';
         }
-        if ($Credential) { AddInvokeScriptBlockCredentials -Hashtable $invokeCommandParams -Credential $Credential; }
-        else { $invokeCommandParams['ScriptBlock'] = [System.Management.Automation.ScriptBlock]::Create($scriptBlock.ToString().Replace('$using:','$')); }
-        Write-Verbose ($localizedData.InvokingScriptBlockWithParams -f [System.String]::Join("','", @($SiteName, $DatabaseServer, $SiteDatabaseName, $LoggingDatabaseName, $MonitorDatabaseName)));
+        if ($Credential) {
+            AddInvokeScriptBlockCredentials -Hashtable $invokeCommandParams -Credential $Credential;
+        }
+        else {
+            $invokeCommandParams['ScriptBlock'] = [System.Management.Automation.ScriptBlock]::Create($scriptBlock.ToString().Replace('$using:','$'));
+        }
+        $scriptBlockParams = @($SiteName, $DatabaseServer, $SiteDatabaseName, $LoggingDatabaseName, $MonitorDatabaseName);
+        Write-Verbose ($localizedData.InvokingScriptBlockWithParams -f [System.String]::Join("','", $scriptBlockParams));
         Invoke-Command  @invokeCommandParams;
     } #end process
 } #end function Test-TargetResource

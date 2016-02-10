@@ -48,7 +48,9 @@ function Get-TargetResource {
         }
         if ([System.String]::IsNullOrEmpty($Name)) {
             $Name = '{0}_Direct' -f $DeliveryGroup;
-            if ($AccessType -eq 'AccessGateway') { $Name = '{0}_AG' -f $DeliveryGroup; }
+            if ($AccessType -eq 'AccessGateway') {
+                $Name = '{0}_AG' -f $DeliveryGroup;
+            }
         }
     }
     process {
@@ -84,8 +86,12 @@ function Get-TargetResource {
             ScriptBlock = $scriptBlock;
             ErrorAction = 'Stop';
         }
-        if ($Credential) { AddInvokeScriptBlockCredentials -Hashtable $invokeCommandParams -Credential $Credential; }
-        else { $invokeCommandParams['ScriptBlock'] = [System.Management.Automation.ScriptBlock]::Create($scriptBlock.ToString().Replace('$using:','$')); }
+        if ($Credential) {
+            AddInvokeScriptBlockCredentials -Hashtable $invokeCommandParams -Credential $Credential;
+        }
+        else {
+            $invokeCommandParams['ScriptBlock'] = [System.Management.Automation.ScriptBlock]::Create($scriptBlock.ToString().Replace('$using:','$'));
+        }
         Write-Verbose ($localizedData.InvokingScriptBlockWithParams -f [System.String]::Join("','", @($Name, $Enabled, $Ensure)));
         return Invoke-Command  @invokeCommandParams;
     }
@@ -142,15 +148,33 @@ function Test-TargetResource {
     process {
         $targetResource = Get-TargetResource @PSBoundParameters;
         $isInCompliance = $true;
-        if ($targetResource['Ensure'] -ne $Ensure) { $isInCompliance = $false; }
-        elseif ($targetResource['AccessType'] -ne $AccessType) { $isInCompliance = $false; }
-        elseif ($targetResource['Enabled'] -ne $Enabled) { $isInCompliance = $false; }
-        elseif ($targetResource['AllowRestart'] -ne $AllowRestart) { $isInCompliance = $false; }
-        elseif ($targetResource['Name'] -ne $Name) { $isInCompliance = $false; }
-        elseif ($targetResource['Description'] -ne $Description) { $isInCompliance = $false; }
-        elseif (Compare-Object -ReferenceObject $Protocol -DifferenceObject $targetResource['Protocol']) { $isInCompliance = $false; }
-        elseif (Compare-Object -ReferenceObject $ExcludeUsers -DifferenceObject $targetResource['ExcludeUsers']) { $isInCompliance = $false; }
-        elseif (Compare-Object -ReferenceObject $IncludeUsers -DifferenceObject $targetResource['IncludeUsers']) { $isInCompliance = $false; }
+        if ($targetResource['Ensure'] -ne $Ensure) {
+            $isInCompliance = $false;
+        }
+        elseif ($targetResource['AccessType'] -ne $AccessType) {
+            $isInCompliance = $false;
+        }
+        elseif ($targetResource['Enabled'] -ne $Enabled) {
+            $isInCompliance = $false;
+        }
+        elseif ($targetResource['AllowRestart'] -ne $AllowRestart) {
+            $isInCompliance = $false;
+        }
+        elseif ($targetResource['Name'] -ne $Name) {
+            $isInCompliance = $false;
+        }
+        elseif ($targetResource['Description'] -ne $Description) {
+            $isInCompliance = $false;
+        }
+        elseif (Compare-Object -ReferenceObject $Protocol -DifferenceObject $targetResource['Protocol']) {
+            $isInCompliance = $false;
+        }
+        elseif (Compare-Object -ReferenceObject $ExcludeUsers -DifferenceObject $targetResource['ExcludeUsers']) {
+            $isInCompliance = $false;
+        }
+        elseif (Compare-Object -ReferenceObject $IncludeUsers -DifferenceObject $targetResource['IncludeUsers']) {
+            $isInCompliance = $false;
+        }
         if ($isInCompliance) {
             Write-Verbose ($localizedData.ResourceInDesiredState -f $Name);
         }
@@ -245,15 +269,21 @@ function Set-TargetResource {
                     $accessPolicyParams['ExcludedUserFilterEnabled'] = $true;
                     foreach ($user in $using:ExcludeUsers) {
                         $brokerUser = Get-BrokerUser -FullName $user -ErrorAction SilentlyContinue;
-                        if (-not $brokerUser) { $brokerUser = New-BrokerUser -Name $user -ErrorAction Stop; }
+                        if (-not $brokerUser) {
+                            $brokerUser = New-BrokerUser -Name $user -ErrorAction Stop;
+                        }
                         $accessPolicyParams['ExcludedUsers'] += $brokerUser;
                     }
                 }
                                 
                 if ($desktopGroupAccessPolicy) {
                     ## Can't change name or delivery group
-                    if ($desktopGroup.Uid -ne $desktopGroupAccessPolicy.DesktopGroupUid) { throw; }
-                    elseif ($using:Name -ne $desktopGroupAccessPolicy.Name) { throw; }
+                    if ($desktopGroup.Uid -ne $desktopGroupAccessPolicy.DesktopGroupUid) {
+                        throw;
+                    }
+                    elseif ($using:Name -ne $desktopGroupAccessPolicy.Name) {
+                        throw;
+                    }
                     Write-Verbose ($using:localizedData.UpdatingAccessPolicy -f $using:Name);
                     $desktopGroupAccessPolicy | Set-BrokerAccessPolicyRule @accessPolicyParams;
                 }
@@ -277,8 +307,12 @@ function Set-TargetResource {
             ScriptBlock = $scriptBlock;
             ErrorAction = 'Stop';
         }
-        if ($Credential) { AddInvokeScriptBlockCredentials -Hashtable $invokeCommandParams -Credential $Credential; }
-        else { $invokeCommandParams['ScriptBlock'] = [System.Management.Automation.ScriptBlock]::Create($scriptBlock.ToString().Replace('$using:','$')); }
+        if ($Credential) {
+            AddInvokeScriptBlockCredentials -Hashtable $invokeCommandParams -Credential $Credential;
+        }
+        else {
+            $invokeCommandParams['ScriptBlock'] = [System.Management.Automation.ScriptBlock]::Create($scriptBlock.ToString().Replace('$using:','$'));
+        }
         Write-Verbose ($localizedData.InvokingScriptBlockWithParams -f [System.String]::Join("','", @($Name, $Enabled, $Ensure)));
         return Invoke-Command  @invokeCommandParams;
     } #end process

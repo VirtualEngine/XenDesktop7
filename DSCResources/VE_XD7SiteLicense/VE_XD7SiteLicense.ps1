@@ -52,9 +52,14 @@ function Get-TargetResource {
             ScriptBlock = $scriptBlock;
             ErrorAction = 'Stop';
         }
-        if ($Credential) { AddInvokeScriptBlockCredentials -Hashtable $invokeCommandParams -Credential $Credential; }
-        else { $invokeCommandParams['ScriptBlock'] = [System.Management.Automation.ScriptBlock]::Create($scriptBlock.ToString().Replace('$using:','$')); }
-        Write-Verbose ($localizedData.InvokingScriptBlockWithParams -f [System.String]::Join("','", @($LicenseServer, $LicenseServerPort, $LicenseEdition, $LicenseModel)));
+        if ($Credential) {
+            AddInvokeScriptBlockCredentials -Hashtable $invokeCommandParams -Credential $Credential;
+        }
+        else {
+            $invokeCommandParams['ScriptBlock'] = [System.Management.Automation.ScriptBlock]::Create($scriptBlock.ToString().Replace('$using:','$'));
+        }
+        $scriptBlockParams = @($LicenseServer, $LicenseServerPort, $LicenseEdition, $LicenseModel);
+        Write-Verbose ($localizedData.InvokingScriptBlockWithParams -f [System.String]::Join("','", $scriptBlockParams));
         return Invoke-Command @invokeCommandParams;
     } #end process
 } #end function Get-TargetResource
@@ -92,11 +97,21 @@ function Test-TargetResource {
         }
         else {
             $targetResource = Get-TargetResource @PSBoundParameters;
-            if ($LicenseServer -ne $targetResource['LicenseServer']) { $isInDesiredState = $false }
-            elseif ($LicenseServerPort -ne $targetResource['LicenseServerPort']) { $isInDesiredState = $false }
-            elseif ($LicenseEdition -ne $targetResource['LicenseEdition']) { $isInDesiredState = $false }
-            elseif ($LicenseModel -ne $targetResource['LicenseModel']) { $isInDesiredState = $false }
-            elseif ($TrustLicenseServerCertificate -ne $targetResource['TrustLicenseServerCertificate']) { $isInDesiredState = $false }
+            if ($LicenseServer -ne $targetResource['LicenseServer']) {
+                $isInDesiredState = $false;
+            }
+            elseif ($LicenseServerPort -ne $targetResource['LicenseServerPort']) {
+                $isInDesiredState = $false;
+            }
+            elseif ($LicenseEdition -ne $targetResource['LicenseEdition']) {
+                $isInDesiredState = $false;
+            }
+            elseif ($LicenseModel -ne $targetResource['LicenseModel']) {
+                $isInDesiredState = $false;
+            }
+            elseif ($TrustLicenseServerCertificate -ne $targetResource['TrustLicenseServerCertificate']) {
+                $isInDesiredState = $false;
+            }
             if ($isInDesiredState) {
                 Write-Verbose $localizedData.ResourceInDesiredState;
             }
@@ -162,9 +177,14 @@ function Set-TargetResource {
             ScriptBlock = $scriptBlock;
             ErrorAction = 'Stop';
         }
-        if ($Credential) { AddInvokeScriptBlockCredentials -Hashtable $invokeCommandParams -Credential $Credential; }
-        else { $invokeCommandParams['ScriptBlock'] = [System.Management.Automation.ScriptBlock]::Create($scriptBlock.ToString().Replace('$using:','$')); }
-        Write-Verbose ($localizedData.InvokingScriptBlockWithParams -f [System.String]::Join("','", @($LicenseServer, $LicenseServerPort, $LicenseEdition, $LicenseModel)));
+        if ($Credential) {
+            AddInvokeScriptBlockCredentials -Hashtable $invokeCommandParams -Credential $Credential;
+        }
+        else {
+            $invokeCommandParams['ScriptBlock'] = [System.Management.Automation.ScriptBlock]::Create($scriptBlock.ToString().Replace('$using:','$'));
+        }
+        $scriptBlockParams = @($LicenseServer, $LicenseServerPort, $LicenseEdition, $LicenseModel);
+        Write-Verbose ($localizedData.InvokingScriptBlockWithParams -f [System.String]::Join("','", $scriptBlockParams));
         return Invoke-Command @invokeCommandParams;
     } #end process
 } #end function Set-TargetResource

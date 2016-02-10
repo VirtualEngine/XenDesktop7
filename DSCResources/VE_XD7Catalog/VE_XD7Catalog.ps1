@@ -55,9 +55,15 @@ function Get-TargetResource {
                 Ensure = $using:Ensure;
             }
             switch ($brokerCatalog.PersistUserChanges) {
-                'OnLocal' { $targetResource['Persistence'] = 'Local'; }
-                'OnPvd' { $targetResource['Persistence'] = 'PVD'; }
-                'Discard' { $targetResource['Persistence'] = 'Discard'; }
+                'OnLocal' {
+                    $targetResource['Persistence'] = 'Local';
+                }
+                'OnPvd' {
+                    $targetResource['Persistence'] = 'PVD';
+                }
+                'Discard' {
+                    $targetResource['Persistence'] = 'Discard';
+                }
             }
             return $targetResource;
         } #end scriptBlock
@@ -66,8 +72,12 @@ function Get-TargetResource {
             ScriptBlock = $scriptBlock;
             ErrorAction = 'Stop';
         }
-        if ($Credential) { AddInvokeScriptBlockCredentials -Hashtable $invokeCommandParams -Credential $Credential; }
-        else { $invokeCommandParams['ScriptBlock'] = [System.Management.Automation.ScriptBlock]::Create($scriptBlock.ToString().Replace('$using:','$')); }
+        if ($Credential) {
+            AddInvokeScriptBlockCredentials -Hashtable $invokeCommandParams -Credential $Credential;
+        }
+        else {
+            $invokeCommandParams['ScriptBlock'] = [System.Management.Automation.ScriptBlock]::Create($scriptBlock.ToString().Replace('$using:','$'));
+        }
         Write-Verbose ($localizedData.InvokingScriptBlockWithParams -f [System.String]::Join("','", @($Name)));
         return Invoke-Command @invokeCommandParams;
     } #end process
@@ -200,8 +210,12 @@ function Set-TargetResource {
                             Name = $using:Name;
                             Description = $using:Description;
                         }
-                        if ($using:PvsDomain) { $setBrokerCatalogParams['PvsDomain'] = $using:PvsDomain; }
-                        if ($using:PvsAddress) { $setBrokerCatalogParams['PvsAddress'] = $using:PvsAddress; }
+                        if ($using:PvsDomain) {
+                            $setBrokerCatalogParams['PvsDomain'] = $using:PvsDomain;
+                        }
+                        if ($using:PvsAddress) {
+                            $setBrokerCatalogParams['PvsAddress'] = $using:PvsAddress;
+                        }
                         [ref] $null = Set-BrokerCatalog @setBrokerCatalogParams;
                     }
                 } #end if brokerCatalog
@@ -249,9 +263,14 @@ function Set-TargetResource {
             ScriptBlock = $scriptBlock;
             ErrorAction = 'Stop';
         }
-        if ($Credential) { AddInvokeScriptBlockCredentials -Hashtable $invokeCommandParams -Credential $Credential; }
-        else { $invokeCommandParams['ScriptBlock'] = [System.Management.Automation.ScriptBlock]::Create($scriptBlock.ToString().Replace('$using:','$')); }
-        Write-Verbose ($localizedData.InvokingScriptBlockWithParams -f [System.String]::Join("','", @($Name, $Ensure, $Allocation, $Provisioning, $Persistence, $IsMultiSession, $Description, $PvsAddress, $PvsDomain)));
+        if ($Credential) {
+            AddInvokeScriptBlockCredentials -Hashtable $invokeCommandParams -Credential $Credential;
+        }
+        else {
+            $invokeCommandParams['ScriptBlock'] = [System.Management.Automation.ScriptBlock]::Create($scriptBlock.ToString().Replace('$using:','$'));
+        }
+        $scriptBlockParams = @($Name, $Ensure, $Allocation, $Provisioning, $Persistence, $IsMultiSession, $Description, $PvsAddress, $PvsDomain);
+        Write-Verbose ($localizedData.InvokingScriptBlockWithParams -f [System.String]::Join("','", $scriptBlockParams));
         Invoke-Command @invokeCommandParams;
     } #end process
 } #end function Set-TargetResource

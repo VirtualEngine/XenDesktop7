@@ -260,6 +260,16 @@ InModuleScope $sut {
                     GetXDInstalledRole -Role $role.Role | Should Be $false;
                 }
             }
+            
+            It 'Returns False when "Director" is not installed, but the VDA is installed' {
+                $getItemProperty = @(
+                    ## Needs multiple Citrix* products to keep the pipeline alive
+                    [PSCustomObject] @{ Role = 'SessionVDA'; ProductName = 'Citrix Director VDA Plugin'; },
+                    [PSCustomObject] @{ Role = 'Citrix Other Product'; ProductName = 'Citrix Other Product'; }
+                );
+                Mock -CommandName Get-ItemProperty -MockWith { return $getItemProperty; }
+                GetXDInstalledRole -Role 'Director' | Should Be $false;
+            }
         }
     
         Context 'ResolveXDSetupMedia' {

@@ -416,15 +416,35 @@ function GetXDInstalledRole {
             Where-Object { $_.ProductName -like '*Citrix*' -and $_.ProductName -notlike '*snap-in' } |
                 Select-Object -ExpandProperty ProductName;
         switch ($Role) {
-            'Controller' { $filter = 'Citrix Broker Service'; }
-            'Studio' { $filter = 'Citrix Studio'; }
-            'Storefront' { $filter = 'Citrix Storefront'; }
-            'Licensing' { $filter = 'Citrix Licensing'; }
-            'Director' { $filter = 'Citrix Director'; }
-            'DesktopVDA' { $filter = 'Citrix Virtual Desktop Agent'; }
-            'SessionVDA' { $filter = 'Citrix Virtual Desktop Agent'; } # Name: Citrix Virtual Delivery Agent 7.6, DisplayName: Citrix Virtual Desktop Agent?
+            'Controller' {
+                $filter = 'Citrix Broker Service';
+            }
+            'Studio' {
+                $filter = 'Citrix Studio';
+            }
+            'Storefront' {
+                $filter = 'Citrix Storefront';
+            }
+            'Licensing' {
+                $filter = 'Citrix Licensing';
+            }
+            'Director' {
+                $filter = 'Citrix Director(?!.VDA Plugin)';
+            }
+            'DesktopVDA' {
+                $filter = 'Citrix Virtual Desktop Agent';
+            }
+            'SessionVDA' {
+                $filter = 'Citrix Virtual Desktop Agent';
+            }
         }
-        return $installedProducts -match $filter;
+        $result = $installedProducts -match $filter;
+        if ([System.String]::IsNullOrEmpty($result)) {
+            return $false;   
+        }
+        else {
+            return $result;
+        }
     } #end process
 } #end functoin GetXDInstalledProduct
 
@@ -451,9 +471,15 @@ function ResolveXDSetupMedia {
             $architecture = 'x64';
         }
         switch ($Role) {
-            'DesktopVDA' { $installMedia = 'XenDesktopVdaSetup.exe'; }
-            'SessionVDA' { $installMedia = 'XenDesktopVdaSetup.exe'; }
-            Default { $installMedia = 'XenDesktopServerSetup.exe'; }
+            'DesktopVDA' {
+                $installMedia = 'XenDesktopVdaSetup.exe';
+            }
+            'SessionVDA' {
+                $installMedia = 'XenDesktopVdaSetup.exe';
+            }
+            Default {
+                $installMedia = 'XenDesktopServerSetup.exe';
+            }
         }
         $sourceArchitecturePath = Join-Path -Path $SourcePath -ChildPath $architecture;
         $installMediaPath = Get-ChildItem -Path $sourceArchitecturePath -Filter $installMedia -Recurse -File;

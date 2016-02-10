@@ -133,11 +133,21 @@ function ResolveXDServerSetupArguments {
         $arguments.AddRange(@('/QUIET', '/LOGPATH', "`"$LogPath`"", '/NOREBOOT', '/COMPONENTS'));
         switch ($Role) {
             ## Install/uninstall component names by role
-            'Controller' { [ref] $null = $arguments.Add('CONTROLLER'); }
-            'Studio' { [ref] $null = $arguments.Add('DESKTOPSTUDIO'); }
-            'Storefront' { [ref] $null = $arguments.Add('STOREFRONT'); }
-            'Licensing' { [ref] $null = $arguments.Add('LICENSESERVER'); }
-            'Director' { [ref] $null = $arguments.Add('DESKTOPDIRECTOR'); }
+            'Controller' {
+                [ref] $null = $arguments.Add('CONTROLLER');
+            }
+            'Studio' {
+                [ref] $null = $arguments.Add('DESKTOPSTUDIO');
+            }
+            'Storefront' {
+                [ref] $null = $arguments.Add('STOREFRONT');
+            }
+            'Licensing' {
+                [ref] $null = $arguments.Add('LICENSESERVER');
+            }
+            'Director' {
+                [ref] $null = $arguments.Add('DESKTOPDIRECTOR');
+            }
         } #end switch Role
         
         if ($Uninstall) {
@@ -146,10 +156,18 @@ function ResolveXDServerSetupArguments {
         else {
             ## Additional install parameters per role
             switch ($Role) {
-                'Controller' { $arguments.AddRange(@('/CONFIGURE_FIREWALL', '/NOSQL')); }
-                'Studio' { $arguments.AddRange(@('/CONFIGURE_FIREWALL')); }
-                'Storefront' { $arguments.AddRange(@('/CONFIGURE_FIREWALL')); }
-                'Licensing' { $arguments.AddRange(@('/CONFIGURE_FIREWALL')); }
+                'Controller' {
+                    $arguments.AddRange(@('/CONFIGURE_FIREWALL', '/NOSQL'));
+                }
+                'Studio' {
+                    $arguments.AddRange(@('/CONFIGURE_FIREWALL'));
+                }
+                'Storefront' {
+                    $arguments.AddRange(@('/CONFIGURE_FIREWALL'));
+                }
+                'Licensing' {
+                    $arguments.AddRange(@('/CONFIGURE_FIREWALL'));
+                }
                 'Director' { };
             } #end switch Role
         }

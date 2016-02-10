@@ -43,9 +43,14 @@ function Get-TargetResource {
             ScriptBlock = $scriptBlock;
             ErrorAction = 'Stop';
         }
-        if ($Credential) { AddInvokeScriptBlockCredentials -Hashtable $invokeCommandParams -Credential $Credential; }
-        else { $invokeCommandParams['ScriptBlock'] = [System.Management.Automation.ScriptBlock]::Create($scriptBlock.ToString().Replace('$using:','$')); }
-        Write-Verbose ($localizedData.InvokingScriptBlockWithParams -f [System.String]::Join("','", @($Name, $RoleScope, $Members, $Ensure)));
+        if ($Credential) {
+            AddInvokeScriptBlockCredentials -Hashtable $invokeCommandParams -Credential $Credential;
+        }
+        else {
+            $invokeCommandParams['ScriptBlock'] = [System.Management.Automation.ScriptBlock]::Create($scriptBlock.ToString().Replace('$using:','$'));
+        }
+        $scriptBlockParams = @($Name, $RoleScope, $Members, $Ensure);
+        Write-Verbose ($localizedData.InvokingScriptBlockWithParams -f [System.String]::Join("','", $scriptBlockParams));
         $targetResource = Invoke-Command  @invokeCommandParams;
         return $targetResource;
     } #end process
@@ -146,7 +151,9 @@ function Set-TargetResource {
             }
             else {
                 foreach ($member in $using:Members) {
-                    $hasAdminRights = Get-AdminAdministrator -Name $member | Select-Object -ExpandProperty Rights | Where-Object { $_.RoleName -eq $using:Name -and $_.ScopeName -eq $using:RoleScope };
+                    $hasAdminRights = Get-AdminAdministrator -Name $member | Select-Object -ExpandProperty Rights | Where-Object {
+                        $_.RoleName -eq $using:Name -and $_.ScopeName -eq $using:RoleScope
+                    };
                     if ($hasAdminRights) {
                         $removingRoleMember = 'Removing Citrix XenDesktop 7.x Administrator ''{0}'' from role ''{1}''.';
                         Write-Verbose ($removingRoleMember -f $member, $using:Name);
@@ -159,9 +166,14 @@ function Set-TargetResource {
             ScriptBlock = $scriptBlock;
             ErrorAction = 'Stop';
         }
-        if ($Credential) { AddInvokeScriptBlockCredentials -Hashtable $invokeCommandParams -Credential $Credential; }
-        else { $invokeCommandParams['ScriptBlock'] = [System.Management.Automation.ScriptBlock]::Create($scriptBlock.ToString().Replace('$using:','$')); }
-        Write-Verbose ($localizedData.InvokingScriptBlockWithParams -f [System.String]::Join("','", @($Name, $RoleScope, $Members, $Ensure)));
+        if ($Credential) {
+            AddInvokeScriptBlockCredentials -Hashtable $invokeCommandParams -Credential $Credential;
+        }
+        else {
+            $invokeCommandParams['ScriptBlock'] = [System.Management.Automation.ScriptBlock]::Create($scriptBlock.ToString().Replace('$using:','$'));
+        }
+        $scriptBlockParams = @($Name, $RoleScope, $Members, $Ensure);
+        Write-Verbose ($localizedData.InvokingScriptBlockWithParams -f [System.String]::Join("','", $scriptBlockParams));
         $targetResource = Invoke-Command  @invokeCommandParams;
     } #end process
 } #end function Set-TargetResource

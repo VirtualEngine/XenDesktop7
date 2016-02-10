@@ -76,7 +76,9 @@ function Get-TargetResource {
                 Ensure = 'Absent';
                 Credential = $using:Credential;
             }
-            if ($deliveryGroup) { $targetResource['Ensure'] = 'Present'; }
+            if ($deliveryGroup) {
+                $targetResource['Ensure'] = 'Present';
+            }
             return $targetResource;
         } #end scriptBlock
 
@@ -84,9 +86,14 @@ function Get-TargetResource {
             ScriptBlock = $scriptBlock;
             ErrorAction = 'Stop';
         }
-        if ($Credential) { AddInvokeScriptBlockCredentials -Hashtable $invokeCommandParams -Credential $Credential; }
-        else { $invokeCommandParams['ScriptBlock'] = [System.Management.Automation.ScriptBlock]::Create($scriptBlock.ToString().Replace('$using:','$')); }
-        $scriptBlockParams = @($Name,$Description,$DeliveryType,$PublishedName,$ColorDepth,$Enabled,$IsMaintenanceMode,$IsRemotePC,$IsSecureIca,$ShutdownDesktopsAfterUse,$TurnOnAddedMachine);
+        if ($Credential) {
+            AddInvokeScriptBlockCredentials -Hashtable $invokeCommandParams -Credential $Credential;
+        }
+        else {
+            $invokeCommandParams['ScriptBlock'] = [System.Management.Automation.ScriptBlock]::Create($scriptBlock.ToString().Replace('$using:','$'));
+        }
+        $scriptBlockParams = @($Name, $Description, $DeliveryType, $PublishedName, $ColorDepth, $Enabled, $IsMaintenanceMode, $IsRemotePC,
+                                $IsSecureIca,$ShutdownDesktopsAfterUse,$TurnOnAddedMachine);
         Write-Verbose ($localizedData.InvokingScriptBlockWithParams -f [System.String]::Join("','", $scriptBlockParams));
         $targetResource = Invoke-Command  @invokeCommandParams;
         return $targetResource;
@@ -145,19 +152,45 @@ function Test-TargetResource {
     process {
         $targetResource = Get-TargetResource @PSBoundParameters;
         $isInCompliance = $true;
-        if ($targetResource['Ensure'] -ne $Ensure) { $isInCompliance = $false; }
-        elseif ($targetResource['IsMultiSession'] -ne $IsMultiSession) { $isInCompliance = $false; }
-        elseif ($targetResource['DeliveryType'] -ne $DeliveryType) { $isInCompliance = $false; }
-        elseif ($targetResource['Description'] -ne $Description) { $isInCompliance = $false; }
-        elseif ($targetResource['DesktopType'] -ne $DesktopType) { $isInCompliance = $false; }
-        elseif ($targetResource['DisplayName'] -ne $DisplayName) { $isInCompliance = $false; }
-        elseif ($targetResource['Enabled'] -ne $Enabled) { $isInCompliance = $false; }
-        elseif ($targetResource['ColorDepth'] -ne $ColorDepth) { $isInCompliance = $false; }
-        elseif ($targetResource['IsMaintenanceMode'] -ne $IsMaintenanceMode) { $isInCompliance = $false; }
-        elseif ($targetResource['IsRemotePC'] -ne $IsRemotePC) { $isInCompliance = $false; }
-        elseif ($targetResource['IsSecureIca'] -ne $IsSecureIca) { $isInCompliance = $false; }
-        elseif ($targetResource['ShutdownDesktopsAfterUse'] -ne $ShutdownDesktopsAfterUse) { $isInCompliance = $false; }
-        elseif ($targetResource['TurnOnAddedMachine'] -ne $TurnOnAddedMachine) { $isInCompliance = $false; }
+        if ($targetResource['Ensure'] -ne $Ensure) {
+            $isInCompliance = $false;
+        }
+        elseif ($targetResource['IsMultiSession'] -ne $IsMultiSession) {
+            $isInCompliance = $false;
+        }
+        elseif ($targetResource['DeliveryType'] -ne $DeliveryType) {
+            $isInCompliance = $false;
+        }
+        elseif ($targetResource['Description'] -ne $Description) {
+            $isInCompliance = $false;
+        }
+        elseif ($targetResource['DesktopType'] -ne $DesktopType) {
+            $isInCompliance = $false;
+        }
+        elseif ($targetResource['DisplayName'] -ne $DisplayName) {
+            $isInCompliance = $false;
+        }
+        elseif ($targetResource['Enabled'] -ne $Enabled) {
+            $isInCompliance = $false;
+        }
+        elseif ($targetResource['ColorDepth'] -ne $ColorDepth) {
+            $isInCompliance = $false;
+        }
+        elseif ($targetResource['IsMaintenanceMode'] -ne $IsMaintenanceMode) {
+            $isInCompliance = $false;
+        }
+        elseif ($targetResource['IsRemotePC'] -ne $IsRemotePC) {
+            $isInCompliance = $false;
+        }
+        elseif ($targetResource['IsSecureIca'] -ne $IsSecureIca) {
+            $isInCompliance = $false;
+        }
+        elseif ($targetResource['ShutdownDesktopsAfterUse'] -ne $ShutdownDesktopsAfterUse) {
+            $isInCompliance = $false;
+        }
+        elseif ($targetResource['TurnOnAddedMachine'] -ne $TurnOnAddedMachine) {
+            $isInCompliance = $false;
+        }
         if ($isInCompliance) {
             Write-Verbose ($localizedData.ResourceInDesiredState -f $Name);
             return $true;
@@ -243,8 +276,12 @@ function Set-TargetResource {
                     TurnOnAddedMachine = $using:TurnOnAddedMachine
                 }
                 if ($deliveryGroup) {
-                    if ($using:IsMultiSession) { $sessionSupport = 'MultiSession'; }
-                    else { $sessionSupport = 'SingleSession'; }
+                    if ($using:IsMultiSession) {
+                        $sessionSupport = 'MultiSession';
+                    }
+                    else {
+                        $sessionSupport = 'SingleSession';
+                    }
                     ## ! No SessionSupport or DesktopKind - DeleteIfNeeded option? RemoveExistingIfNeeded/Required?
                     if ($sessionSupport -ne $deliveryGroup.SessionSupport) {
                         ThrowInvalidOperationException -ErrorId 'ImmutableProperty' -ErrorMessage ($using:localizedData.ImmutablePropertyError -f 'IsMultiSession');
@@ -256,8 +293,12 @@ function Set-TargetResource {
                     Set-BrokerDesktopGroup @brokerDeliveryGroupParams;
                 }
                 else {
-                    if ($using:IsMultiSession) { $brokerDeliveryGroupParams['SessionSupport'] = 'MultiSession'; }
-                    else { $brokerDeliveryGroupParams['SessionSupport'] = 'SingleSession'; }
+                    if ($using:IsMultiSession) {
+                        $brokerDeliveryGroupParams['SessionSupport'] = 'MultiSession';
+                    }
+                    else {
+                        $brokerDeliveryGroupParams['SessionSupport'] = 'SingleSession';
+                    }
                     $brokerDeliveryGroupParams['DesktopKind'] = $using:DesktopType;
                     Write-Verbose ($localizedData.AddingDeliveryGroup -f $using:Name);
                     New-BrokerDesktopGroup @brokerDeliveryGroupparams;
@@ -273,9 +314,14 @@ function Set-TargetResource {
             ScriptBlock = $scriptBlock;
             ErrorAction = 'Stop';
         }
-        if ($Credential) { AddInvokeScriptBlockCredentials -Hashtable $invokeCommandParams -Credential $Credential; }
-        else { $invokeCommandParams['ScriptBlock'] = [System.Management.Automation.ScriptBlock]::Create($scriptBlock.ToString().Replace('$using:','$')); }
-        $scriptBlockParams = @($Name,$Description,$DeliveryType,$PublishedName,$ColorDepth,$Enabled,$IsMaintenanceMode,$IsRemotePC,$IsSecureIca,$ShutdownDesktopsAfterUse,$TurnOnAddedMachine);
+        if ($Credential) {
+            AddInvokeScriptBlockCredentials -Hashtable $invokeCommandParams -Credential $Credential;
+        }
+        else {
+            $invokeCommandParams['ScriptBlock'] = [System.Management.Automation.ScriptBlock]::Create($scriptBlock.ToString().Replace('$using:','$'));
+        }
+        $scriptBlockParams = @($Name, $Description, $DeliveryType, $PublishedName, $ColorDepth, $Enabled, $IsMaintenanceMode, $IsRemotePC,
+                                $IsSecureIca,$ShutdownDesktopsAfterUse,$TurnOnAddedMachine);
         Write-Verbose ($localizedData.InvokingScriptBlockWithParams -f [System.String]::Join("','", $scriptBlockParams));
         Invoke-Command  @invokeCommandParams;
     } #end process
