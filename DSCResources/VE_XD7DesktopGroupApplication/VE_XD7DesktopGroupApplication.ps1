@@ -32,7 +32,7 @@ function Get-TargetResource {
         [System.String] $Description,
 
         [Parameter()] [ValidateNotNullOrEmpty()]
-        [System.String] $DisplayName,
+        [System.String] $DisplayName = $Name,
         
         [Parameter()] [ValidateNotNull()]
         [System.Boolean] $Enabled = $true,
@@ -118,7 +118,7 @@ function Test-TargetResource {
         [System.String] $Description,
 
         [Parameter()] [ValidateNotNullOrEmpty()]
-        [System.String] $DisplayName,
+        [System.String] $DisplayName = $Name,
         
         [Parameter()] [ValidateNotNull()]
         [System.Boolean] $Enabled = $true,
@@ -137,9 +137,12 @@ function Test-TargetResource {
         $targetResource = Get-TargetResource @PSBoundParameters;
         $inDesiredState = $true;
         foreach ($property in $targetResource.Keys) {
-            if (($property -eq 'ApplicationType') -and ($ApplicationType -ne $targetResource.ApplicationType)) {
-                $errorMessage = $localizedData.ImmutablePropertyError -f 'ApplicationType';
-                ThrowInvalidOperationException -ErrorId 'ImmutablePropertyError' -ErrorMessage $errorMessage;
+            if ($property -eq 'ApplicationType') {
+                ## If we don't have an application, the ApplicationType won't be correct!
+                if (($targetResource -eq 'Present') -and ($ApplicationType -ne $targetResource.ApplicationType)) {
+                    $errorMessage = $localizedData.ImmutablePropertyError -f 'ApplicationType';
+                    ThrowInvalidOperationException -ErrorId 'ImmutablePropertyError' -ErrorMessage $errorMessage;
+                }
             }
             elseif ($PSBoundParameters.ContainsKey($property) -and ($targetResource.$property -ne $PSBoundParameters.$property)) {
                 Write-Verbose -Message ($localizedData.ApplicationPropertyMismatch -f $property, $PSBoundParameters.$property, $targetResource.$property);
@@ -188,7 +191,7 @@ function Set-TargetResource {
         [System.String] $Description,
 
         [Parameter()] [ValidateNotNullOrEmpty()]
-        [System.String] $DisplayName,
+        [System.String] $DisplayName = $Name,
         
         [Parameter()] [ValidateNotNull()]
         [System.Boolean] $Enabled = $true,

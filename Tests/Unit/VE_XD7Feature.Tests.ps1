@@ -162,7 +162,7 @@ InModuleScope $sut {
                 $targetResource = Get-TargetResource -Role 'Controller' -SourcePath $testDrivePath -Ensure 'Present';
                 $targetResource['Ensure'] | Should Be 'Absent';
             }
-        
+                   
         } #end context Get-TargetResource
 
         Context 'Test-TargetResource' {
