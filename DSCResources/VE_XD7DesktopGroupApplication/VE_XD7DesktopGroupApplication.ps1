@@ -139,7 +139,7 @@ function Test-TargetResource {
         foreach ($property in $targetResource.Keys) {
             if ($property -eq 'ApplicationType') {
                 ## If we don't have an application, the ApplicationType won't be correct!
-                if (($targetResource -eq 'Present') -and ($ApplicationType -ne $targetResource.ApplicationType)) {
+                if (($targetResource.Ensure -eq 'Present') -and ($ApplicationType -ne $targetResource.ApplicationType)) {
                     $errorMessage = $localizedData.ImmutablePropertyError -f 'ApplicationType';
                     ThrowInvalidOperationException -ErrorId 'ImmutablePropertyError' -ErrorMessage $errorMessage;
                 }

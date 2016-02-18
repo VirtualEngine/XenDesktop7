@@ -108,7 +108,13 @@ InModuleScope $sut {
                 Test-TargetResource @testApplication -Visible $false | Should Be $false;
             }
             
+            It 'Does not throw when immutable "ApplicationType" property is specified but application does not exist' {
+                Mock Get-TargetResource -MockWith { return @{ Ensure = 'Absent'; ApplicationType = 'HostedOnDesktop'; } }
+                { Test-TargetResource @testApplication -ApplicationType 'InstalledOnClient' } | Should Not Throw;
+            }
+            
             It 'Throws when immutable "ApplicationType" property is specified' {
+                Mock Get-TargetResource -MockWith { return @{ Ensure = 'Present'; ApplicationType = 'HostedOnDesktop'; } }
                 { Test-TargetResource @testApplication -ApplicationType 'InstalledOnClient' } | Should Throw 'ApplicationType';
             }
 
