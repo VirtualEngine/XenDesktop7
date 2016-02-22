@@ -1,4 +1,4 @@
-ConvertFrom-StringData @'    
+ConvertFrom-StringData @'
     InvalidSourcePathError = Invalid XenDesktop source path '{0}' specified.
     NoValidSetupMediaError = No valid '{0}' setup media found in path '{1}'.
     SourceDirectorySet = Installation source path set to '{0}'.

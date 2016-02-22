@@ -1,5 +1,5 @@
 ﻿<# XD7Common\Resources.psd1 #>
-ConvertFrom-StringData @'    
+ConvertFrom-StringData @'
     XenDesktopSDKNotFoundError = Citrix XenDesktop 7.x Powershell SDK/Snap-in was not found.
     MachineNotFoundError = Citrix XenDesktop 7.x machine name '{0}' was not found.
     AmbiguousMachineReferenceError = Citrix XenDesktop 7.x machine reference '{0}' is ambiguous. Specify the machine's FQDN.

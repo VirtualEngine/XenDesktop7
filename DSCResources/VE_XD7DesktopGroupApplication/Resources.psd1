@@ -1,4 +1,4 @@
-ConvertFrom-StringData @'    
+ConvertFrom-StringData @'
     XenDesktopSDKNotFoundError = Citrix XenDesktop 7.x Powershell SDK/Snap-in was not found.
     ImmutablePropertyError = Citrix XenDesktop 7.x property '{0}' cannot be modified post-creation. Remove the object and then recreate.
     ApplicationPropertyMismatch = Application property '{0}' mismatch; expected '{1}', actual '{2}'.

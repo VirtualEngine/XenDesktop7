@@ -1,5 +1,5 @@
 <# XD7DeliveryGroupMachine\Resources.psd1 #>
-ConvertFrom-StringData @'    
+ConvertFrom-StringData @'
     XenDesktopSDKNotFoundError = Citrix XenDesktop 7.x Powershell SDK/Snap-in was not found.
     InvokingScriptBlockWithParams = Invoking script block with parameters: '{0}'.
     AddingDeliveryGroupMachine = Adding Citrix XenDesktop 7.x Machine '{0}' to Delivery Group '{1}'.

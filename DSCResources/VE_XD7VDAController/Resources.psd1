@@ -1,4 +1,4 @@
-ConvertFrom-StringData @'    
+ConvertFrom-StringData @'
     MissingDeliveryController = Citrix XenDesktop 7.x delivery controller '{0}' is missing and will be added.
     AdditionalDeliveryController = Citrix XenDesktop 7.x delivery controller '{0}' is present and will be removed.
     AddingDeliveryController = Adding Citrix XenDesktop 7.x '{0}' delivery controller.

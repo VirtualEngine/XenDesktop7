@@ -1,4 +1,4 @@
-ConvertFrom-StringData @'    
+ConvertFrom-StringData @'
     XenDesktopSDKNotFoundError = Citrix XenDesktop 7.x Powershell SDK/Snap-in was not found.
     AddingAccessPolicy = Adding Citrix XenDesktop 7.x access policy '{0}'.
     UpdatingAccessPolicy = Updating Citrix XenDesktop 7.x access policy '{0}'.

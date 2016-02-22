@@ -1,4 +1,4 @@
-ConvertFrom-StringData @'    
+ConvertFrom-StringData @'
     XenDesktopSDKNotFoundError = Citrix XenDesktop 7.x Powershell SDK/Snap-in was not found.
     CreatingXDSite = Creating Citrix XenDesktop 7.x Site '{0}'.
     InvokingScriptBlock = Invoking script block.
