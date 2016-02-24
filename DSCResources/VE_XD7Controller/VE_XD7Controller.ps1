@@ -6,22 +6,22 @@ function Get-TargetResource {
     param (
         [Parameter(Mandatory)] [ValidateNotNullOrEmpty()]
         [System.String] $SiteName,
-        
+
         ## Existing controller used to join/remove the site.
         [Parameter(Mandatory)] [ValidateNotNullOrEmpty()]
-        [System.String] $ExistingControllerName, 
-        
+        [System.String] $ExistingControllerName,
+
         ## Database credentials used to join/remove the controller to/from the site.
         [Parameter()] [AllowNull()]
-        [System.Management.Automation.PSCredential] $Credential, 
-        
+        [System.Management.Automation.PSCredential]
+        [System.Management.Automation.CredentialAttribute()]
+        $Credential,
+
         [Parameter()] [ValidateSet('Present','Absent')]
         [System.String] $Ensure = 'Present'
     )
     begin {
-        if (-not (TestXDModule)) {
-            ThrowInvalidProgramException -ErrorId 'Citrix.XenDesktop.Admin' -ErrorMessage $localizedData.XenDesktopSDKNotFoundError;
-        }
+        AssertXDModule -Name 'Citrix.XenDesktop.Admin';
     } #end begin
     process {
         $scriptBlock = {
@@ -39,7 +39,7 @@ function Get-TargetResource {
             }
             return $targetResource;
         } #end scriptBlock
-        
+
         $localHostName = GetHostName;
         $invokeCommandParams = @{
             ScriptBlock = $scriptBlock;
@@ -64,15 +64,17 @@ function Test-TargetResource {
     param (
         [Parameter(Mandatory)] [ValidateNotNullOrEmpty()]
         [System.String] $SiteName,
-        
+
         ## Existing controller used to join/remove the site.
         [Parameter(Mandatory)] [ValidateNotNullOrEmpty()]
-        [System.String] $ExistingControllerName, 
-        
+        [System.String] $ExistingControllerName,
+
         ## Database credentials used to join/remove the controller to/from the site.
         [Parameter()] [AllowNull()]
-        [System.Management.Automation.PSCredential] $Credential, 
-        
+        [System.Management.Automation.PSCredential]
+        [System.Management.Automation.CredentialAttribute()]
+        $Credential,
+
         [Parameter()] [ValidateSet('Present','Absent')]
         [System.String] $Ensure = 'Present'
     )
@@ -97,28 +99,28 @@ function Set-TargetResource {
     param (
         [Parameter(Mandatory)] [ValidateNotNullOrEmpty()]
         [System.String] $SiteName,
-        
+
         ## Existing controller used to join/remove the site.
         [Parameter(Mandatory)] [ValidateNotNullOrEmpty()]
-        [System.String] $ExistingControllerName, 
-        
+        [System.String] $ExistingControllerName,
+
         ## Database credentials used to join/remove the controller to/from the site.
         [Parameter()] [AllowNull()]
-        [System.Management.Automation.PSCredential] $Credential, 
-        
+        [System.Management.Automation.PSCredential]
+        [System.Management.Automation.CredentialAttribute()]
+        $Credential,
+
         [Parameter()] [ValidateSet('Present','Absent')]
         [System.String] $Ensure = 'Present'
     )
     begin {
-        if (-not (TestXDModule)) {
-            ThrowInvalidProgramException -ErrorId 'Citrix.XenDesktop.Admin module not found.' -ErrorMessage $localizedData.XenDesktopSDKNotFoundError;
-        }
+        AssertXDModule -Name 'Citrix.XenDesktop.Admin';
     } #end begin
     process {
         $scriptBlock = {
             Import-Module "$env:ProgramFiles\Citrix\XenDesktopPoshSdk\Module\Citrix.XenDesktop.Admin.V1\Citrix.XenDesktop.Admin\Citrix.XenDesktop.Admin.psd1" -Verbose:$false;
             Remove-Variable -Name CitrxHLSSdkContext -Force -ErrorAction SilentlyContinue;
-            
+
             if ($using:Ensure -eq 'Present') {
                 $addXDControllerParams = @{
                     AdminAddress = $using:localHostName;
@@ -135,7 +137,7 @@ function Set-TargetResource {
                 Remove-XDController @removeXDControllerParams -ErrorAction Stop;
             }
         } #end scriptBlock
-        
+
         $localHostName = GetHostName;
         $invokeCommandParams = @{
             ScriptBlock = $scriptBlock;

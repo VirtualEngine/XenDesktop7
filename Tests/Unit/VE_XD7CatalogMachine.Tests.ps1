@@ -19,32 +19,40 @@ InModuleScope $sut {
         $testCredentials = New-Object System.Management.Automation.PSCredential 'DummyUser', (ConvertTo-SecureString 'DummyPassword' -AsPlainText -Force);
 
         Context 'Get-TargetResource' {
-            Mock -CommandName TestXDModule -MockWith { return $true; }
+            Mock -CommandName AssertXDModule -MockWith { };
             Mock -CommandName Add-PSSnapin -MockWith { };
 
             It 'Returns a System.Collections.Hashtable type' {
                 Mock -CommandName Get-BrokerMachine { }
                 Mock -CommandName Invoke-Command -MockWith { & $ScriptBlock; }
+
                 (Get-TargetResource @testMachineCatalog) -is [System.Collections.Hashtable] | Should Be $true;
             }
 
             It 'Invokes script block without credentials by default' {
                 Mock -CommandName Invoke-Command -ParameterFilter { $Credential -eq $null -and $Authentication -eq $null } { }
+
                 Get-TargetResource @testMachineCatalog;
+
                 Assert-MockCalled Invoke-Command -ParameterFilter { $Credential -eq $null -and $Authentication -eq $null } -Exactly 1 -Scope It;
             }
 
             It 'Invokes script block with credentials and CredSSP when specified' {
-                Mock -CommandName Invoke-Command -ParameterFilter { $Credential -eq $testCredentials -and $Authentication -eq 'CredSSP' } { }
                 $testMachineCatalogWithCredentials = $testMachineCatalog.Clone();
                 $testMachineCatalogWithCredentials['Credential'] = $testCredentials;
+                Mock -CommandName Invoke-Command -ParameterFilter { $Credential -eq $testCredentials -and $Authentication -eq 'CredSSP' } { }
+
                 Get-TargetResource @testMachineCatalogWithCredentials;
+
                 Assert-MockCalled Invoke-Command -ParameterFilter { $Credential -eq $testCredentials -and $Authentication -eq 'CredSSP' } -Exactly 1 -Scope It;
             }
-            
-            It 'Throws when Citrix.Broker.Admin.V2 is not registered' {
-                Mock -CommandName TestXDModule -MockWith { return $false; }
-                { Get-TargetResource @testMachineCatalog } | Should Throw;
+
+            It 'Asserts "Citrix.Broker.Admin.V2" snapin is registered' {
+                Mock -CommandName AssertXDModule -MockWith { };
+
+                Get-TargetResource @testMachineCatalog;
+
+                Assert-MockCalled AssertXDModule -Scope It;
             }
 
         } #end context Get-TargetResource
@@ -54,25 +62,28 @@ InModuleScope $sut {
             It 'Returns a System.Boolean type' {
                 Mock -CommandName TestXDMachineMembership -MockWith { return $true; }
                 Mock -CommandName Get-TargetResource -MockWith { return $testMachineCatalog; }
+
                 (Test-TargetResource @testMachineCatalog) -is [System.Boolean] | Should Be $true;
             }
 
             It 'Returns True when catalog membership is correct' {
                 Mock -CommandName TestXDMachineMembership -MockWith { return $true; }
                 Mock -CommandName Get-TargetResource -MockWith { return $testMachineCatalog; }
+
                 Test-TargetResource @testMachineCatalog | Should Be $true;
             }
 
             It 'Returns False when catalog membership is incorrect' {
                 Mock -CommandName TestXDMachineMembership -MockWith { return $false; }
                 Mock -CommandName Get-TargetResource -MockWith { return $testMachineCatalog; }
+
                 Test-TargetResource @testMachineCatalog | Should Be $false;
             }
 
         } #end context Test-TargetResource
 
         Context 'Set-TargetResource' {
-            Mock -CommandName TestXDModule -MockWith { return $true; }
+            Mock -CommandName AssertXDModule -MockWith { };
             Mock -CommandName Import-Module -MockWith { }
             Mock -CommandName Add-PSSnapin -MockWith { };
             Mock -CommandName Get-BrokerCatalog -MockWith { return @{ Name = $testCatalogName; Uid = 1; }; }
@@ -83,7 +94,9 @@ InModuleScope $sut {
                 Mock -CommandName GetXDBrokerMachine -MockWith { return $testMachineCatalogMembers[0]; }
                 Mock -CommandName New-BrokerMachine -MockWith { }
                 Mock -CommandName Invoke-Command -MockWith { & $ScriptBlock }
+
                 Set-TargetResource @testMachineCatalog;
+
                 Assert-MockCalled -CommandName New-BrokerMachine -Exactly 1 -Scope It;
             }
 
@@ -93,7 +106,9 @@ InModuleScope $sut {
                 Mock -CommandName GetXDBrokerMachine -MockWith { return $testMachineCatalogMembers[0]; }
                 Mock -CommandName New-BrokerMachine -MockWith { }
                 Mock -CommandName Invoke-Command -MockWith { & $ScriptBlock }
+
                 Set-TargetResource @testMachineCatalog;
+
                 Assert-MockCalled -CommandName New-BrokerMachine -Exactly 0 -Scope It;
             }
 
@@ -103,7 +118,9 @@ InModuleScope $sut {
                 Mock -CommandName GetXDBrokerMachine -MockWith { return $testMachineCatalogMembers[0]; }
                 Mock -CommandName Remove-BrokerMachine -MockWith { }
                 Mock -CommandName Invoke-Command -MockWith { & $ScriptBlock }
+
                 Set-TargetResource @testMachineCatalogAbsent;
+
                 Assert-MockCalled -CommandName Remove-BrokerMachine -Exactly 1 -Scope It;
             }
 
@@ -113,7 +130,9 @@ InModuleScope $sut {
                 Mock -CommandName GetXDBrokerMachine -MockWith { return $testMachineCatalogMembers[0]; }
                 Mock -CommandName Remove-BrokerMachine -MockWith { }
                 Mock -CommandName Invoke-Command -MockWith { & $ScriptBlock }
+
                 Set-TargetResource @testMachineCatalogAbsent;
+
                 Assert-MockCalled -CommandName Remove-BrokerMachine -Exactly 0 -Scope It;
             }
 
@@ -123,27 +142,36 @@ InModuleScope $sut {
                 Mock -CommandName GetXDBrokerMachine -MockWith { return $testMachineCatalogMembers[0]; }
                 Mock -CommandName Remove-BrokerMachine -MockWith { }
                 Mock -CommandName Invoke-Command -MockWith { & $ScriptBlock }
+
                 Set-TargetResource @testMachineCatalogAbsent;
+
                 Assert-MockCalled -CommandName Remove-BrokerMachine -Exactly 0 -Scope It;
             }
 
             It 'Invokes script block without credentials by default' {
                 Mock -CommandName Invoke-Command -ParameterFilter { $Credential -eq $null -and $Authentication -eq $null } { }
+
                 Set-TargetResource @testMachineCatalog;
+
                 Assert-MockCalled Invoke-Command -ParameterFilter { $Credential -eq $null -and $Authentication -eq $null } -Exactly 1 -Scope It;
             }
 
             It 'Invokes script block with credentials and CredSSP when specified' {
-                Mock -CommandName Invoke-Command -ParameterFilter { $Credential -eq $testCredentials -and $Authentication -eq 'CredSSP' } { }
                 $testMachineCatalogWithCredentials = $testMachineCatalog.Clone();
                 $testMachineCatalogWithCredentials['Credential'] = $testCredentials;
+                Mock -CommandName Invoke-Command -ParameterFilter { $Credential -eq $testCredentials -and $Authentication -eq 'CredSSP' } { }
+
                 Set-TargetResource @testMachineCatalogWithCredentials;
+
                 Assert-MockCalled Invoke-Command -ParameterFilter { $Credential -eq $testCredentials -and $Authentication -eq 'CredSSP' } -Exactly 1 -Scope It;
             }
-            
-            It 'Throws when Citrix.Broker.Admin.V2 is not registered' {
-                Mock -CommandName TestXDModule -MockWith { return $false; }
-                { Set-TargetResource @testMachineCatalog } | Should Throw;
+
+            It 'Asserts "Citrix.Broker.Admin.V2" snapin is registered' {
+                Mock -CommandName AssertXDModule -MockWith { };
+
+                Set-TargetResource @testMachineCatalog;
+
+                Assert-MockCalled AssertXDModule -Scope It;
             }
         }
 

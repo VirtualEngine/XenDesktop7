@@ -12,9 +12,11 @@ function AddInvokeScriptBlockCredentials {
     param (
         [Parameter(Mandatory)]
         [System.Collections.Hashtable] $Hashtable,
-        
+
         [Parameter(Mandatory)]
-        [System.Management.Automation.PSCredential] $Credential
+        [System.Management.Automation.PSCredential]
+        [System.Management.Automation.CredentialAttribute()]
+        $Credential
     )
     process {
         $Hashtable['ComputerName'] = $env:COMPUTERNAME;
@@ -51,7 +53,7 @@ function GetRegistryValue {
         # Registry key name/path to query.
         [Parameter(Mandatory)] [ValidateNotNullOrEmpty()]
         [Alias('Path')] [System.String] $Key,
-        
+
         # Registry value to return.
         [Parameter(Mandatory)] [ValidateNotNullOrEmpty()]
         [System.String] $Name
@@ -78,15 +80,17 @@ function StartWaitProcess {
         # Path to process to start.
         [Parameter(Mandatory)] [ValidateNotNullOrEmpty()]
         [System.String] $FilePath,
-        
+
         # Arguments (if any) to apply to the process.
         [Parameter()] [AllowNull()]
         [System.String[]] $ArgumentList,
-        
+
         # Credential to start the process as.
         [Parameter()] [AllowNull()]
-        [System.Management.Automation.PSCredential] $Credential,
-        
+        [System.Management.Automation.PSCredential]
+        [System.Management.Automation.CredentialAttribute()]
+        $Credential,
+
         # Working directory
         [Parameter()] [ValidateNotNullOrEmpty()]
         [System.String] $WorkingDirectory = (Split-Path -Path $FilePath -Parent)
@@ -132,7 +136,7 @@ function FindXDModule {
     param (
         [Parameter()] [ValidateNotNullOrEmpty()]
         [System.String] $Name = 'Citrix.XenDesktop.Admin',
-        
+
         [Parameter()] [ValidateNotNullOrEmpty()]
         [System.String] $Path = 'C:\Program Files\Citrix\XenDesktopPoshSdk\Module\Citrix.XenDesktop.Admin.V1'
     )
@@ -151,10 +155,10 @@ function TestXDModule {
     param (
         [Parameter()] [ValidateNotNullOrEmpty()]
         [System.String] $Name = 'Citrix.XenDesktop.Admin',
-        
+
         [Parameter()] [ValidateNotNullOrEmpty()]
         [System.String] $Path = 'C:\Program Files\Citrix\XenDesktopPoshSdk\Module\Citrix.XenDesktop.Admin.V1',
-        
+
         [Parameter()]
         [System.Management.Automation.SwitchParameter] $IsSnapin
     )
@@ -182,10 +186,10 @@ function AssertXDModule {
     param (
         [Parameter()] [ValidateNotNullOrEmpty()]
         [System.String[]] $Name,
-        
+
         [Parameter()] [ValidateNotNullOrEmpty()]
         [System.String] $Path = 'C:\Program Files\Citrix\XenDesktopPoshSdk\Module\Citrix.XenDesktop.Admin.V1',
-        
+
         [Parameter()]
         [System.Management.Automation.SwitchParameter] $IsSnapin
     )
@@ -240,7 +244,7 @@ function TestXDMachineIsExistingMember {
     param (
         [Parameter(Mandatory)]
         [System.String] $MachineName,
-        
+
         [Parameter()]
         [System.String[]] $ExistingMembers
     )
@@ -251,7 +255,7 @@ function TestXDMachineIsExistingMember {
     elseif ($MachineName.Contains('\')) {
         $netBIOSName = $MachineName.Split('\')[1];
     }
-            
+
     if ($ExistingMembers -contains $MachineName) {
         return $true;
     }
@@ -271,10 +275,10 @@ function TestXDMachineMembership {
     param (
         [Parameter(Mandatory)]
         [System.String[]] $RequiredMembers,
-        
+
         [Parameter(Mandatory)] [ValidateSet('Present','Absent')]
         [System.String] $Ensure,
-        
+
         [Parameter()]
         [System.String[]] $ExistingMembers
     )
@@ -306,7 +310,7 @@ function ResolveXDBrokerMachine {
     param (
         [Parameter(Mandatory)]
         [System.String] $MachineName,
-        
+
         [Parameter(Mandatory)] [AllowNull()]
         [System.Object[]] $BrokerMachines
     )
@@ -332,7 +336,7 @@ function ThrowInvalidOperationException {
     param(
         [Parameter(Mandatory)]
         [System.String] $ErrorId,
-        
+
         [Parameter(Mandatory)]
         [System.String] $ErrorMessage
     )
@@ -351,7 +355,7 @@ function ThrowInvalidProgramException {
     param(
         [Parameter(Mandatory)]
         [System.String] $ErrorId,
-        
+
         [Parameter(Mandatory)]
         [System.String] $ErrorMessage
     )
@@ -369,7 +373,7 @@ function ThrowOperationCanceledException {
     param(
         [Parameter(Mandatory)]
         [System.String] $ErrorId,
-        
+
         [Parameter(Mandatory)]
         [System.String] $ErrorMessage
     )
@@ -440,7 +444,7 @@ function GetXDInstalledRole {
         }
         $result = $installedProducts -match $filter;
         if ([System.String]::IsNullOrEmpty($result)) {
-            return $false;   
+            return $false;
         }
         else {
             return $result;
@@ -460,7 +464,7 @@ function ResolveXDSetupMedia {
         ## Citrix XenDesktop 7.x role to install/uninstall.
         [Parameter(Mandatory)] [ValidateSet('Controller','Studio','Storefront','Licensing','Director','DesktopVDA','SessionVDA')]
         [System.String] $Role,
-        
+
         ## Citrix XenDesktop 7.x installation media path.
         [Parameter(Mandatory)] [ValidateNotNullOrEmpty()]
         [System.String] $SourcePath

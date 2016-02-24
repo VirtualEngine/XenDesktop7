@@ -7,38 +7,38 @@ function Get-TargetResource {
         # Delivery Group Name
         [Parameter(Mandatory)]
         [System.String] $DeliveryGroup,
-        
+
         # BrokerEntitlementPolicyRule | BrokerAppEntitlementPolicyRule
         [Parameter(Mandatory)] [ValidateSet('Desktop','Application')]
         [System.String] $EntitlementType,
-        
-        [Parameter()] 
+
+        [Parameter()]
         [System.Boolean] $Enabled = $true,
-        
+
         [Parameter()] [AllowNull()]
         [System.String] $Name = $null,
-        
+
         [Parameter()] [AllowNull()]
         [System.String] $Description = $null,
-        
+
         # IncludedUserFilterEnabled/IncludedUsers
         [Parameter()] [ValidateNotNull()]
         [System.String[]] $IncludeUsers = @(),
-        
+
         # ExcludedUserFilterEnabled/ExcludedUsers
         [Parameter()] [ValidateNotNull()]
         [System.String[]] $ExcludeUsers = @(),
-        
+
         [Parameter()] [ValidateSet('Present','Absent')]
         [System.String] $Ensure = 'Present',
-        
+
         [Parameter()] [ValidateNotNull()]
-        [System.Management.Automation.PSCredential] $Credential
+        [System.Management.Automation.PSCredential]
+        [System.Management.Automation.CredentialAttribute()]
+        $Credential
     )
     begin {
-        if (-not (TestXDModule -Name 'Citrix.Broker.Admin.V2' -IsSnapin)) {
-            ThrowInvalidProgramException -ErrorId 'Citrix.Broker.Admin.V2' -ErrorMessage $localizedData.XenDesktopSDKNotFoundError;
-        }
+        AssertXDModule -Name 'Citrix.Broker.Admin.V2' -IsSnapin;
         if ([System.String]::IsNullOrEmpty($Name)) {
             $Name = '{0}_{1}' -f $DeliveryGroup, $EntitlementType;
         }
@@ -95,33 +95,35 @@ function Test-TargetResource {
         # Delivery Group Name
         [Parameter(Mandatory)]
         [System.String] $DeliveryGroup,
-        
+
         # BrokerEntitlementPolicyRule | BrokerAppEntitlementPolicyRule
         [Parameter(Mandatory)] [ValidateSet('Desktop','Application')]
         [System.String] $EntitlementType,
-        
-        [Parameter()] 
+
+        [Parameter()]
         [System.Boolean] $Enabled = $true,
-        
+
         [Parameter()] [AllowNull()]
         [System.String] $Name = $null,
-        
+
         [Parameter()] [AllowNull()]
         [System.String] $Description = $null,
-        
+
         # IncludedUserFilterEnabled/IncludedUsers
         [Parameter()] [ValidateNotNull()]
         [System.String[]] $IncludeUsers = @(),
-        
+
         # ExcludedUserFilterEnabled/ExcludedUsers
         [Parameter()] [ValidateNotNull()]
         [System.String[]] $ExcludeUsers = @(),
-        
+
         [Parameter()] [ValidateSet('Present','Absent')]
         [System.String] $Ensure = 'Present',
-        
+
         [Parameter()] [ValidateNotNull()]
-        [System.Management.Automation.PSCredential] $Credential
+        [System.Management.Automation.PSCredential]
+        [System.Management.Automation.CredentialAttribute()]
+        $Credential
     )
     begin {
         if ([System.String]::IsNullOrEmpty($Name)) {
@@ -166,38 +168,38 @@ function Set-TargetResource {
         # Delivery Group Name
         [Parameter(Mandatory)]
         [System.String] $DeliveryGroup,
-        
+
         # BrokerEntitlementPolicyRule | BrokerAppEntitlementPolicyRule
         [Parameter(Mandatory)] [ValidateSet('Desktop','Application')]
         [System.String] $EntitlementType,
-        
-        [Parameter()] 
+
+        [Parameter()]
         [System.Boolean] $Enabled = $true,
-        
+
         [Parameter()] [AllowNull()]
         [System.String] $Name = $null,
-        
+
         [Parameter()] [AllowNull()]
         [System.String] $Description = $null,
-        
+
         # IncludedUserFilterEnabled/IncludedUsers
         [Parameter()] [ValidateNotNull()]
         [System.String[]] $IncludeUsers = @(),
-        
+
         # ExcludedUserFilterEnabled/ExcludedUsers
         [Parameter()] [ValidateNotNull()]
         [System.String[]] $ExcludeUsers = @(),
-        
+
         [Parameter()] [ValidateSet('Present','Absent')]
         [System.String] $Ensure = 'Present',
-        
+
         [Parameter()] [ValidateNotNull()]
-        [System.Management.Automation.PSCredential] $Credential
+        [System.Management.Automation.PSCredential]
+        [System.Management.Automation.CredentialAttribute()]
+        $Credential
     )
     begin {
-        if (-not (TestXDModule -Name 'Citrix.Broker.Admin.V2' -IsSnapin)) {
-            ThrowInvalidProgramException -ErrorId 'Citrix.Broker.Admin.V2' -ErrorMessage $localizedData.XenDesktopSDKNotFoundError;
-        }
+        AssertXDModule -Name 'Citrix.Broker.Admin.V2' -IsSnapin;
         if ([System.String]::IsNullOrEmpty($Name)) {
             $Name = '{0}_{1}' -f $DeliveryGroup, $EntitlementType;
         }
@@ -212,7 +214,7 @@ function Set-TargetResource {
             elseif ($using:EntitlementType -eq 'Application') {
                 $entitlementPolicy = Get-AppBrokerEntitlementPolicyRule -Name $using:Name -DesktopGroupUid $desktopGroup.Uid -ErrorAction SilentlyContinue;
             }
-            
+
             if ($using:Ensure -eq 'Present') {
                 $entitlementPolicyParams = @{
                     Enabled = $using:Enabled;
@@ -244,7 +246,7 @@ function Set-TargetResource {
                         $entitlementPolicyParams['ExcludedUsers'] += $brokerUser;
                     }
                 }
-                                
+
                 if ($entitlementPolicy) {
                     if ($using:EntitlementType -eq 'Desktop') {
                         Write-Verbose ($using:localizedData.UpdatingDesktopEntitlementPolicy -f $using:Name);

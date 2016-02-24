@@ -6,13 +6,15 @@ function Get-TargetResource {
     param (
         [Parameter(Mandatory)] [ValidateSet('Controller','Studio','Storefront','Licensing','Director')]
         [System.String] $Role,
-        
+
         [Parameter(Mandatory)] [ValidateNotNullOrEmpty()]
         [System.String] $SourcePath,
-        
+
         [Parameter()] [AllowNull()]
-        [System.Management.Automation.PSCredential] $Credential,
-        
+        [System.Management.Automation.PSCredential]
+        [System.Management.Automation.CredentialAttribute()]
+        $Credential,
+
         [Parameter()] [ValidateSet('Present','Absent')]
         [System.String] $Ensure = 'Present'
     )
@@ -25,7 +27,7 @@ function Get-TargetResource {
         }
         if (TestXDInstalledRole -Role $Role) {
             $targetResource['Ensure'] = 'Present';
-        }       
+        }
         return $targetResource;
     } #end process
 } #end function Get-TargetResource
@@ -36,16 +38,18 @@ function Test-TargetResource {
     param (
         [Parameter(Mandatory)] [ValidateSet('Controller','Studio','Storefront','Licensing','Director')]
         [System.String] $Role,
-        
+
         [Parameter(Mandatory)] [ValidateNotNullOrEmpty()]
         [System.String] $SourcePath,
-        
+
         [Parameter()] [AllowNull()]
-        [System.Management.Automation.PSCredential] $Credential,
-        
+        [System.Management.Automation.PSCredential]
+        [System.Management.Automation.CredentialAttribute()]
+        $Credential,
+
         [Parameter()] [ValidateSet('Present','Absent')]
         [System.String] $Ensure = 'Present',
-        
+
         [Parameter()] [ValidateNotNullOrEmpty()]
         [System.String] $LogPath = (Join-Path -Path $env:TMP -ChildPath '\Citrix\XenDesktop Installer')
     )
@@ -67,16 +71,18 @@ function Set-TargetResource {
     param (
         [Parameter(Mandatory)] [ValidateSet('Controller','Studio','Storefront','Licensing','Director')]
         [System.String] $Role,
-        
+
         [Parameter(Mandatory)] [ValidateNotNullOrEmpty()]
         [System.String] $SourcePath,
-        
+
         [Parameter()] [AllowNull()]
-        [System.Management.Automation.PSCredential] $Credential,
-        
+        [System.Management.Automation.PSCredential]
+        [System.Management.Automation.CredentialAttribute()]
+        $Credential,
+
         [Parameter()] [ValidateSet('Present','Absent')]
         [System.String] $Ensure = 'Present',
-        
+
         [Parameter()] [ValidateNotNullOrEmpty()]
         [System.String] $LogPath = (Join-Path -Path $env:TMP -ChildPath '\Citrix\XenDesktop Installer')
     )
@@ -119,11 +125,11 @@ function ResolveXDServerSetupArguments {
         ## Citrix XenDesktop 7.x role to install/uninstall.
         [Parameter(Mandatory)] [ValidateSet('Controller','Studio','Storefront','Licensing','Director')]
         [System.String] $Role,
-        
+
         ## Citrix XenDesktop 7.x installation media path.
         [Parameter()] [ValidateNotNullOrEmpty()]
         [System.String] $LogPath = (Join-Path -Path $env:TMP -ChildPath '\Citrix\XenDesktop Installer'),
-        
+
         ## Uninstall Citrix XenDesktop 7.x product.
         [Parameter()]
         [System.Management.Automation.SwitchParameter] $Uninstall
@@ -149,7 +155,7 @@ function ResolveXDServerSetupArguments {
                 [ref] $null = $arguments.Add('DESKTOPDIRECTOR');
             }
         } #end switch Role
-        
+
         if ($Uninstall) {
             [ref] $null = $arguments.Add('/REMOVE');
         }

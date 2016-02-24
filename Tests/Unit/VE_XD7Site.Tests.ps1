@@ -27,17 +27,21 @@ InModuleScope $sut {
         $testCredentials = New-Object System.Management.Automation.PSCredential 'DummyUser', (ConvertTo-SecureString 'DummyPassword' -AsPlainText -Force);
 
         Context 'Get-TargetResource' {
-            Mock -CommandName TestXDModule -MockWith { return $true; }
+            Mock -CommandName AssertXDModule -MockWith { };
             Mock -CommandName Import-Module { };
 
             It 'Returns a System.Collections.Hashtable type' {
                 Mock -CommandName Get-XDSite -MockWith { return $stubSite; }
-                (Get-TargetResource @testSite) -is [System.Collections.Hashtable] | Should Be $true;
+
+                $targetResource = Get-TargetResource @testSite;
+                $targetResource -is [System.Collections.Hashtable] | Should Be $true;
             }
 
             It 'Invokes script block without credentials by default' {
                 Mock -CommandName Invoke-Command -ParameterFilter { $Credential -eq $null -and $Authentication -eq $null } { }
-                Get-TargetResource @testSite;
+
+                $targetResource = Get-TargetResource @testSite;
+
                 Assert-MockCalled Invoke-Command -ParameterFilter { $Credential -eq $null -and $Authentication -eq $null } -Exactly 1 -Scope It;
             }
 
@@ -45,13 +49,18 @@ InModuleScope $sut {
                 Mock -CommandName Invoke-Command -ParameterFilter { $Credential -eq $testCredentials -and $Authentication -eq 'CredSSP' } { }
                 $testSiteWithCredentials = $testSite.Clone();
                 $testSiteWithCredentials['Credential'] = $testCredentials;
-                Get-TargetResource @testSiteWithCredentials;
+
+                $targetResource = Get-TargetResource @testSiteWithCredentials;
+
                 Assert-MockCalled Invoke-Command -ParameterFilter { $Credential -eq $testCredentials -and $Authentication -eq 'CredSSP' } -Exactly 1 -Scope It;
             }
-            
-            It 'Throws when Citrix.XenDesktop.Admin is not registered' {
-                Mock -CommandName TestXDModule -MockWith { return $false; }
-                { Get-TargetResource @testSite } | Should Throw;
+
+            It 'Asserts "Citrix.XenDesktop.Admin" module is registered' {
+                Mock AssertXDModule -ParameterFilter { $Name -eq 'Citrix.XenDesktop.Admin' } -MockWith { }
+
+                $targetResource = Get-TargetResource @testSite;
+
+                Assert-MockCalled AssertXDModule -ParameterFilter { $Name -eq 'Citrix.XenDesktop.Admin' } -Scope It;
             }
 
         } #end context Get-TargetResource
@@ -62,10 +71,11 @@ InModuleScope $sut {
             It 'Returns True when all properties match' {
                 Test-TargetResource @testSite | Should Be $true;
             }
-            
+
             It 'Returns False when "SiteName" is incorrect' {
                 $testSiteCustom = $testSite.Clone();
                 $testSiteCustom['SiteName'] = 'Custom';
+
                 Test-TargetResource @testSiteCustom | Should Be $false;
             }
 
@@ -80,31 +90,36 @@ InModuleScope $sut {
             It 'Returns False when "SiteDatabaseName" is incorrect' {
                 $testSiteCustom = $testSite.Clone();
                 $testSiteCustom['SiteDatabaseName'] = 'Custom';
+
                 Test-TargetResource @testSiteCustom | Should Be $false;
             }
 
             It 'Returns False when "LoggingDatabaseName" is incorrect' {
                 $testSiteCustom = $testSite.Clone();
                 $testSiteCustom['LoggingDatabaseName'] = 'Custom';
+
                 Test-TargetResource @testSiteCustom | Should Be $false;
             }
 
             It 'Returns False when "MonitorDatabaseName" is incorrect' {
                 $testSiteCustom = $testSite.Clone();
                 $testSiteCustom['MonitorDatabaseName'] = 'Custom';
+
                 Test-TargetResource @testSiteCustom | Should Be $false;
             }
 
         } #end context Test-TargetResource
 
         Context 'Set-TargetResource' {
-            Mock -CommandName TestXDModule -MockWith { return $true; }
+            Mock -CommandName AssertXDModule -MockWith { };
             Mock -CommandName Import-Module { };
 
-            
+
             It 'Invokes script block without credentials by default' {
                 Mock -CommandName Invoke-Command -ParameterFilter { $Credential -eq $null -and $Authentication -eq $null } { }
-                Get-TargetResource @testSite;
+
+                Set-TargetResource @testSite;
+
                 Assert-MockCalled Invoke-Command -ParameterFilter { $Credential -eq $null -and $Authentication -eq $null } -Exactly 1 -Scope It;
             }
 
@@ -112,13 +127,18 @@ InModuleScope $sut {
                 Mock -CommandName Invoke-Command -ParameterFilter { $Credential -eq $testCredentials -and $Authentication -eq 'CredSSP' } { }
                 $testSiteWithCredentials = $testSite.Clone();
                 $testSiteWithCredentials['Credential'] = $testCredentials;
-                Get-TargetResource @testSiteWithCredentials;
+
+                Set-TargetResource @testSiteWithCredentials;
+
                 Assert-MockCalled Invoke-Command -ParameterFilter { $Credential -eq $testCredentials -and $Authentication -eq 'CredSSP' } -Exactly 1 -Scope It;
             }
-            
-            It 'Throws when Citrix.XenDesktop.Admin is not registered' {
-                Mock -CommandName TestXDModule -MockWith { return $false; }
-                { Get-TargetResource @testSite } | Should Throw;
+
+            It 'Asserts "Citrix.XenDesktop.Admin" module is registered' {
+                Mock AssertXDModule -ParameterFilter { $Name -eq 'Citrix.XenDesktop.Admin' } -MockWith { }
+
+                Set-TargetResource @testSite;
+
+                Assert-MockCalled AssertXDModule -ParameterFilter { $Name -eq 'Citrix.XenDesktop.Admin' } -Scope It;
             }
 
         } #end Set-TargetResource

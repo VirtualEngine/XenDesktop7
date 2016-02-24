@@ -6,20 +6,20 @@ function Get-TargetResource {
     param (
         [Parameter(Mandatory)] [ValidateNotNullOrEmpty()]
         [System.String] $Name,
-        
+
         [Parameter(Mandatory)] [ValidateNotNullOrEmpty()]
         [System.String[]] $Members,
-        
+
         [Parameter()] [AllowNull()]
-        [System.Management.Automation.PSCredential] $Credential,
-        
+        [System.Management.Automation.PSCredential]
+        [System.Management.Automation.CredentialAttribute()]
+        $Credential,
+
         [Parameter()] [ValidateSet('Present','Absent')]
         [System.String] $Ensure = 'Present'
     )
     begin {
-        if (-not (TestXDModule -Name 'Citrix.Broker.Admin.V2' -IsSnapin)) {
-            ThrowInvalidProgramException -ErrorId 'Citrix.Broker.Admin.V2' -ErrorMessage $localizedData.XenDesktopSDKNotFoundError;
-        }
+        AssertXDModule -Name 'Citrix.Broker.Admin.V2' -IsSnapin;
     } #end begin
     process {
         $scriptBlock = {
@@ -35,7 +35,7 @@ function Get-TargetResource {
             }
             return $targetResource;
         } #end scriptBlock
-        
+
         $invokeCommandParams = @{
             ScriptBlock = $scriptBlock;
             ErrorAction = 'Stop';
@@ -57,13 +57,15 @@ function Test-TargetResource {
     param (
         [Parameter(Mandatory)] [ValidateNotNullOrEmpty()]
         [System.String] $Name,
-        
+
         [Parameter(Mandatory)] [ValidateNotNullOrEmpty()]
         [System.String[]] $Members,
-        
+
         [Parameter()] [AllowNull()]
-        [System.Management.Automation.PSCredential] $Credential,
-        
+        [System.Management.Automation.PSCredential]
+        [System.Management.Automation.CredentialAttribute()]
+        $Credential,
+
         [Parameter()] [ValidateSet('Present','Absent')]
         [System.String] $Ensure = 'Present'
     )
@@ -85,20 +87,20 @@ function Set-TargetResource {
     param (
         [Parameter(Mandatory)] [ValidateNotNullOrEmpty()]
         [System.String] $Name,
-        
+
         [Parameter(Mandatory)] [ValidateNotNullOrEmpty()]
         [System.String[]] $Members,
-        
+
         [Parameter()] [AllowNull()]
-        [System.Management.Automation.PSCredential] $Credential,
-        
+        [System.Management.Automation.PSCredential]
+        [System.Management.Automation.CredentialAttribute()]
+        $Credential,
+
         [Parameter()] [ValidateSet('Present','Absent')]
         [System.String] $Ensure = 'Present'
     )
     begin {
-        if (-not (TestXDModule -Name 'Citrix.Broker.Admin.V2' -IsSnapin)) {
-            ThrowInvalidProgramException -ErrorId 'Citrix.Broker.Admin.V2' -ErrorMessage $localizedData.XenDesktopSDKNotFoundError;
-        }
+        AssertXDModule -Name 'Citrix.Broker.Admin.V2' -IsSnapin;
     }
     process {
         $scriptBlock = {

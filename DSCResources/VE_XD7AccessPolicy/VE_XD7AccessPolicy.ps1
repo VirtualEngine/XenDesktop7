@@ -7,45 +7,45 @@ function Get-TargetResource {
          # Delivery Group Name
         [Parameter(Mandatory)]
         [System.String] $DeliveryGroup,
-        
+
         # NotViaAG | ViaAG
         [Parameter(Mandatory)] [ValidateSet('AccessGateway','Direct')]
         [System.String] $AccessType,
-        
+
         [Parameter()]
         [System.Boolean] $Enabled = $true,
-        
+
         [Parameter()]
         [System.Boolean] $AllowRestart = $true,
-        
+
         [Parameter()] [ValidateSet('HDX','RDP')]
         [System.String[]] $Protocol = @('HDX','RDP'),
-        
+
         # Name example: <DeliveryGroupName>_Direct or <DeliveryGroupName>_AG
         [Parameter()]
-        [System.String] $Name, 
-        
+        [System.String] $Name,
+
         [Parameter()] [AllowNull()]
         [System.String] $Description = $null,
-        
+
         # IncludedUsersFilterEnabled/IncludedUsers
         [Parameter()] [ValidateNotNull()]
-        [System.String[]] $IncludeUsers = @(), 
-        
+        [System.String[]] $IncludeUsers = @(),
+
         # ExcludedUserFilterEnabled/ExcludedUsers
         [Parameter()] [ValidateNotNull()]
-        [System.String[]] $ExcludeUsers = @(), 
-        
+        [System.String[]] $ExcludeUsers = @(),
+
         [Parameter()] [ValidateSet('Present','Absent')]
         [System.String] $Ensure = 'Present',
-        
+
         [Parameter()] [ValidateNotNull()]
-        [System.Management.Automation.PSCredential] $Credential
+        [System.Management.Automation.PSCredential]
+        [System.Management.Automation.CredentialAttribute()]
+        $Credential
     )
     begin {
-        if (-not (TestXDModule -Name 'Citrix.Broker.Admin.V2' -IsSnapin)) {
-            ThrowInvalidProgramException -ErrorId 'Citrix.Broker.Admin.V2' -ErrorMessage $localizedData.XenDesktopSDKNotFoundError;
-        }
+        AssertXDModule -Name 'Citrix.Broker.Admin.V2' -IsSnapin;
         if ([System.String]::IsNullOrEmpty($Name)) {
             $Name = '{0}_Direct' -f $DeliveryGroup;
             if ($AccessType -eq 'AccessGateway') {
@@ -103,41 +103,43 @@ function Test-TargetResource {
     param (
         # Delivery Group Name
         [Parameter(Mandatory)]
-        [System.String] $DeliveryGroup, 
-        
+        [System.String] $DeliveryGroup,
+
         # NotViaAG | ViaAG
         [Parameter(Mandatory)] [ValidateSet('AccessGateway','Direct')]
-        [System.String] $AccessType, 
-        
+        [System.String] $AccessType,
+
         [Parameter()]
         [System.Boolean] $Enabled = $true,
-        
+
         [Parameter()]
         [System.Boolean] $AllowRestart = $true,
-        
+
         [Parameter()] [ValidateSet('HDX','RDP')] [System.String[]]
         $Protocol = @('HDX','RDP'),
-        
+
         # Name example: <DeliveryGroupName>_Direct or <DeliveryGroupName>_AG
         [Parameter()]
-        [System.String] $Name, 
+        [System.String] $Name,
 
         [Parameter()] [AllowNull()]
         [System.String] $Description = $null,
-        
+
         # IncludedUsersFilterEnabled/IncludedUsers
         [Parameter()] [ValidateNotNull()]
-        [System.String[]] $IncludeUsers = @(), 
-        
+        [System.String[]] $IncludeUsers = @(),
+
         # ExcludedUserFilterEnabled/ExcludedUsers
         [Parameter()] [ValidateNotNull()]
-        [System.String[]] $ExcludeUsers = @(), 
-        
+        [System.String[]] $ExcludeUsers = @(),
+
         [Parameter()] [ValidateSet('Present','Absent')]
         [System.String] $Ensure = 'Present',
-        
+
         [Parameter()] [ValidateNotNull()]
-        [System.Management.Automation.PSCredential] $Credential
+        [System.Management.Automation.PSCredential]
+        [System.Management.Automation.CredentialAttribute()]
+        $Credential
     )
     begin {
         if ([System.String]::IsNullOrEmpty($Name)) {
@@ -190,46 +192,46 @@ function Set-TargetResource {
     param (
         # Delivery Group Name
         [Parameter(Mandatory)]
-        [System.String] $DeliveryGroup, 
-        
+        [System.String] $DeliveryGroup,
+
         # NotViaAG | ViaAG
         [Parameter(Mandatory)] [ValidateSet('AccessGateway','Direct')]
-        [System.String] $AccessType, 
-        
+        [System.String] $AccessType,
+
         [Parameter()]
         [System.Boolean] $Enabled = $true,
-        
+
         [Parameter()]
         [System.Boolean] $AllowRestart = $true,
-        
+
         [Parameter()] [ValidateSet('HDX','RDP')] [System.String[]]
         $Protocol = @('HDX','RDP'),
-        
+
         # Name example: <DeliveryGroupName>_Direct or <DeliveryGroupName>_AG
         [Parameter()]
-        [System.String] $Name, 
+        [System.String] $Name,
 
         [Parameter()] [AllowNull()]
         [System.String] $Description = $null,
-        
+
         # IncludedUsersFilterEnabled/IncludedUsers
         [Parameter()] [ValidateNotNull()]
-        [System.String[]] $IncludeUsers = @(), 
-        
+        [System.String[]] $IncludeUsers = @(),
+
         # ExcludedUserFilterEnabled/ExcludedUsers
         [Parameter()] [ValidateNotNull()]
-        [System.String[]] $ExcludeUsers = @(), 
-        
+        [System.String[]] $ExcludeUsers = @(),
+
         [Parameter()] [ValidateSet('Present','Absent')]
         [System.String] $Ensure = 'Present',
-        
+
         [Parameter()] [ValidateNotNull()]
-        [System.Management.Automation.PSCredential] $Credential
+        [System.Management.Automation.PSCredential]
+        [System.Management.Automation.CredentialAttribute()]
+        $Credential
     )
     begin {
-        if (-not (TestXDModule -Name 'Citrix.Broker.Admin.V2' -IsSnapin)) {
-            ThrowInvalidProgramException -ErrorId 'Citrix.Broker.Admin.V2' -ErrorMessage $localizedData.XenDesktopSDKNotFoundError;
-        }
+        AssertXDModule -Name 'Citrix.Broker.Admin.V2' -IsSnapin;
         if ([System.String]::IsNullOrEmpty($Name)) {
             $Name = '{0}_Direct' -f $DeliveryGroup;
             if ($AccessType -eq 'AccessGateway') { $Name = '{0}_AG' -f $DeliveryGroup; }
@@ -240,7 +242,7 @@ function Set-TargetResource {
             Add-PSSnapin -Name 'Citrix.Broker.Admin.V2' -ErrorAction Stop;
             $desktopGroup = Get-BrokerDesktopGroup -Name $using:DeliveryGroup -ErrorAction Stop;
             $desktopGroupAccessPolicy = Get-BrokerAccessPolicyRule -Name $using:Name -DesktopGroupUid $desktopGroup.Uid -ErrorAction SilentlyContinue;
-            
+
             if ($using:Ensure -eq 'Present') {
                 if ($using:AccessType -eq 'AccessGateway') { $allowedConnections = 'ViaAG'; }
                 else { $allowedConnections = 'NotViaAG'; }
@@ -275,7 +277,7 @@ function Set-TargetResource {
                         $accessPolicyParams['ExcludedUsers'] += $brokerUser;
                     }
                 }
-                                
+
                 if ($desktopGroupAccessPolicy) {
                     ## Can't change name or delivery group
                     if ($desktopGroup.Uid -ne $desktopGroupAccessPolicy.DesktopGroupUid) {

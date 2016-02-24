@@ -16,7 +16,7 @@ InModuleScope $sut {
         $testScopeName = 'All';
         $testScopeNameCustom = 'Custom Scope';
         $testRoleMembers = @('TEST\USER1','TEST\USER 2');
-        
+
         $testRole = @{ Name = $testRoleName; Members = $testRoleMembers; };
         $testRoleCustomRole = @{ Name = $testRoleNameCustom; Members = $testRoleMembers; };
         $testScopeCustom = @{ Name = $testRoleName; Members = $testRoleMembers; RoleScope = $roleScopeNameCustom };
@@ -34,35 +34,38 @@ InModuleScope $sut {
                         ForEach { $_.Name }; #>
 
         Context 'Get-TargetResource' {
-            Mock -CommandName TestXDModule -MockWith { return $true; }
+            Mock -CommandName AssertXDModule -MockWith { }
             Mock -CommandName Add-PSSnapin -MockWith { }
 
             It 'Returns a System.Collections.Hashtable type' {
                 Mock -CommandName Get-AdminAdministrator { return $stubAdmins; }
-                (Get-TargetResource @testRole) -is [System.Collections.Hashtable] | Should Be $true;
+                $targetResource = Get-TargetResource @testRole;
+                $targetResource -is [System.Collections.Hashtable] | Should Be $true;
             }
 
             <#
                 Can't appear to mock the Get-AdminAdministrator | Select-Object -Property Name ...
                     The property cannot be processed because the property "Name" already exists.
                     at line: 4 in [nothing here?]
-            
+
             It 'Returns two "Test Role" administrators' {
                 Mock -CommandName Get-AdminAdministrator { return $stubAdmins; }
                 Mock -CommandName Invoke-Command -MockWith { & $ScriptBlock; }
                 (Get-TargetResource @testRole).Count | Should Be 2;
             }
-            
+
             It 'Returns two "All Scope" administrators' {
                 Mock -CommandName Get-AdminAdministrator { return $stubAdmins; }
                 Mock -CommandName Invoke-Command -MockWith { & $ScriptBlock; }
                 (Get-TargetResource @testRole).Count | Should Be 2;
             }
-            #>            
+            #>
 
             It 'Invokes script block without credentials by default' {
                 Mock -CommandName Invoke-Command -ParameterFilter { $Credential -eq $null -and $Authentication -eq $null } { }
-                Get-TargetResource @testRole;
+
+                $targetResource = Get-TargetResource @testRole;
+
                 Assert-MockCalled Invoke-Command -ParameterFilter { $Credential -eq $null -and $Authentication -eq $null } -Exactly 1 -Scope It;
             }
 
@@ -70,14 +73,20 @@ InModuleScope $sut {
                 Mock -CommandName Invoke-Command -ParameterFilter { $Credential -eq $testCredentials -and $Authentication -eq 'CredSSP' } { }
                 $testRoleWithCredentials = $testRole.Clone();
                 $testRoleWithCredentials['Credential'] = $testCredentials;
-                Get-TargetResource @testRoleWithCredentials;
+
+                $targetResource = Get-TargetResource @testRoleWithCredentials;
+
                 Assert-MockCalled Invoke-Command -ParameterFilter { $Credential -eq $testCredentials -and $Authentication -eq 'CredSSP' } -Exactly 1 -Scope It;
             }
 
-            It 'Throws when Citrix.DelegatedAdmin.Admin.V1 is not registered' {
-                Mock -CommandName TestXDModule -MockWith { return $false; }
-                { Get-TargetResource @testRole } | Should Throw;
+            It 'Asserts "Citrix.DelegatedAdmin.Admin.V1" module is registered' {
+                Mock AssertXDModule -ParameterFilter { $Name -eq 'Citrix.DelegatedAdmin.Admin.V1' } -MockWith { }
+
+                $targetResource = Get-TargetResource @testRole;
+
+                Assert-MockCalled AssertXDModule -ParameterFilter { $Name -eq 'Citrix.DelegatedAdmin.Admin.V1' } -Scope It;
             }
+
         } #end context Get-TargetResource
 
         Context 'Test-TargetResource' {
@@ -92,6 +101,7 @@ InModuleScope $sut {
                 $getTargetResource = @{ Name = 'Test Role'; Members = @('TEST\USER1','TEST\group 2','test\user2'); Ensure = 'Present'; };
                 $testTargetResource = @{ Name = 'Test Role'; Members = @('TEST\user1','test\USER2','test\group 2'); };
                 Mock -CommandName Get-TargetResource -MockWith { return $getTargetResource; }
+
                 Test-TargetResource @testTargetResource -Ensure Present | Should Be $true;
             }
 
@@ -99,6 +109,7 @@ InModuleScope $sut {
                 $getTargetResource = @{ Name = 'Test Role'; Members = @(); Ensure = 'Absent'; };
                 $testTargetResource = @{ Name = 'Test Role'; Members = @('TEST\user1','test\USER2','test\group 2'); };
                 Mock -CommandName Get-TargetResource -MockWith { return $getTargetResource; }
+
                 Test-TargetResource @testTargetResource -Ensure Absent | Should Be $true;
             }
 
@@ -106,6 +117,7 @@ InModuleScope $sut {
                 $getTargetResource = @{ Name = 'Test Role'; Members = @('TEST\group 2'); Ensure = 'Present'; };
                 $testTargetResource = @{ Name = 'Test Role'; Members = @('TEST\user1','test\USER2','test\group 2'); };
                 Mock -CommandName Get-TargetResource -MockWith { return $getTargetResource; }
+
                 Test-TargetResource @testTargetResource -Ensure Present | Should Be $false;
             }
 
@@ -113,6 +125,7 @@ InModuleScope $sut {
                 $getTargetResource = @{ Name = 'Test Role'; Members = @('TEST\USER1','TEST\group 2','test\user2'); Ensure = 'Present'; };
                 $testTargetResource = @{ Name = 'Test Role'; Members = @('user1','USER2','group 2'); };
                 Mock -CommandName Get-TargetResource -MockWith { return $getTargetResource; }
+
                 Test-TargetResource @testTargetResource -Ensure Present -WarningAction SilentlyContinue | Should Be $true;
             }
 
@@ -120,6 +133,7 @@ InModuleScope $sut {
                 $getTargetResource = @{ Name = 'Test Role'; Members = @(); Ensure = 'Absent'; };
                 $testTargetResource = @{ Name = 'Test Role'; Members = @('user1','USER2','group 2'); };
                 Mock -CommandName Get-TargetResource -MockWith { return $getTargetResource; }
+
                 Test-TargetResource @testTargetResource -Ensure Absent | Should Be $true;
             }
 
@@ -127,6 +141,7 @@ InModuleScope $sut {
                 $getTargetResource = @{ Name = 'Test Role'; Members = @('TEST\group 2'); Ensure = 'Present'; };
                 $testTargetResource = @{ Name = 'Test Role'; Members = @('user1','USER2','group 2'); };
                 Mock -CommandName Get-TargetResource -MockWith { return $getTargetResource; }
+
                 Test-TargetResource @testTargetResource -Ensure Present -WarningAction SilentlyContinue | Should Be $false;
             }
 
@@ -134,6 +149,7 @@ InModuleScope $sut {
                 $getTargetResource = @{ Name = 'Test Role'; Members = @('TEST\USER4','TEST\group 5','test\user6'); Ensure = 'Absent'; };
                 $testTargetResource = @{ Name = 'Test Role'; Members = @('TEST\user1','test\USER2','test\group 2'); };
                 Mock -CommandName Get-TargetResource -MockWith { return $getTargetResource; }
+
                 Test-TargetResource @testTargetResource -Ensure Absent | Should Be $true;
             }
 
@@ -141,6 +157,7 @@ InModuleScope $sut {
                 $getTargetResource = @{ Name = 'Test Role'; Members = @(); Ensure = 'Absent'; };
                 $testTargetResource = @{ Name = 'Test Role'; Members = @('TEST\user1','test\USER2','test\group 2'); };
                 Mock -CommandName Get-TargetResource -MockWith { return $getTargetResource; }
+
                 Test-TargetResource @testTargetResource -Ensure Absent | Should Be $true;
             }
 
@@ -148,6 +165,7 @@ InModuleScope $sut {
                 $getTargetResource = @{ Name = 'Test Role'; Members = @('TEST\group 2'); Ensure = 'Absent'; };
                 $testTargetResource = @{ Name = 'Test Role'; Members = @('TEST\user1','test\USER2','test\group 2'); };
                 Mock -CommandName Get-TargetResource -MockWith { return $getTargetResource; }
+
                 Test-TargetResource @testTargetResource -Ensure Absent | Should Be $false;
             }
 
@@ -155,6 +173,7 @@ InModuleScope $sut {
                 $getTargetResource = @{ Name = 'Test Role'; Members = @('TEST\USER4','TEST\group 5','test\user6'); Ensure = 'Absent'; };
                 $testTargetResource = @{ Name = 'Test Role'; Members = @('user1','USER2','group 2'); };
                 Mock -CommandName Get-TargetResource -MockWith { return $getTargetResource; }
+
                 Test-TargetResource @testTargetResource -Ensure Absent -WarningAction SilentlyContinue | Should Be $true;
             }
 
@@ -162,6 +181,7 @@ InModuleScope $sut {
                 $getTargetResource = @{ Name = 'Test Role'; Members = @(); Ensure = 'Absent'; };
                 $testTargetResource = @{ Name = 'Test Role'; Members = @('user1','USER2','group 2'); };
                 Mock -CommandName Get-TargetResource -MockWith { return $getTargetResource; }
+
                 Test-TargetResource @testTargetResource -Ensure Absent | Should Be $true;
             }
 
@@ -169,19 +189,22 @@ InModuleScope $sut {
                 $getTargetResource = @{ Name = 'Test Role'; Members = @('TEST\group 2'); Ensure = 'Absent'; };
                 $testTargetResource = @{ Name = 'Test Role'; Members = @('user1','USER2','group 2'); };
                 Mock -CommandName Get-TargetResource -MockWith { return $getTargetResource; }
+
                 Test-TargetResource @testTargetResource -Ensure Absent -WarningAction SilentlyContinue | Should Be $false;
             }
 
         } #end context Test-TargetResource
 
         Context 'Set-TargetResource' {
-            Mock -CommandName TestXDModule -MockWith { return $true; }
+            Mock -CommandName AssertXDModule -MockWith { }
             Mock -CommandName Add-PSSnapin -MockWith { }
 
             It 'Calls "Add-AdminRight" once per administrator when "Ensure" = "Present"' {
                 Mock -CommandName Invoke-Command -MockWith { & $ScriptBlock; }
                 Mock -CommandName Add-AdminRight -MockWith { }
+
                 Set-TargetResource @testRole;
+
                 Assert-MockCalled -CommandName Add-AdminRight -Exactly $testRole.Members.Count -Scope It;
             }
 
@@ -189,13 +212,17 @@ InModuleScope $sut {
                 Mock -CommandName Invoke-Command -MockWith { & $ScriptBlock; }
                 Mock -CommandName Get-AdminAdministrator -MockWith { return [PSCustomObject] @{ Rights = @{ RoleName = $testRoleName; ScopeName = $testScopeName; } } }
                 Mock -CommandName Remove-AdminRight -MockWith { }
+
                 Set-TargetResource @testRole -Ensure Absent;
+
                 Assert-MockCalled -CommandName Remove-AdminRight -Exactly $testRole.Members.Count -Scope It;
             }
 
             It 'Invokes script block without credentials by default' {
                 Mock -CommandName Invoke-Command -ParameterFilter { $Credential -eq $null -and $Authentication -eq $null } { }
+
                 Set-TargetResource @testRole;
+
                 Assert-MockCalled Invoke-Command -ParameterFilter { $Credential -eq $null -and $Authentication -eq $null } -Exactly 1 -Scope It;
             }
 
@@ -203,13 +230,18 @@ InModuleScope $sut {
                 Mock -CommandName Invoke-Command -ParameterFilter { $Credential -eq $testCredentials -and $Authentication -eq 'CredSSP' } { }
                 $testRoleWithCredentials = $testRole.Clone();
                 $testRoleWithCredentials['Credential'] = $testCredentials;
+
                 Set-TargetResource @testRoleWithCredentials;
+
                 Assert-MockCalled Invoke-Command -ParameterFilter { $Credential -eq $testCredentials -and $Authentication -eq 'CredSSP' } -Exactly 1 -Scope It;
             }
 
-            It 'Throws when Citrix.DelegatedAdmin.Admin.V1 is not registered' {
-                Mock -CommandName TestXDModule -MockWith { return $false; }
-                { Get-TargetResource @testRole } | Should Throw;
+            It 'Asserts "Citrix.DelegatedAdmin.Admin.V1" module is registered' {
+                Mock AssertXDModule -ParameterFilter { $Name -eq 'Citrix.DelegatedAdmin.Admin.V1' } -MockWith { }
+
+                Set-TargetResource @testRole;
+
+                Assert-MockCalled AssertXDModule -ParameterFilter { $Name -eq 'Citrix.DelegatedAdmin.Admin.V1' } -Scope It;
             }
 
         } #end context Set-TargetResource

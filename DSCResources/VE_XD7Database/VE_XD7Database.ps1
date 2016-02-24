@@ -6,18 +6,20 @@ function Get-TargetResource {
     param (
         [Parameter(Mandatory)] [ValidateNotNullOrEmpty()]
         [System.String] $SiteName,
-        
+
         [Parameter(Mandatory)] [ValidateSet('Site','Logging','Monitor')]
         [System.String] $DataStore,
-        
+
         [Parameter(Mandatory)] [ValidateNotNullOrEmpty()]
         [System.String] $DatabaseServer,
-        
+
         [Parameter(Mandatory)] [ValidateNotNullOrEmpty()]
         [System.String] $DatabaseName,
-        
+
         [Parameter()] [AllowNull()]
-        [System.Management.Automation.PSCredential] $Credential
+        [System.Management.Automation.PSCredential]
+        [System.Management.Automation.CredentialAttribute()]
+        $Credential
     )
     process {
         $targetResource = @{
@@ -40,18 +42,20 @@ function Test-TargetResource {
     param (
         [Parameter(Mandatory)] [ValidateNotNullOrEmpty()]
         [System.String] $SiteName,
-        
+
         [Parameter(Mandatory)] [ValidateSet('Site','Logging','Monitor')]
         [System.String] $DataStore,
-        
+
         [Parameter(Mandatory)] [ValidateNotNullOrEmpty()]
         [System.String] $DatabaseServer,
-        
+
         [Parameter(Mandatory)] [ValidateNotNullOrEmpty()]
         [System.String] $DatabaseName,
-        
+
         [Parameter()] [AllowNull()]
-        [System.Management.Automation.PSCredential] $Credential
+        [System.Management.Automation.PSCredential]
+        [System.Management.Automation.CredentialAttribute()]
+        $Credential
     )
     process {
         $targetResource = Get-TargetResource @PSBoundParameters;
@@ -73,28 +77,28 @@ function Set-TargetResource {
     param (
         [Parameter(Mandatory)] [ValidateNotNullOrEmpty()]
         [System.String] $SiteName,
-        
+
         [Parameter(Mandatory)] [ValidateSet('Site','Logging','Monitor')]
         [System.String] $DataStore,
-        
+
         [Parameter(Mandatory)] [ValidateNotNullOrEmpty()]
         [System.String] $DatabaseServer,
-        
+
         [Parameter(Mandatory)] [ValidateNotNullOrEmpty()]
         [System.String] $DatabaseName,
-        
+
         [Parameter()] [AllowNull()]
-        [System.Management.Automation.PSCredential] $Credential
+        [System.Management.Automation.PSCredential]
+        [System.Management.Automation.CredentialAttribute()]
+        $Credential
     )
     begin {
-        if (-not (TestXDModule)) {
-            ThrowInvalidProgramException -ErrorId 'Citrix.XenDesktop.Admin' -ErrorMessage $localizedData.XenDesktopSDKNotFoundError;
-        }
+        AssertXDModule -Name 'Citrix.XenDesktop.Admin';
     } #end begin
     process {
         $scriptBlock = {
             Import-Module "$env:ProgramFiles\Citrix\XenDesktopPoshSdk\Module\Citrix.XenDesktop.Admin.V1\Citrix.XenDesktop.Admin\Citrix.XenDesktop.Admin.psd1" -Verbose:$false;
-            
+
             $newXDDatabaseParams = @{
                 DatabaseServer = $using:DatabaseServer;
                 DatabaseName = $using:DatabaseName;
@@ -132,9 +136,16 @@ function TestMSSQLDatabase {
         This function requires CredSSP to be enabled on the local machine to communicate with the MS SQL Server.
     #>
     param (
-        [Parameter(Mandatory)] [ValidateNotNullOrEmpty()] [System.String] $DatabaseServer,
-        [Parameter(Mandatory)] [ValidateNotNullOrEmpty()] [System.String] $DatabaseName,
-        [Parameter()] [AllowNull()] [System.Management.Automation.PSCredential] $Credential
+        [Parameter(Mandatory)] [ValidateNotNullOrEmpty()]
+        [System.String] $DatabaseServer,
+
+        [Parameter(Mandatory)] [ValidateNotNullOrEmpty()]
+        [System.String] $DatabaseName,
+
+        [Parameter()] [AllowNull()]
+        [System.Management.Automation.PSCredential]
+        [System.Management.Automation.CredentialAttribute()]
+        $Credential
     )
     process {
         $scriptBlock = {
@@ -157,7 +168,7 @@ function TestMSSQLDatabase {
                 $sqlConnection.Close();
             }
         } #end scriptblock
-        
+
         $invokeCommandParams = @{
             ScriptBlock = $scriptBlock;
             ErrorAction = 'Stop';

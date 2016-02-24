@@ -6,38 +6,38 @@ function Get-TargetResource {
     param (
         [Parameter(Mandatory)] [ValidateNotNullOrEmpty()]
         [System.String] $Name,
-        
+
         [Parameter(Mandatory)] [ValidateSet('Permanent','Random','Static')]
         [System.String] $Allocation,
-        
+
         [Parameter(Mandatory)] [ValidateSet('Manual','PVS','MCS')]
         [System.String] $Provisioning,
-        
+
         [Parameter(Mandatory)] [ValidateSet('Discard','Local','PVD')]
         [System.String] $Persistence,
-        
+
         [Parameter()] [ValidateNotNull()]
         [System.Boolean] $IsMultiSession = $false,
-        
+
         [Parameter()] [AllowNull()]
         [System.String] $Description,
-        
+
         [Parameter()] [AllowNull()]
         [System.String] $PvsAddress,
-        
+
         [Parameter()] [AllowNull()]
         [System.String] $PvsDomain,
-        
+
         [Parameter()] [ValidateSet('Present','Absent')]
         [System.String] $Ensure = 'Present',
-        
+
         [Parameter()] [AllowNull()]
-        [System.Management.Automation.PSCredential] $Credential
+        [System.Management.Automation.PSCredential]
+        [System.Management.Automation.CredentialAttribute()]
+        $Credential
     )
     begin {
-        if (-not (TestXDModule -Name 'Citrix.Broker.Admin.V2' -IsSnapin)) {
-            ThrowInvalidProgramException -ErrorId 'Citrix.Broker.Admin.V2' -ErrorMessage $localizedData.XenDesktopSDKNotFoundError;
-        }
+        AssertXDModule -Name 'Citrix.Broker.Admin.V2' -IsSnapin;
     }
     process {
         $scriptBlock = {
@@ -89,33 +89,35 @@ function Test-TargetResource {
     param (
         [Parameter(Mandatory)] [ValidateNotNullOrEmpty()]
         [System.String] $Name,
-        
+
         [Parameter(Mandatory)] [ValidateSet('Permanent','Random','Static')]
         [System.String] $Allocation,
-        
+
         [Parameter(Mandatory)] [ValidateSet('Manual','PVS','MCS')]
         [System.String] $Provisioning,
-        
+
         [Parameter(Mandatory)] [ValidateSet('Discard','Local','PVD')]
         [System.String] $Persistence,
-        
+
         [Parameter()] [ValidateNotNull()]
         [System.Boolean] $IsMultiSession = $false,
-        
+
         [Parameter()] [AllowNull()]
         [System.String] $Description,
-        
+
         [Parameter()] [AllowNull()]
         [System.String] $PvsAddress,
-        
+
         [Parameter()] [AllowNull()]
         [System.String] $PvsDomain,
-        
+
         [Parameter()] [ValidateSet('Present','Absent')]
         [System.String] $Ensure = 'Present',
-        
+
         [Parameter()] [AllowNull()]
-        [System.Management.Automation.PSCredential] $Credential
+        [System.Management.Automation.PSCredential]
+        [System.Management.Automation.CredentialAttribute()]
+        $Credential
     )
     process {
         $PSBoundParameters['Ensure'] = $Ensure;
@@ -142,38 +144,38 @@ function Set-TargetResource {
     param (
         [Parameter(Mandatory)] [ValidateNotNullOrEmpty()]
         [System.String] $Name,
-        
+
         [Parameter(Mandatory)] [ValidateSet('Permanent','Random','Static')]
         [System.String] $Allocation,
-        
+
         [Parameter(Mandatory)] [ValidateSet('Manual','PVS','MCS')]
         [System.String] $Provisioning,
-        
+
         [Parameter(Mandatory)] [ValidateSet('Discard','Local','PVD')]
         [System.String] $Persistence,
-        
+
         [Parameter()] [ValidateNotNull()]
         [System.Boolean] $IsMultiSession = $false,
-        
+
         [Parameter()] [AllowNull()]
         [System.String] $Description,
-        
+
         [Parameter()] [AllowNull()]
         [System.String] $PvsAddress,
-        
+
         [Parameter()] [AllowNull()]
         [System.String] $PvsDomain,
-        
+
         [Parameter()] [ValidateSet('Present','Absent')]
         [System.String] $Ensure = 'Present',
-        
+
         [Parameter()] [AllowNull()]
-        [System.Management.Automation.PSCredential] $Credential
+        [System.Management.Automation.PSCredential]
+        [System.Management.Automation.CredentialAttribute()]
+        $Credential
     )
     begin {
-        if (-not (TestXDModule -Name 'Citrix.Broker.Admin.V2' -IsSnapin)) {
-            ThrowInvalidProgramException -ErrorId 'Citrix.Broker.Admin.V2' -ErrorMessage $localizedData.XenDesktopSDKNotFoundError;
-        }
+        AssertXDModule -Name 'Citrix.Broker.Admin.V2' -IsSnapin;
     }
     process {
         $scriptBlock = {
@@ -196,9 +198,9 @@ function Set-TargetResource {
                     }
                     elseif ($brokerCatalog.SessionSupport -eq 'Multisession' -and $using:IsMultiSession -ne $true) {
                         Write-Warning ($localizedData.ChangingMachineCatalogUnsupportedWarning -f $using:Name, 'Session');
-                        $recreateMachineCatalog = $true; 
+                        $recreateMachineCatalog = $true;
                     }
-            
+
                     if ($recreateMachineCatalog) {
                         Write-Verbose ($localizedData.RemovingMachineCatalog -f $using:Name);
                         [ref] $null = Remove-BrokerCatalog -Name $using:Name;
@@ -219,7 +221,7 @@ function Set-TargetResource {
                         [ref] $null = Set-BrokerCatalog @setBrokerCatalogParams;
                     }
                 } #end if brokerCatalog
-        
+
                 if (-not $brokerCatalog) {
                     $newBrokerCatalogParams = @{
                         Name = $using:Name;

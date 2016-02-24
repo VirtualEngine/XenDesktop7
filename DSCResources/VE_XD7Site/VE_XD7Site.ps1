@@ -6,26 +6,26 @@ function Get-TargetResource {
     param (
         [Parameter(Mandatory)] [ValidateNotNullOrEmpty()]
         [System.String] $SiteName,
-        
+
         [Parameter(Mandatory)] [ValidateNotNullOrEmpty()]
         [System.String] $DatabaseServer,
-        
+
         [Parameter(Mandatory)] [ValidateNotNullOrEmpty()]
         [System.String] $SiteDatabaseName,
-        
+
         [Parameter(Mandatory)] [ValidateNotNullOrEmpty()]
         [System.String] $LoggingDatabaseName,
-        
+
         [Parameter(Mandatory)] [ValidateNotNullOrEmpty()]
         [System.String] $MonitorDatabaseName,
-        
+
         [Parameter()] [ValidateNotNull()]
-        [System.Management.Automation.PSCredential] $Credential
+        [System.Management.Automation.PSCredential]
+        [System.Management.Automation.CredentialAttribute()]
+        $Credential
     )
     begin {
-        if (-not (TestXDModule)) {
-            ThrowInvalidProgramException -ErrorId 'Citrix.XenDesktop.Admin' -ErrorMessage $localizedData.XenDesktopSDKNotFoundError;
-        }
+        AssertXDModule -Name 'Citrix.XenDesktop.Admin';
     } #end begin
     process {
         $scriptBlock = {
@@ -65,21 +65,23 @@ function Test-TargetResource {
     param (
         [Parameter(Mandatory)] [ValidateNotNullOrEmpty()]
         [System.String] $SiteName,
-        
+
         [Parameter(Mandatory)] [ValidateNotNullOrEmpty()]
         [System.String] $DatabaseServer,
-        
+
         [Parameter(Mandatory)] [ValidateNotNullOrEmpty()]
         [System.String] $SiteDatabaseName,
-        
+
         [Parameter(Mandatory)] [ValidateNotNullOrEmpty()]
         [System.String] $LoggingDatabaseName,
-        
+
         [Parameter(Mandatory)] [ValidateNotNullOrEmpty()]
         [System.String] $MonitorDatabaseName,
-        
+
         [Parameter()] [ValidateNotNull()]
-        [System.Management.Automation.PSCredential] $Credential
+        [System.Management.Automation.PSCredential]
+        [System.Management.Automation.CredentialAttribute()]
+        $Credential
     )
     process {
         $targetResource = Get-TargetResource @PSBoundParameters;
@@ -111,26 +113,26 @@ function Set-TargetResource {
     param (
         [Parameter(Mandatory)] [ValidateNotNullOrEmpty()]
         [System.String] $SiteName,
-        
+
         [Parameter(Mandatory)] [ValidateNotNullOrEmpty()]
         [System.String] $DatabaseServer,
-        
+
         [Parameter(Mandatory)] [ValidateNotNullOrEmpty()]
         [System.String] $SiteDatabaseName,
-        
+
         [Parameter(Mandatory)] [ValidateNotNullOrEmpty()]
         [System.String] $LoggingDatabaseName,
-        
+
         [Parameter(Mandatory)] [ValidateNotNullOrEmpty()]
         [System.String] $MonitorDatabaseName,
-        
+
         [Parameter()] [ValidateNotNull()]
-        [System.Management.Automation.PSCredential] $Credential
+        [System.Management.Automation.PSCredential]
+        [System.Management.Automation.CredentialAttribute()]
+        $Credential
     )
     begin {
-        if (-not (TestXDModule)) {
-            ThrowInvalidProgramException -ErrorId 'Citrix.XenDesktop.Admin' -ErrorMessage $localizedData.XenDesktopSDKNotFoundError;
-        }
+        AssertXDModule -Name 'Citrix.XenDesktop.Admin';
     } #end begin
     process {
         $scriptBlock = {

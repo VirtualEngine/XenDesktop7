@@ -8,7 +8,7 @@ InModuleScope $sut {
     function Get-BrokerDesktopGroup { }
     function Get-BrokerEntitlementPolicyRule { }
     function Get-BrokerAppEntitlementPolicyRule { }
-    
+
     Describe 'XenDesktop7\VE_XD7EntitlementPolicy' {
 
         $testDeliveryGroupName = 'Test Delivery Group';
@@ -34,12 +34,13 @@ InModuleScope $sut {
         $testCredentials = New-Object System.Management.Automation.PSCredential 'DummyUser', (ConvertTo-SecureString 'DummyPassword' -AsPlainText -Force);
 
         Context 'Get-TargetResource' {
-            Mock -CommandName TestXDModule -MockWith { return $true; }
+            Mock -CommandName AssertXDModule -MockWith { }
             Mock -CommandName Add-PSSnapin { };
 
             It 'Returns a System.Collections.Hashtable type' {
                 Mock -CommandName Get-BrokerDesktopGroup { return $stubBrokerEntitlementPolicy; }
                 Mock -CommandName Invoke-Command -MockWith { & $ScriptBlock; }
+
                 (Get-TargetResource @testEntitlementPolicy -EntitlementType Desktop) -is [System.Collections.Hashtable] | Should Be $true;
             }
 
@@ -47,7 +48,9 @@ InModuleScope $sut {
                 Mock -CommandName Get-BrokerDesktopGroup { return $stubBrokerEntitlementPolicy; }
                 Mock -CommandName Get-BrokerEntitlementPolicyRule -MockWith { }
                 Mock -CommandName Get-BrokerAppEntitlementPolicyRule -MockWith { }
-                Get-TargetResource @testEntitlementPolicy -EntitlementType Desktop;
+
+                $targetResource = Get-TargetResource @testEntitlementPolicy -EntitlementType Desktop;
+
                 Assert-MockCalled -CommandName Get-BrokerEntitlementPolicyRule -Exactly 1 -Scope It;
                 Assert-MockCalled -CommandName Get-BrokerAppEntitlementPolicyRule -Exactly 0 -Scope It;
             }
@@ -56,14 +59,18 @@ InModuleScope $sut {
                 Mock -CommandName Get-BrokerDesktopGroup { return $stubBrokerEntitlementPolicy; }
                 Mock -CommandName Get-BrokerEntitlementPolicyRule -MockWith { }
                 Mock -CommandName Get-BrokerAppEntitlementPolicyRule -MockWith { }
-                Get-TargetResource @testEntitlementPolicy -EntitlementType Application;
+
+                $targetResource = Get-TargetResource @testEntitlementPolicy -EntitlementType Application;
+
                 Assert-MockCalled -CommandName Get-BrokerEntitlementPolicyRule -Exactly 0 -Scope It;
                 Assert-MockCalled -CommandName Get-BrokerAppEntitlementPolicyRule -Exactly 1 -Scope It;
             }
 
             It 'Invokes script block without credentials by default' {
                 Mock -CommandName Invoke-Command -ParameterFilter { $Credential -eq $null -and $Authentication -eq $null } { }
-                Get-TargetResource @testEntitlementPolicy -EntitlementType Desktop;
+
+                $targetResource = Get-TargetResource @testEntitlementPolicy -EntitlementType Desktop;
+
                 Assert-MockCalled Invoke-Command -ParameterFilter { $Credential -eq $null -and $Authentication -eq $null } -Exactly 1 -Scope It;
             }
 
@@ -71,21 +78,27 @@ InModuleScope $sut {
                 Mock -CommandName Invoke-Command -ParameterFilter { $Credential -eq $testCredentials -and $Authentication -eq 'CredSSP' } { }
                 $testEntitlementPolicyWithCredentials = $testEntitlementPolicy.Clone();
                 $testEntitlementPolicyWithCredentials['Credential'] = $testCredentials;
-                Get-TargetResource @testEntitlementPolicyWithCredentials -EntitlementType Desktop;
+
+                $targetResource = Get-TargetResource @testEntitlementPolicyWithCredentials -EntitlementType Desktop;
+
                 Assert-MockCalled Invoke-Command -ParameterFilter { $Credential -eq $testCredentials -and $Authentication -eq 'CredSSP' } -Exactly 1 -Scope It;
             }
-            
-            It 'Throws when Citrix.Broker.Admin.V2 is not registered' {
-                Mock -CommandName TestXDModule -MockWith { return $false; }
-                { Get-TargetResource @testEntitlementPolicy -EntitlementType Application } | Should Throw;
+
+            It 'Asserts "Citrix.Broker.Admin.V2" module is registered' {
+                Mock AssertXDModule -ParameterFilter { $Name -eq 'Citrix.Broker.Admin.V2' } -MockWith { }
+
+                Set-TargetResource @testEntitlementPolicy -EntitlementType Desktop
+
+                Assert-MockCalled AssertXDModule -ParameterFilter { $Name -eq 'Citrix.Broker.Admin.V2' } -Scope It;
             }
 
         } #end context Get-TargetResource
 
         Context 'Test-TargetResource' {
-            
+
             It 'Returns a System.Boolean type' {
                 Mock -CommandName Get-TargetResource -MockWith { return $stubDesktopTargetResource; }
+
                 (Test-TargetResource @testEntitlementPolicy -EntitlementType Desktop) -is [System.Boolean] | Should Be $true;
             }
 
@@ -97,6 +110,7 @@ InModuleScope $sut {
                     IncludeUsers = 'TEST\IncludedUser';
                     ExcludeUsers = 'TEST\ExcludedUser';
                 }
+
                 Test-TargetResource @targetResourceParams | Should Be $true;
             }
 
@@ -109,6 +123,7 @@ InModuleScope $sut {
                     ExcludeUsers = 'TEST\ExcludedUser';
                     Ensure = 'Absent';
                 }
+
                 Test-TargetResource @targetResourceParams | Should Be $false;
             }
 
@@ -121,6 +136,7 @@ InModuleScope $sut {
                     ExcludeUsers = 'TEST\ExcludedUser';
                     Enabled = $false;
                 }
+
                 Test-TargetResource @targetResourceParams | Should Be $false;
             }
 
@@ -133,6 +149,7 @@ InModuleScope $sut {
                     ExcludeUsers = 'TEST\ExcludedUser';
                     Name = 'My Custom Name';
                 }
+
                 Test-TargetResource @targetResourceParams | Should Be $false;
             }
 
@@ -145,6 +162,7 @@ InModuleScope $sut {
                     ExcludeUsers = 'TEST\ExcludedUser';
                     Description = 'My Custom Description';
                 }
+
                 Test-TargetResource @targetResourceParams | Should Be $false;
             }
 
@@ -156,6 +174,7 @@ InModuleScope $sut {
                     IncludeUsers = 'TEST\IncludedUser';
                     ExcludeUsers = 'TEST\ExcludedUser','TEST\IncludedUser';
                 }
+
                 Test-TargetResource @targetResourceParams | Should Be $false;
             }
 
@@ -167,6 +186,7 @@ InModuleScope $sut {
                     IncludeUsers = 'TEST\IncludedUser';
                     ExcludeUsers = '';
                 }
+
                 Test-TargetResource @targetResourceParams | Should Be $false;
             }
 
@@ -178,6 +198,7 @@ InModuleScope $sut {
                     IncludeUsers = 'TEST\IncludedUser','TEST\ExcludedUser';
                     ExcludeUsers = 'TEST\ExcludedUser';
                 }
+
                 Test-TargetResource @targetResourceParams | Should Be $false;
             }
 
@@ -189,6 +210,7 @@ InModuleScope $sut {
                     IncludeUsers = '';
                     ExcludeUsers = 'TEST\ExcludedUser';
                 }
+
                 Test-TargetResource @targetResourceParams | Should Be $false;
             }
 

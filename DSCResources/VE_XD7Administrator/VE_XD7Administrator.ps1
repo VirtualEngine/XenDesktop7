@@ -6,10 +6,12 @@ function Get-TargetResource {
     param (
         [Parameter(Mandatory)] [ValidateNotNullOrEmpty()]
         [System.String] $Name,
-        
+
         [Parameter()] [AllowNull()]
-        [System.Management.Automation.PSCredential] $Credential,
-        
+        [System.Management.Automation.PSCredential]
+        [System.Management.Automation.CredentialAttribute()]
+        $Credential,
+
         [Parameter()] [ValidateSet('Present','Absent')]
         [System.String] $Ensure = 'Present',
 
@@ -17,9 +19,7 @@ function Get-TargetResource {
         [System.Boolean] $Enabled = $true
     )
     begin {
-        if (-not (TestXDModule -Name 'Citrix.DelegatedAdmin.Admin.V1' -IsSnapin)) {
-            ThrowInvalidProgramException -ErrorId 'Citrix.DelegatedAdmin.Admin.V1' -ErrorMessage $localizedData.XenDesktopSDKNotFoundError;
-        }
+        AssertXDModule -Name 'Citrix.DelegatedAdmin.Admin.V1' -IsSnapin;
     }
     process {
         $scriptBlock = {
@@ -39,7 +39,7 @@ function Get-TargetResource {
             }
             return $targetResource;
         } #end scriptblock
-        
+
         $invokeCommandParams = @{
             ScriptBlock = $scriptBlock;
             ErrorAction = 'Stop';
@@ -62,10 +62,12 @@ function Test-TargetResource {
     param (
         [Parameter(Mandatory)] [ValidateNotNullOrEmpty()]
         [System.String] $Name,
-        
+
         [Parameter()] [AllowNull()]
-        [System.Management.Automation.PSCredential] $Credential,
-        
+        [System.Management.Automation.PSCredential]
+        [System.Management.Automation.CredentialAttribute()]
+        $Credential,
+
         [Parameter()] [ValidateSet('Present','Absent')]
         [System.String] $Ensure = 'Present',
 
@@ -97,10 +99,12 @@ function Set-TargetResource {
     param (
         [Parameter(Mandatory)] [ValidateNotNullOrEmpty()]
         [System.String] $Name,
-        
+
         [Parameter()] [AllowNull()]
-        [System.Management.Automation.PSCredential] $Credential,
-        
+        [System.Management.Automation.PSCredential]
+        [System.Management.Automation.CredentialAttribute()]
+        $Credential,
+
         [Parameter()] [ValidateSet('Present','Absent')]
         [System.String] $Ensure = 'Present',
 
@@ -108,9 +112,7 @@ function Set-TargetResource {
         [System.Boolean] $Enabled = $true
     )
     begin {
-        if (-not (TestXDModule -Name 'Citrix.DelegatedAdmin.Admin.V1' -IsSnapin)) {
-            ThrowInvalidProgramException -ErrorId 'Citrix.DelegatedAdmin.Admin.V1' -ErrorMessage $localizedData.XenDesktopSDKNotFoundError;
-        }
+        AssertXDModule -Name 'Citrix.DelegatedAdmin.Admin.V1' -IsSnapin;
     }
     process {
         $scriptBlock = {
@@ -127,7 +129,7 @@ function Set-TargetResource {
                 }
                 else {
                     Write-Verbose ($using:localizedData.AddingAdministrator -f $using:Name);
-                    New-AdminAdministrator -Name $using:Name -Enabled $using:Enabled;                        
+                    New-AdminAdministrator -Name $using:Name -Enabled $using:Enabled;
                 }
             }
             else {

@@ -6,29 +6,29 @@ function Get-TargetResource {
     param (
         [Parameter(Mandatory)] [ValidateNotNullOrEmpty()]
         [System.String] $LicenseServer,
-        
+
         [Parameter()] [ValidateSet('Present','Absent')]
         [System.String] $Ensure = 'Present',
-        
-        [Parameter()] [ValidateNotNull()] [System.UInt16]
-        $LicenseServerPort = 27000,
-        
-        [Parameter()] [ValidateSet('PLT','ENT','ADV')] [System.String]
-        $LicenseEdition = 'PLT',
-        
+
+        [Parameter()] [ValidateNotNull()]
+        [System.UInt16] $LicenseServerPort = 27000,
+
+        [Parameter()] [ValidateSet('PLT','ENT','ADV')]
+        [System.String] $LicenseEdition = 'PLT',
+
         [Parameter()] [ValidateSet('UserDevice','Concurrent')]
         [System.String] $LicenseModel = 'UserDevice',
-        
+
         [Parameter()]
         [System.Boolean] $TrustLicenseServerCertificate = $true,
-        
-        [Parameter()]
-        [AllowNull()] [System.Management.Automation.PSCredential] $Credential
+
+        [Parameter()] [AllowNull()]
+        [System.Management.Automation.PSCredential]
+        [System.Management.Automation.CredentialAttribute()]
+        $Credential
     )
     begin {
-        if (-not (TestXDModule -Name 'Citrix.Configuration.Admin.V2' -IsSnapin)) {
-            ThrowInvalidProgramException -ErrorId 'Citrix.Configuration.Admin.V2' -ErrorMessage $localizedData.XenDesktopSDKNotFoundError;
-        }
+        AssertXDModule -Name 'Citrix.Configuration.Admin.V2' -IsSnapin;
     }
     process {
         $scriptBlock = {
@@ -70,24 +70,26 @@ function Test-TargetResource {
     param (
         [Parameter(Mandatory)] [ValidateNotNullOrEmpty()]
         [System.String] $LicenseServer,
-        
+
         [Parameter()] [ValidateSet('Present','Absent')]
         [System.String] $Ensure = 'Present',
-        
-        [Parameter()] [ValidateNotNull()] [System.UInt16]
-        $LicenseServerPort = 27000,
-        
-        [Parameter()] [ValidateSet('PLT','ENT','ADV')] [System.String]
-        $LicenseEdition = 'PLT',
-        
+
+        [Parameter()] [ValidateNotNull()]
+        [System.UInt16] $LicenseServerPort = 27000,
+
+        [Parameter()] [ValidateSet('PLT','ENT','ADV')]
+        [System.String] $LicenseEdition = 'PLT',
+
         [Parameter()] [ValidateSet('UserDevice','Concurrent')]
         [System.String] $LicenseModel = 'UserDevice',
-        
+
         [Parameter()]
         [System.Boolean] $TrustLicenseServerCertificate = $true,
-        
-        [Parameter()]
-        [AllowNull()] [System.Management.Automation.PSCredential] $Credential
+
+        [Parameter()] [AllowNull()]
+        [System.Management.Automation.PSCredential]
+        [System.Management.Automation.CredentialAttribute()]
+        $Credential
     )
     process {
         $isInDesiredState = $true;
@@ -128,31 +130,31 @@ function Set-TargetResource {
     param (
         [Parameter(Mandatory)] [ValidateNotNullOrEmpty()]
         [System.String] $LicenseServer,
-        
+
         [Parameter()] [ValidateSet('Present','Absent')]
         [System.String] $Ensure = 'Present',
-        
-        [Parameter()] [ValidateNotNull()] [System.UInt16]
-        $LicenseServerPort = 27000,
-        
-        [Parameter()] [ValidateSet('PLT','ENT','ADV')] [System.String]
-        $LicenseEdition = 'PLT',
-        
+
+        [Parameter()] [ValidateNotNull()]
+        [System.UInt16] $LicenseServerPort = 27000,
+
+        [Parameter()] [ValidateSet('PLT','ENT','ADV')]
+        [System.String] $LicenseEdition = 'PLT',
+
         [Parameter()] [ValidateSet('UserDevice','Concurrent')]
         [System.String] $LicenseModel = 'UserDevice',
-        
+
         [Parameter()]
         [System.Boolean] $TrustLicenseServerCertificate = $true,
-        
-        [Parameter()]
-        [AllowNull()] [System.Management.Automation.PSCredential] $Credential
+
+        [Parameter()] [AllowNull()]
+        [System.Management.Automation.PSCredential]
+        [System.Management.Automation.CredentialAttribute()]
+        $Credential
     )
     begin {
-        if (-not (TestXDModule -Name 'Citrix.Configuration.Admin.V2' -IsSnapin)) {
-            ThrowInvalidProgramException -ErrorId 'Citrix.Configuration.Admin.V2' -ErrorMessage $localizedData.XenDesktopSDKNotFoundError;
-        }
-        elseif ($TrustLicenseServerCertificate -and (-not (TestXDModule -Name 'Citrix.Licensing.Admin.V1' -IsSnapin))) {
-            ThrowInvalidProgramException -ErrorId 'Citrix.Licensing.Admin.V1' -ErrorMessage $localizedData.XenDesktopSDKNotFoundError;
+        AssertXDModule -Name 'Citrix.Configuration.Admin.V2' -IsSnapin;
+        if ($TrustLicenseServerCertificate) {
+            AssertXDModule -Name 'Citrix.Licensing.Admin.V1' -IsSnapin;
         }
     }
     process {
@@ -172,7 +174,7 @@ function Set-TargetResource {
                 Set-ConfigSiteMetadata -Name 'CertificateHash' -Value $licenseServerCertificateHash;
             }
         } #end scriptBlock
-        
+
         $invokeCommandParams = @{
             ScriptBlock = $scriptBlock;
             ErrorAction = 'Stop';

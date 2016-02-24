@@ -6,23 +6,23 @@ function Get-TargetResource {
     param (
         [Parameter(Mandatory)] [ValidateNotNullOrEmpty()]
         [System.String] $Name,
-        
+
         [Parameter(Mandatory)] [ValidateNotNullOrEmpty()]
         [System.String[]] $Members,
-        
+
         [Parameter()] [ValidateSet('Present','Absent')]
         [System.String] $Ensure = 'Present',
-        
+
         [Parameter()] [ValidateNotNullOrEmpty()]
         [System.String] $RoleScope = 'All',
-        
+
         [Parameter()] [AllowNull()]
-        [System.Management.Automation.PSCredential] $Credential
+        [System.Management.Automation.PSCredential]
+        [System.Management.Automation.CredentialAttribute()]
+        $Credential
     )
     begin {
-        if (-not (TestXDModule -Name 'Citrix.DelegatedAdmin.Admin.V1' -IsSnapin)) {
-            ThrowInvalidProgramException -ErrorId 'Citrix.DelegatedAdmin.Admin.V1' -ErrorMessage $localizedData.XenDesktopSDKNotFoundError;
-        }
+        AssertXDModule -Name 'Citrix.DelegatedAdmin.Admin.V1' -IsSnapin;
     }
     process {
         $scriptBlock = {
@@ -62,18 +62,20 @@ function Test-TargetResource {
     param (
         [Parameter(Mandatory)] [ValidateNotNullOrEmpty()]
         [System.String] $Name,
-        
+
         [Parameter(Mandatory)] [ValidateNotNullOrEmpty()]
         [System.String[]] $Members,
-        
+
         [Parameter()] [ValidateSet('Present','Absent')]
         [System.String] $Ensure = 'Present',
-        
+
         [Parameter()] [ValidateNotNullOrEmpty()]
         [System.String] $RoleScope = 'All',
-        
+
         [Parameter()] [AllowNull()]
-        [System.Management.Automation.PSCredential] $Credential
+        [System.Management.Automation.PSCredential]
+        [System.Management.Automation.CredentialAttribute()]
+        $Credential
     )
     process {
         $targetResource = Get-TargetResource @PSBoundParameters;
@@ -82,7 +84,7 @@ function Test-TargetResource {
             if ($member.Contains('\')) {
                 $netBIOSName = $member.Split('\')[1];
             }
-            
+
             ## Try a direct match
             if ($targetResource.Members -contains $member) {
                 if ($Ensure -eq 'Absent') {
@@ -121,23 +123,23 @@ function Set-TargetResource {
     param (
         [Parameter(Mandatory)] [ValidateNotNullOrEmpty()]
         [System.String] $Name,
-        
+
         [Parameter(Mandatory)] [ValidateNotNullOrEmpty()]
         [System.String[]] $Members,
-        
+
         [Parameter()] [ValidateSet('Present','Absent')]
         [System.String] $Ensure = 'Present',
-        
+
         [Parameter()] [ValidateNotNullOrEmpty()]
         [System.String] $RoleScope = 'All',
-        
+
         [Parameter()] [AllowNull()]
-        [System.Management.Automation.PSCredential] $Credential
+        [System.Management.Automation.PSCredential]
+        [System.Management.Automation.CredentialAttribute()]
+        $Credential
     )
     begin {
-        if (-not (TestXDModule -Name 'Citrix.DelegatedAdmin.Admin.V1' -IsSnapin)) {
-            ThrowInvalidProgramException -ErrorId 'Citrix.DelegatedAdmin.Admin.V1' -ErrorMessage $localizedData.XenDesktopSDKNotFoundError;
-        }
+        AssertXDModule -Name 'Citrix.DelegatedAdmin.Admin.V1' -IsSnapin;
     }
     process {
         $scriptBlock = {

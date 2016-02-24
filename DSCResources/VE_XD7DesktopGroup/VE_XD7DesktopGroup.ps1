@@ -6,58 +6,58 @@ function Get-TargetResource {
     param (
         [Parameter(Mandatory)] [ValidateNotNullOrEmpty()]
         [System.String] $Name,
-        
+
         [Parameter(Mandatory)] [ValidateNotNull()]
         [System.Boolean] $IsMultiSession,
-        
+
         [Parameter(Mandatory)] [ValidateSet('AppsOnly','DesktopsOnly','DesktopsAndApps')]
         [System.String] $DeliveryType,
-        
+
         [Parameter(Mandatory)] [ValidateSet('Private','Shared')]
         [System.String] $DesktopType, # Type?
-        
+
         [Parameter()] [ValidateSet('Present','Absent')]
         [System.String] $Ensure = 'Present',
-        
+
         [Parameter()] [ValidateNotNullOrEmpty()]
         [System.String] $Description = $Name,
-        
+
         [Parameter()] [ValidateNotNullOrEmpty()]
         [System.String] $DisplayName = $Name,
-        
+
         [Parameter()] [ValidateNotNull()]
         [System.Boolean] $Enabled = $true,
-        
+
         [Parameter()] [ValidateSet('FourBit','EightBit','SixteenBit','TwentyFourBit')]
         [System.String] $ColorDepth = 'TwentyFourBit',
-        
+
         [Parameter()] [ValidateNotNull()]
         [System.Boolean] $IsMaintenanceMode = $false,
-        
+
         [Parameter()] [ValidateNotNull()]
         [System.Boolean] $IsRemotePC = $false,
-        
+
         [Parameter()] [ValidateNotNull()]
         [System.Boolean] $IsSecureIca = $false,
-        
+
         [Parameter()] [ValidateNotNull()]
         [System.Boolean] $ShutdownDesktopsAfterUse = $false,
-        
+
         [Parameter()] [ValidateNotNull()]
         [System.Boolean] $TurnOnAddedMachine = $false,
-        
+
         [Parameter()] [AllowNull()]
-        [System.Management.Automation.PSCredential] $Credential
+        [System.Management.Automation.PSCredential]
+        [System.Management.Automation.CredentialAttribute()]
+        $Credential
     )
     begin {
-        if (-not (TestXDModule -Name 'Citrix.Broker.Admin.V2' -IsSnapin)) {
-            ThrowInvalidProgramException -ErrorId 'Citrix.Broker.Admin.V2' -ErrorMessage $localizedData.XenDesktopSDKNotFoundError;
-        }
+        AssertXDModule -Name 'Citrix.Broker.Admin.V2' -IsSnapin;
     }
     process {
         $scriptBlock = {
             Add-PSSnapin -Name 'Citrix.Broker.Admin.V2' -ErrorAction Stop;
-        
+
             $deliveryGroup = Get-BrokerDesktopGroup -Name $using:Name -ErrorAction SilentlyContinue;
             $targetResource = @{
                 Name = $using:Name;
@@ -106,48 +106,50 @@ function Test-TargetResource {
     param (
         [Parameter(Mandatory)] [ValidateNotNullOrEmpty()]
         [System.String] $Name,
-        
+
         [Parameter(Mandatory)] [ValidateNotNull()]
         [System.Boolean] $IsMultiSession,
-        
+
         [Parameter(Mandatory)] [ValidateSet('AppsOnly','DesktopsOnly','DesktopsAndApps')]
         [System.String] $DeliveryType,
-        
+
         [Parameter(Mandatory)] [ValidateSet('Private','Shared')]
         [System.String] $DesktopType, # Type?
-        
+
         [Parameter()] [ValidateSet('Present','Absent')]
         [System.String] $Ensure = 'Present',
-        
+
         [Parameter()] [ValidateNotNullOrEmpty()]
         [System.String] $Description = $Name,
-        
+
         [Parameter()] [ValidateNotNullOrEmpty()]
         [System.String] $DisplayName = $Name,
-        
+
         [Parameter()] [ValidateNotNull()]
         [System.Boolean] $Enabled = $true,
-        
+
         [Parameter()] [ValidateSet('FourBit','EightBit','SixteenBit','TwentyFourBit')]
         [System.String] $ColorDepth = 'TwentyFourBit',
-        
+
         [Parameter()] [ValidateNotNull()]
         [System.Boolean] $IsMaintenanceMode = $false,
-        
+
         [Parameter()] [ValidateNotNull()]
         [System.Boolean] $IsRemotePC = $false,
-        
+
         [Parameter()] [ValidateNotNull()]
         [System.Boolean] $IsSecureIca = $false,
-        
+
         [Parameter()] [ValidateNotNull()]
         [System.Boolean] $ShutdownDesktopsAfterUse = $false,
-        
+
         [Parameter()] [ValidateNotNull()]
         [System.Boolean] $TurnOnAddedMachine = $false,
-        
+
         [Parameter()] [AllowNull()]
-        [System.Management.Automation.PSCredential] $Credential
+        [System.Management.Automation.PSCredential]
+        [System.Management.Automation.CredentialAttribute()]
+        $Credential
     )
     process {
         $targetResource = Get-TargetResource @PSBoundParameters;
@@ -207,59 +209,59 @@ function Set-TargetResource {
     param (
         [Parameter(Mandatory)] [ValidateNotNullOrEmpty()]
         [System.String] $Name,
-        
+
         [Parameter(Mandatory)] [ValidateNotNull()]
         [System.Boolean] $IsMultiSession,
-        
+
         [Parameter(Mandatory)] [ValidateSet('AppsOnly','DesktopsOnly','DesktopsAndApps')]
         [System.String] $DeliveryType,
-        
+
         [Parameter(Mandatory)] [ValidateSet('Private','Shared')]
         [System.String] $DesktopType, # Type?
-        
+
         [Parameter()] [ValidateSet('Present','Absent')]
         [System.String] $Ensure = 'Present',
-        
+
         [Parameter()] [ValidateNotNullOrEmpty()]
         [System.String] $Description = $Name,
-        
+
         [Parameter()] [ValidateNotNullOrEmpty()]
         [System.String] $DisplayName = $Name,
-        
+
         [Parameter()] [ValidateNotNull()]
         [System.Boolean] $Enabled = $true,
-        
+
         [Parameter()] [ValidateSet('FourBit','EightBit','SixteenBit','TwentyFourBit')]
         [System.String] $ColorDepth = 'TwentyFourBit',
-        
+
         [Parameter()] [ValidateNotNull()]
         [System.Boolean] $IsMaintenanceMode = $false,
-        
+
         [Parameter()] [ValidateNotNull()]
         [System.Boolean] $IsRemotePC = $false,
-        
+
         [Parameter()] [ValidateNotNull()]
         [System.Boolean] $IsSecureIca = $false,
-        
+
         [Parameter()] [ValidateNotNull()]
         [System.Boolean] $ShutdownDesktopsAfterUse = $false,
-        
+
         [Parameter()] [ValidateNotNull()]
         [System.Boolean] $TurnOnAddedMachine = $false,
-        
+
         [Parameter()] [AllowNull()]
-        [System.Management.Automation.PSCredential] $Credential
+        [System.Management.Automation.PSCredential]
+        [System.Management.Automation.CredentialAttribute()]
+        $Credential
     )
     begin {
-        if (-not (TestXDModule -Name 'Citrix.Broker.Admin.V2' -IsSnapin)) {
-            ThrowInvalidProgramException -ErrorId 'Citrix.Broker.Admin.V2' -ErrorMessage $localizedData.XenDesktopSDKNotFoundError;
-        }
+        AssertXDModule -Name 'Citrix.Broker.Admin.V2' -IsSnapin;
     }
     process {
         $scriptBlock = {
             Add-PSSnapin -Name 'Citrix.Broker.Admin.V2' -ErrorAction Stop;
             Import-Module "$env:ProgramFiles\WindowsPowerShell\Modules\XenDesktop7\DSCResources\VE_XD7Common\VE_XD7Common.psd1" -Verbose:$false;
-        
+
             $deliveryGroup = Get-BrokerDesktopGroup -Name $using:Name -ErrorAction SilentlyContinue;
             if ($using:Ensure -eq 'Present') {
                 $brokerDeliveryGroupParams = @{

@@ -15,16 +15,19 @@ InModuleScope $sut {
 
             It 'Adds "ComputerName" key' {
                 AddInvokeScriptBlockCredentials -Hashtable $testHashtable -Credential $testCredentials;
+
                 $testHashtable['ComputerName'] | Should Be $env:COMPUTERNAME;
             }
 
             It 'Adds "Authentication" key' {
                 AddInvokeScriptBlockCredentials -Hashtable $testHashtable -Credential $testCredentials;
+
                 $testHashtable['Authentication'] | Should Be 'CredSSP';
             }
 
             It 'Adds "Credential" key' {
                 AddInvokeScriptBlockCredentials -Hashtable $testHashtable -Credential $testCredentials;
+
                 $testHashtable['Credential'] | Should Be $testCredentials;
             }
 
@@ -35,28 +38,33 @@ InModuleScope $sut {
             $testMachineDnsName = 'testmachine.local';
             $testMachine = [PSCustomObject] @{ DNSName = $testMachineDnsName; MachineName = $testMachineName; }
 
-            It 'Returns broker machine (by DNS name)' { 
+            It 'Returns broker machine (by DNS name)' {
                 Mock -CommandName Get-BrokerMachine -MockWith { return @($testMachine); }
+
                 GetXDBrokerMachine -MachineName $testMachineDnsName | Should Not Be $null;
             }
 
-            It 'Returns broker machine (by DomainName\NetBIOS name)' { 
+            It 'Returns broker machine (by DomainName\NetBIOS name)' {
                 Mock -CommandName Get-BrokerMachine -MockWith { return @($testMachine); }
+
                 GetXDBrokerMachine -MachineName $testMachineName | Should Not Be $null;
             }
 
-            It 'Returns broker machine (by NetBIOS name)' { 
+            It 'Returns broker machine (by NetBIOS name)' {
                 Mock -CommandName Get-BrokerMachine -MockWith { return @($testMachine); }
+
                 GetXDBrokerMachine -MachineName $testMachineName.Split('\')[1] | Should Not Be $null;
             }
 
             It 'Throws when no broker machine is found' {
                 Mock -CommandName Get-BrokerMachine -MockWith { }
+
                 { GetXDBrokerMachine -MachineName $testMachineName -ErrorAction Stop } | Should Throw;
             }
 
             It 'Throws when multiple broker machines are found' {
                 Mock -CommandName Get-BrokerMachine -MockWith { return @($testMachine, $testMachine); }
+
                 { GetXDBrokerMachine -MachineName $testMachineName -ErrorAction Stop } | Should Throw;
             }
 
@@ -68,107 +76,125 @@ InModuleScope $sut {
 
             It 'Returns True when member is present (by DNS name)' {
                 $members = @('testmachine1.local','testmachine2.local');
+
                 TestXDMachineIsExistingMember -MachineName $testMachineDnsName -ExistingMembers $members | Should Be $true;
             }
 
             It 'Returns True when member is present (by DomainName\NetBios name)' {
                 $members = @('testmachine1.local','testmachine2.local');
+
                 TestXDMachineIsExistingMember -MachineName $testMachineName -ExistingMembers $members | Should Be $true;
             }
 
             It 'Returns True when existing member is present (by NetBIOS name)' {
                 $members = @('testmachine1.local','testmachine2.local');
+
                 TestXDMachineIsExistingMember -MachineName $testMachineName.Split('\')[1] -ExistingMembers $members -WarningAction SilentlyContinue | Should Be $true;
             }
 
             It 'Returns False when member is absent (by DNS name)' {
                 $members = @('testmachine2.local','testmachine3.local');
+
                 TestXDMachineIsExistingMember -MachineName $testMachineDnsName -ExistingMembers $members | Should Be $false;
             }
 
             It 'Returns False when member is absent (by DomainName\NetBios name)' {
                 $members = @('testmachine2.local','testmachine3.local');
+
                 TestXDMachineIsExistingMember -MachineName $testMachineName -ExistingMembers $members | Should Be $false;
             }
 
             It 'Returns False when member is absent (by NetBIOS name)' {
                 $members = @('testmachine2.local','testmachine3.local');
+
                 TestXDMachineIsExistingMember -MachineName $testMachineName.Split('\')[1] -ExistingMembers $members -WarningAction SilentlyContinue | Should Be $false;
             }
 
         } #end context TestXDMachineIsExistingMember
 
         Context 'TestXDMachineMembership' {
-            
+
             It 'Returns True when "Ensure" = "Present" and members are present (by DNS name)' {
                 $requiredMembers = @('testmachine1.local','testmachine2.local');
                 $existingMembers = @('testmachine2.local','testmachine1.local');
+
                 TestXDMachineMembership -RequiredMembers $requiredMembers -ExistingMembers $existingMembers -Ensure Present | Should Be $true;
             }
 
             It 'Returns True when "Ensure" = "Present" and members are present (by DomainName\NetBIOS name)' {
                 $requiredMembers = @('TEST\TestMachine1','TEST\TestMachine2');
                 $existingMembers = @('testmachine2.local','testmachine1.local');
+
                 TestXDMachineMembership -RequiredMembers $requiredMembers -ExistingMembers $existingMembers -Ensure Present | Should Be $true;
             }
 
             It 'Returns True when "Ensure" = "Present" and members are present (by NetBIOS name)' {
                 $requiredMembers = @('TestMachine1','TestMachine2');
                 $existingMembers = @('testmachine2.local','testmachine1.local');
+
                 TestXDMachineMembership -RequiredMembers $requiredMembers -ExistingMembers $existingMembers -Ensure Present -WarningAction SilentlyContinue | Should Be $true;
             }
 
             It 'Returns False when "Ensure" = "Present" and members are absent by DNS name' {
                 $requiredMembers = @('testmachine1.local','testmachine3.local','testmachine2.local');
                 $existingMembers = @('testmachine2.local','testmachine1.local');
+
                 TestXDMachineMembership -RequiredMembers $requiredMembers -ExistingMembers $existingMembers -Ensure Present | Should Be $false;
             }
 
             It 'Returns False when "Ensure" = "Present" and members are absent (by DomainName\NetBIOS name)' {
                 $requiredMembers = @('TEST\TestMachine1','TEST\TestMachine3','TEST\TestMachine2');
                 $existingMembers = @('testmachine2.local','testmachine1.local');
+
                 TestXDMachineMembership -RequiredMembers $requiredMembers -ExistingMembers $existingMembers -Ensure Present | Should Be $false;
             }
 
             It 'Returns False when "Ensure" = "Present" and members are absent (by NetBIOS name)' {
                 $requiredMembers = @('TestMachine1','TestMachine3','TestMachine2');
                 $existingMembers = @('testmachine2.local','testmachine1.local');
+
                 TestXDMachineMembership -RequiredMembers $requiredMembers -ExistingMembers $existingMembers -Ensure Present -WarningAction SilentlyContinue | Should Be $false;
             }
 
             It 'Returns True when "Ensure" = "Absent" and members are absent (by DNS name)' {
                 $requiredMembers = @('testmachine3.local');
                 $existingMembers = @('testmachine2.local','testmachine1.local');
+
                 TestXDMachineMembership -RequiredMembers $requiredMembers -ExistingMembers $existingMembers -Ensure Absent | Should Be $true;
             }
 
             It 'Returns True when "Ensure" = "Absent" and members are absent (by DomainName\NetBIOS name)' {
                 $requiredMembers = @('TEST\TestMachine3','TEST\TestMachine4');
                 $existingMembers = @('testmachine2.local','testmachine1.local');
+
                 TestXDMachineMembership -RequiredMembers $requiredMembers -ExistingMembers $existingMembers -Ensure Absent | Should Be $true;
             }
 
             It 'Returns True when "Ensure" = "Absent" and members are absent (by NetBIOS name)' {
                 $requiredMembers = @('TestMachine3','TestMachine4');
                 $existingMembers = @('testmachine2.local','testmachine1.local');
+
                 TestXDMachineMembership -RequiredMembers $requiredMembers -ExistingMembers $existingMembers -Ensure Absent -WarningAction SilentlyContinue | Should Be $true;
             }
 
             It 'Returns False when "Ensure" = "Absent" and members are present (by DNS name)' {
                 $requiredMembers = @('testmachine1.local');
                 $existingMembers = @('testmachine2.local','testmachine1.local');
+
                 TestXDMachineMembership -RequiredMembers $requiredMembers -ExistingMembers $existingMembers -Ensure Absent | Should Be $false;
             }
 
             It 'Returns False when "Ensure" = "Absent" and members are present by (DomainName\NetBIOS name)' {
                 $requiredMembers = @('TEST\TestMachine3','TEST\TestMachine2');
                 $existingMembers = @('testmachine2.local','testmachine1.local');
+
                 TestXDMachineMembership -RequiredMembers $requiredMembers -ExistingMembers $existingMembers -Ensure Absent | Should Be $false;
             }
 
             It 'Returns False when "Ensure" = "Absent" and members are present (by NetBIOS name)' {
                 $requiredMembers = @('TestMachine2','TestMachine3');
                 $existingMembers = @('testmachine2.local','testmachine1.local');
+
                 TestXDMachineMembership -RequiredMembers $requiredMembers -ExistingMembers $existingMembers -Ensure Absent -WarningAction SilentlyContinue | Should Be $false;
             }
 
@@ -181,6 +207,7 @@ InModuleScope $sut {
                     @{ MachineName = 'TEST\TestMachine1'; DNSName = 'testmachine1.local'; }
                     @{ MachineName = 'TEST\TestMachine2'; DNSName = 'testmachine2.local'; }
                 )
+
                 ResolveXDBrokerMachine -MachineName testmachine1.local -BrokerMachines $brokerMachines | Should Not Be $null;
             }
 
@@ -189,6 +216,7 @@ InModuleScope $sut {
                     @{ MachineName = 'TEST\TestMachine1'; DNSName = 'testmachine1.local'; }
                     @{ MachineName = 'TEST\TestMachine2'; DNSName = 'testmachine2.local'; }
                 )
+
                 ResolveXDBrokerMachine -MachineName TEST\testmachine2 -BrokerMachines $brokerMachines | Should Not Be $null;
             }
 
@@ -197,14 +225,16 @@ InModuleScope $sut {
                     @{ MachineName = 'TEST\TestMachine1'; DNSName = 'testmachine1.local'; }
                     @{ MachineName = 'TEST\TestMachine2'; DNSName = 'testmachine2.local'; }
                 )
+
                 ResolveXDBrokerMachine -MachineName testmachine1 -BrokerMachines $brokerMachines | Should Not Be $null;
             }
-            
+
             It 'Returns $null when broker machine is absent (by DNS Name)' {
                 $brokerMachines = @(
                     @{ MachineName = 'TEST\TestMachine1'; DNSName = 'testmachine1.local'; }
                     @{ MachineName = 'TEST\TestMachine2'; DNSName = 'testmachine2.local'; }
                 )
+
                 ResolveXDBrokerMachine -MachineName testmachine3.local -BrokerMachines $brokerMachines | Should Be $null;
             }
 
@@ -213,6 +243,7 @@ InModuleScope $sut {
                     @{ MachineName = 'TEST\TestMachine1'; DNSName = 'testmachine1.local'; }
                     @{ MachineName = 'TEST\TestMachine2'; DNSName = 'testmachine2.local'; }
                 )
+
                 ResolveXDBrokerMachine -MachineName TEST\testmachine4 -BrokerMachines $brokerMachines | Should Be $null;
             }
 
@@ -221,8 +252,9 @@ InModuleScope $sut {
                     @{ MachineName = 'TEST\TestMachine1'; DNSName = 'testmachine1.local'; }
                     @{ MachineName = 'TEST\TestMachine2'; DNSName = 'testmachine2.local'; }
                 )
+
                 ResolveXDBrokerMachine -MachineName testmachine5 -BrokerMachines $brokerMachines | Should Be $null;
-            }         
+            }
 
         } #end context ResolveXDBrokerMachine
 
@@ -238,6 +270,7 @@ InModuleScope $sut {
             )
 
             foreach ($role in $roles) {
+
                 It "Returns True when ""$($role.Role)"" is installed" {
                     $getItemProperty = @(
                         ## Needs multiple Citrix* products to keep the pipeline alive
@@ -245,11 +278,14 @@ InModuleScope $sut {
                         [PSCustomObject] @{ Role = 'Citrix Other Product'; ProductName = 'Citrix Other Product'; }
                     );
                     Mock -CommandName Get-ItemProperty -MockWith { return $getItemProperty; }
+
                     GetXDInstalledRole -Role $role.Role | Should Be $true;
                 }
+
             }
 
             foreach ($role in $roles) {
+
                 It "Returns False when ""$($role.Role)"" is not installed" {
                     $getItemProperty = @(
                         ## Needs multiple Citrix* products to keep the pipeline alive
@@ -257,10 +293,12 @@ InModuleScope $sut {
                         [PSCustomObject] @{ Role = 'Citrix Other Product'; ProductName = 'Citrix Other Product'; }
                     );
                     Mock -CommandName Get-ItemProperty -MockWith { return $getItemProperty; }
+
                     GetXDInstalledRole -Role $role.Role | Should Be $false;
                 }
+
             }
-            
+
             It 'Returns False when "Director" is not installed, but the VDA is installed' {
                 $getItemProperty = @(
                     ## Needs multiple Citrix* products to keep the pipeline alive
@@ -268,12 +306,13 @@ InModuleScope $sut {
                     [PSCustomObject] @{ Role = 'Citrix Other Product'; ProductName = 'Citrix Other Product'; }
                 );
                 Mock -CommandName Get-ItemProperty -MockWith { return $getItemProperty; }
+
                 GetXDInstalledRole -Role 'Director' | Should Be $false;
             }
         }
-    
+
         Context 'ResolveXDSetupMedia' {
-            $testDrivePath = (Get-PSDrive -Name TestDrive).Root  
+            $testDrivePath = (Get-PSDrive -Name TestDrive).Root
             [ref] $null = New-Item -Path 'TestDrive:\x86\Xen Desktop Setup' -ItemType Directory;
             [ref] $null = New-Item -Path 'TestDrive:\x86\Xen Desktop Setup\XenDesktopServerSetup.exe' -ItemType File;
             [ref] $null = New-Item -Path 'TestDrive:\x86\Xen Desktop Setup\XenDesktopVdaSetup.exe' -ItemType File;
@@ -283,19 +322,23 @@ InModuleScope $sut {
 
             $architecture = 'x86';
             if ([System.Environment]::Is64BitOperatingSystem) { $architecture = 'x64' }
-    
+
             foreach ($role in @('Controller','Studio','Licensing','Director','Storefront')) {
+
                 It "Resolves ""$role"" role setup to ""XenDesktopServerSetup.exe""." {
                     $setup = ResolveXDSetupMedia -Role $role -SourcePath $testDrivePath;
+
                     $setup.EndsWith('XenDesktopServerSetup.exe') | Should Be $true;
                     $setup.Contains($architecture) | Should Be $true;
                 }
+
             }
-    
+
             It 'Throws when no valid installer found.' {
                 [ref] $null = New-Item -Path 'TestDrive:\Empty' -ItemType Directory;
+
                 { ResolveXDSetupMedia -Role $role -SourcePath "$testDrivePath\Empty" } | Should Throw;
-            }  
+            }
 
         } #end context ResolveXDSetupMedia
 

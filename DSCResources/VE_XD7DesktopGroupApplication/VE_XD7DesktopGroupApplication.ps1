@@ -7,44 +7,46 @@ function Get-TargetResource {
         ## Display name of the application
         [Parameter(Mandatory)] [ValidateNotNullOrEmpty()]
         [System.String] $Name,
-        
-        ## Path to the application executable 
+
+        ## Path to the application executable
         [Parameter(Mandatory)] [ValidateNotNullOrEmpty()]
         [System.String] $Path,
-        
+
         ## Desktop delivery group name
         [Parameter(Mandatory)] [ValidateNotNullOrEmpty()]
         [System.String] $DesktopGroupName,
-        
+
         ## Desktop delivery group name
         [Parameter()] [ValidateSet('HostedOnDesktop','InstalledOnClient')]
         [System.String] $ApplicationType = 'HostedOnDesktop',
-        
+
         ## Application executable arguments
         [Parameter()] [AllowNull()]
         [System.String] $Arguments,
 
-        ## Working directory of the application executable 
+        ## Working directory of the application executable
         [Parameter()] [AllowNull()]
         [System.String] $WorkingDirectory,
-                
+
         [Parameter()] [AllowNull()]
         [System.String] $Description,
 
         [Parameter()] [ValidateNotNullOrEmpty()]
         [System.String] $DisplayName = $Name,
-        
+
         [Parameter()] [ValidateNotNull()]
         [System.Boolean] $Enabled = $true,
-        
+
         [Parameter()] [ValidateNotNull()]
         [System.Boolean] $Visible = $true,
-        
+
         [Parameter()] [ValidateSet('Present','Absent')]
         [System.String] $Ensure = 'Present',
-        
+
         [Parameter()] [AllowNull()]
-        [System.Management.Automation.PSCredential] $Credential
+        [System.Management.Automation.PSCredential]
+        [System.Management.Automation.CredentialAttribute()]
+        $Credential
     )
     begin {
         AssertXDModule -Name 'Citrix.Broker.Admin.V2' -IsSnapin;
@@ -93,44 +95,46 @@ function Test-TargetResource {
         ## Display name of the application
         [Parameter(Mandatory)] [ValidateNotNullOrEmpty()]
         [System.String] $Name,
-        
-        ## Path to the application executable 
+
+        ## Path to the application executable
         [Parameter(Mandatory)] [ValidateNotNullOrEmpty()]
         [System.String] $Path,
-        
+
         ## Desktop delivery group name
         [Parameter(Mandatory)] [ValidateNotNullOrEmpty()]
         [System.String] $DesktopGroupName,
-        
+
         ## Desktop delivery group name
         [Parameter()] [ValidateSet('HostedOnDesktop','InstalledOnClient')]
         [System.String] $ApplicationType = 'HostedOnDesktop',
-        
+
         ## Application executable arguments
         [Parameter()] [AllowNull()]
         [System.String] $Arguments,
 
-        ## Working directory of the application executable 
+        ## Working directory of the application executable
         [Parameter()] [AllowNull()]
         [System.String] $WorkingDirectory,
-                
+
         [Parameter()] [AllowNull()]
         [System.String] $Description,
 
         [Parameter()] [ValidateNotNullOrEmpty()]
         [System.String] $DisplayName = $Name,
-        
+
         [Parameter()] [ValidateNotNull()]
         [System.Boolean] $Enabled = $true,
-        
+
         [Parameter()] [ValidateNotNull()]
         [System.Boolean] $Visible = $true,
-        
+
         [Parameter()] [ValidateSet('Present','Absent')]
         [System.String] $Ensure = 'Present',
-        
+
         [Parameter()] [AllowNull()]
-        [System.Management.Automation.PSCredential] $Credential
+        [System.Management.Automation.PSCredential]
+        [System.Management.Automation.CredentialAttribute()]
+        $Credential
     )
     process {
         $PSBoundParameters['Ensure'] = $Ensure;
@@ -166,44 +170,46 @@ function Set-TargetResource {
         ## Display name of the application
         [Parameter(Mandatory)] [ValidateNotNullOrEmpty()]
         [System.String] $Name,
-        
-        ## Path to the application executable 
+
+        ## Path to the application executable
         [Parameter(Mandatory)] [ValidateNotNullOrEmpty()]
         [System.String] $Path,
-        
+
         ## Desktop delivery group name
         [Parameter(Mandatory)] [ValidateNotNullOrEmpty()]
         [System.String] $DesktopGroupName,
-        
+
         ## Desktop delivery group name
         [Parameter()] [ValidateSet('HostedOnDesktop','InstalledOnClient')]
         [System.String] $ApplicationType = 'HostedOnDesktop',
-        
+
         ## Application executable arguments
         [Parameter()] [AllowNull()]
         [System.String] $Arguments,
 
-        ## Working directory of the application executable 
+        ## Working directory of the application executable
         [Parameter()] [AllowNull()]
         [System.String] $WorkingDirectory,
-                
+
         [Parameter()] [AllowNull()]
         [System.String] $Description,
 
         [Parameter()] [ValidateNotNullOrEmpty()]
         [System.String] $DisplayName = $Name,
-        
+
         [Parameter()] [ValidateNotNull()]
         [System.Boolean] $Enabled = $true,
-        
+
         [Parameter()] [ValidateNotNull()]
         [System.Boolean] $Visible = $true,
-        
+
         [Parameter()] [ValidateSet('Present','Absent')]
         [System.String] $Ensure = 'Present',
-        
+
         [Parameter()] [AllowNull()]
-        [System.Management.Automation.PSCredential] $Credential
+        [System.Management.Automation.PSCredential]
+        [System.Management.Automation.CredentialAttribute()]
+        $Credential
     )
     begin {
         AssertXDModule -Name 'Citrix.Common.Commands','Citrix.Broker.Admin.V2' -IsSnapin;
@@ -235,7 +241,7 @@ function Set-TargetResource {
             if ($null -ne $using:Visible) {
                 $applicationParams['Visible'] = $using:Visible;
             }
-            
+
             if ($application) {
                 if ($using:Ensure -eq 'Present') {
                     Write-Verbose -Message ($localizedData.UpdatingApplication -f $using:Name);

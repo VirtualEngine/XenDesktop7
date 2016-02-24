@@ -6,16 +6,18 @@ function Get-TargetResource {
     param (
         [Parameter(Mandatory)] [ValidateNotNullOrEmpty()]
         [System.String] $SiteName,
-        
+
         [Parameter(Mandatory)] [ValidateNotNullOrEmpty()]
         [System.String] $ExistingControllerName,
-        
+
         [Parameter()] [ValidateNotNull()]
-        [System.Management.Automation.PSCredential] $Credential,
-        
+        [System.Management.Automation.PSCredential]
+        [System.Management.Automation.CredentialAttribute()]
+        $Credential,
+
         [Parameter()]
         [System.UInt64] $RetryIntervalSec = 30,
-	    
+
         [Parameter()]
         [System.UInt32] $RetryCount = 10
     )
@@ -43,16 +45,18 @@ function Test-TargetResource {
     param (
         [Parameter(Mandatory)] [ValidateNotNullOrEmpty()]
         [System.String] $SiteName,
-        
+
         [Parameter(Mandatory)] [ValidateNotNullOrEmpty()]
         [System.String] $ExistingControllerName,
-        
+
         [Parameter()] [ValidateNotNull()]
-        [System.Management.Automation.PSCredential] $Credential,
-        
+        [System.Management.Automation.PSCredential]
+        [System.Management.Automation.CredentialAttribute()]
+        $Credential,
+
         [Parameter()]
         [System.UInt64] $RetryIntervalSec = 30,
-	    
+
         [Parameter()]
         [System.UInt32] $RetryCount = 10
     )
@@ -78,16 +82,18 @@ function Set-TargetResource {
     param (
         [Parameter(Mandatory)] [ValidateNotNullOrEmpty()]
         [System.String] $SiteName,
-        
+
         [Parameter(Mandatory)] [ValidateNotNullOrEmpty()]
         [System.String] $ExistingControllerName,
-        
+
         [Parameter()] [ValidateNotNull()]
-        [System.Management.Automation.PSCredential] $Credential,
-        
+        [System.Management.Automation.PSCredential]
+        [System.Management.Automation.CredentialAttribute()]
+        $Credential,
+
         [Parameter()]
         [System.UInt64] $RetryIntervalSec = 30,
-	    
+
         [Parameter()]
         [System.UInt32] $RetryCount = 10
     )
@@ -122,9 +128,11 @@ function TestXDSite {
     param (
         [Parameter(Mandatory)] [ValidateNotNullOrEmpty()]
         [System.String] $ExistingControllerName,
-        
+
         [Parameter()] [ValidateNotNull()]
-        [System.Management.Automation.PSCredential] $Credential
+        [System.Management.Automation.PSCredential]
+        [System.Management.Automation.CredentialAttribute()]
+        $Credential
     )
     process {
         $scriptBlock = {
@@ -136,7 +144,7 @@ function TestXDSite {
             catch { } # Get-XDSite doesn't support $ErrorActionPreference :@
             return $xdSite.Name
         } #end scriptBlock
-        
+
         $invokeCommandParams = @{
             ScriptBlock = $scriptBlock;
             ErrorAction = 'Stop';
