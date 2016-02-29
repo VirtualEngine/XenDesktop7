@@ -78,9 +78,11 @@ function Test-TargetResource {
         $targetResource = Get-TargetResource @PSBoundParameters;
         $isInCompliance = $true;
         if ($Ensure -ne $targetResource['Ensure']) {
+            Write-Verbose ($localizedData.ResourcePropertyMismatch -f 'Ensure', $Ensure, $targetResource['Ensure']);
             $isInCompliance = $false;
         }
         elseif (($Ensure -eq 'Present')-and ($Enabled -ne $targetResource['Enabled'])) {
+            Write-Verbose ($localizedData.ResourcePropertyMismatch -f 'Enabled', $Enabled, $targetResource['Enabled']);
             $isInCompliance = $false;
         }
 

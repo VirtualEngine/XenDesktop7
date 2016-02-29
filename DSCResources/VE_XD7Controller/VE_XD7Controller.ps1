@@ -31,7 +31,6 @@ function Get-TargetResource {
             $targetResource = @{
                 SiteName = $xdSite.Name;
                 ExistingControllerName = $using:ExistingControllerName;
-                Credential = $using:Credential;
                 Ensure = 'Absent';
             }
             if (($xdSite.Name -eq $using:SiteName) -and ($xdSite.Controllers.DnsName -contains $using:localHostName)) {

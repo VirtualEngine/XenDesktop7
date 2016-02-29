@@ -60,7 +60,8 @@ function Get-TargetResource {
             $desktopGroupAccessPolicy = Get-BrokerAccessPolicyRule -Name $using:Name -DesktopGroupUid $desktopGroup.Uid -ErrorAction SilentlyContinue;
             $targetResource = @{
                 DeliveryGroup = $using:DeliveryGroup;
-                AccessType = 'Direct';
+                Name = $desktopGroupAccessPolicy.Name;
+                AccessType = if ($desktopGroupAccessPolicy.AllowedConnections -eq 'ViaAG') { 'AccessGateway' } else { 'Direct' }
                 Enabled = $desktopGroupAccessPolicy.Enabled;
                 AllowRestart = $desktopGroupAccessPolicy.AllowRestart;
                 Protocol = [System.String[]] $desktopGroupAccessPolicy.AllowedProtocols;
@@ -68,17 +69,12 @@ function Get-TargetResource {
                 IncludeUsers = @()
                 ExcludeUsers = @();
                 Ensure = 'Absent';
-                Name = $using:Name;
-                Credential = $using:Credential;
             }
             $targetResource['IncludeUsers'] += $desktopGroupAccessPolicy.IncludedUsers | Where Name -ne $null | Select -ExpandProperty Name;
             $targetResource['ExcludeUsers'] += $desktopGroupAccessPolicy.ExcludedUsers | Where Name -ne $null | Select -ExpandProperty Name;
             if ($desktopGroupAccessPolicy) {
                 $targetResource.Ensure = 'Present';
             }
-            if ($desktopGroupAccessPolicy.AllowedConnections -eq 'ViaAG') {
-                $targetResource.AccessType = 'AccessGateway';
-            };
             return $targetResource;
         } #end scriptBlock
 
@@ -148,42 +144,32 @@ function Test-TargetResource {
         }
     } #end begin
     process {
+        $PSBoundParameters['Ensure'] = $Ensure;
         $targetResource = Get-TargetResource @PSBoundParameters;
-        $isInCompliance = $true;
-        if ($targetResource['Ensure'] -ne $Ensure) {
-            $isInCompliance = $false;
+        $inCompliance = $true;
+        foreach ($property in $PSBoundParameters.Keys) {
+            if ($targetResource.ContainsKey($property)) {
+                $expected = $PSBoundParameters[$property];
+                $actual = $targetResource[$property];
+                if ($PSBoundParameters[$property] -is [System.String[]]) {
+                    if (Compare-Object -ReferenceObject $expected -DifferenceObject $actual) {
+                        Write-Verbose ($localizedData.ResourcePropertyMismatch -f $property, ($expected -join ','), ($actual -join ','));
+                        $inCompliance = $false;
+                    }
+                }
+                elseif ($expected -ne $actual) {
+                    Write-Verbose ($localizedData.ResourcePropertyMismatch -f $property, $expected, $actual);
+                    $inCompliance = $false;
+                }
+            }
         }
-        elseif ($targetResource['AccessType'] -ne $AccessType) {
-            $isInCompliance = $false;
-        }
-        elseif ($targetResource['Enabled'] -ne $Enabled) {
-            $isInCompliance = $false;
-        }
-        elseif ($targetResource['AllowRestart'] -ne $AllowRestart) {
-            $isInCompliance = $false;
-        }
-        elseif ($targetResource['Name'] -ne $Name) {
-            $isInCompliance = $false;
-        }
-        elseif ($targetResource['Description'] -ne $Description) {
-            $isInCompliance = $false;
-        }
-        elseif (Compare-Object -ReferenceObject $Protocol -DifferenceObject $targetResource['Protocol']) {
-            $isInCompliance = $false;
-        }
-        elseif (Compare-Object -ReferenceObject $ExcludeUsers -DifferenceObject $targetResource['ExcludeUsers']) {
-            $isInCompliance = $false;
-        }
-        elseif (Compare-Object -ReferenceObject $IncludeUsers -DifferenceObject $targetResource['IncludeUsers']) {
-            $isInCompliance = $false;
-        }
-        if ($isInCompliance) {
-            Write-Verbose ($localizedData.ResourceInDesiredState -f $Name);
+        if ($inCompliance) {
+            Write-Verbose ($localizedData.ResourceInDesiredState -f $DeliveryGroup);
         }
         else {
-            Write-Verbose ($localizedData.ResourceNotInDesiredState -f $Name);
+            Write-Verbose ($localizedData.ResourceNotInDesiredState -f $DeliveryGroup);
         }
-        return $isInCompliance;
+        return $inCompliance;
     } #end process
 } #end function Test-TargetResource
 
@@ -244,13 +230,11 @@ function Set-TargetResource {
             $desktopGroupAccessPolicy = Get-BrokerAccessPolicyRule -Name $using:Name -DesktopGroupUid $desktopGroup.Uid -ErrorAction SilentlyContinue;
 
             if ($using:Ensure -eq 'Present') {
-                if ($using:AccessType -eq 'AccessGateway') { $allowedConnections = 'ViaAG'; }
-                else { $allowedConnections = 'NotViaAG'; }
                 $accessPolicyParams = @{
                     Enabled = $using:Enabled;
                     Description = $using:Description;
                     AllowRestart = $using:AllowRestart;
-                    AllowedConnections = $allowedConnections;
+                    AllowedConnections = if ($using:AccessType -eq 'AccessGateway') { 'ViaAG' } else { 'NotViaAG' }
                     AllowedProtocols = $using:Protocol;
                     IncludedUserFilterEnabled = $false;
                     IncludedUsers = @();
@@ -262,7 +246,9 @@ function Set-TargetResource {
                     $accessPolicyParams['IncludedUserFilterEnabled'] = $true;
                     foreach ($user in $using:IncludeUsers) {
                         $brokerUser = Get-BrokerUser -FullName $user -ErrorAction SilentlyContinue;
-                        if (-not $brokerUser) { $brokerUser = New-BrokerUser -Name $user -ErrorAction Stop; }
+                        if (-not $brokerUser) {
+                            $brokerUser = New-BrokerUser -Name $user -ErrorAction Stop;
+                        }
                         $accessPolicyParams['IncludedUsers'] += $brokerUser;
                     }
                 }
@@ -281,10 +267,10 @@ function Set-TargetResource {
                 if ($desktopGroupAccessPolicy) {
                     ## Can't change name or delivery group
                     if ($desktopGroup.Uid -ne $desktopGroupAccessPolicy.DesktopGroupUid) {
-                        throw;
+                        throw ($using:localizedData.ImmutablePropertyError -f 'Uid');
                     }
                     elseif ($using:Name -ne $desktopGroupAccessPolicy.Name) {
-                        throw;
+                        throw ($using:localizedData.ImmutablePropertyError -f 'Name');
                     }
                     Write-Verbose ($using:localizedData.UpdatingAccessPolicy -f $using:Name);
                     $desktopGroupAccessPolicy | Set-BrokerAccessPolicyRule @accessPolicyParams;

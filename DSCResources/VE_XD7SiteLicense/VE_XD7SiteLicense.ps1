@@ -92,36 +92,37 @@ function Test-TargetResource {
         $Credential
     )
     process {
-        $isInDesiredState = $true;
         if ($Ensure -eq 'Absent') {
             ## Not supported and we will always return $true
             Write-Warning $localizedData.RemovingLicenseServerPropertiesWarning;
         }
         else {
             $targetResource = Get-TargetResource @PSBoundParameters;
-            if ($LicenseServer -ne $targetResource['LicenseServer']) {
-                $isInDesiredState = $false;
+            $inCompliance = $true;
+            foreach ($property in $PSBoundParameters.Keys) {
+                if ($targetResource.ContainsKey($property)) {
+                    $expected = $PSBoundParameters[$property];
+                    $actual = $targetResource[$property];
+                    if ($PSBoundParameters[$property] -is [System.String[]]) {
+                        if (Compare-Object -ReferenceObject $expected -DifferenceObject $actual) {
+                            Write-Verbose ($localizedData.ResourcePropertyMismatch -f $property, ($expected -join ','), ($actual -join ','));
+                            $inCompliance = $false;
+                        }
+                    }
+                    elseif ($expected -ne $actual) {
+                        Write-Verbose ($localizedData.ResourcePropertyMismatch -f $property, $expected, $actual);
+                        $inCompliance = $false;
+                    }
+                }
             }
-            elseif ($LicenseServerPort -ne $targetResource['LicenseServerPort']) {
-                $isInDesiredState = $false;
-            }
-            elseif ($LicenseEdition -ne $targetResource['LicenseEdition']) {
-                $isInDesiredState = $false;
-            }
-            elseif ($LicenseModel -ne $targetResource['LicenseModel']) {
-                $isInDesiredState = $false;
-            }
-            elseif ($TrustLicenseServerCertificate -ne $targetResource['TrustLicenseServerCertificate']) {
-                $isInDesiredState = $false;
-            }
-            if ($isInDesiredState) {
-                Write-Verbose $localizedData.ResourceInDesiredState;
+            if ($inCompliance) {
+                Write-Verbose ($localizedData.ResourceInDesiredState -f $DeliveryGroup);
             }
             else {
-                Write-Verbose $localizedData.ResourceNotInDesiredState;
+                Write-Verbose ($localizedData.ResourceNotInDesiredState -f $DeliveryGroup);
             }
+            return $inCompliance;
         }
-        return $isInDesiredState;
     } #end process
 } #end function Test-TargetResource
 

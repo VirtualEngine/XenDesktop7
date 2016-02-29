@@ -37,7 +37,6 @@ function Get-TargetResource {
         $targetResource = @{
             Role = $Role;
             SourcePath = $SourcePath;
-            Credential = $Credential;
             InstallReceiver = $InstallReceiver;
             EnableRemoteAssistance = $EnableRemoteAssistance;
             Optimize = $Optimize;

@@ -74,7 +74,6 @@ function Get-TargetResource {
                 ShutdownDesktopsAfterUse = $deliveryGroup.ShutdownDesktopsAfterUse;
                 TurnOnAddedMachine = $deliveryGroup.TurnOnAddedMachine
                 Ensure = 'Absent';
-                Credential = $using:Credential;
             }
             if ($deliveryGroup) {
                 $targetResource['Ensure'] = 'Present';
@@ -152,48 +151,20 @@ function Test-TargetResource {
         $Credential
     )
     process {
+        $PSBoundParameters['Ensure'] = $Ensure;
         $targetResource = Get-TargetResource @PSBoundParameters;
-        $isInCompliance = $true;
-        if ($targetResource['Ensure'] -ne $Ensure) {
-            $isInCompliance = $false;
+        $inCompliance = $true;
+        foreach ($property in $PSBoundParameters.Keys) {
+            if ($targetResource.ContainsKey($property)) {
+                $expected = $PSBoundParameters[$property];
+                $actual = $targetResource[$property];
+                if ($expected -ne $actual) {
+                    Write-Verbose ($localizedData.ResourcePropertyMismatch -f $property, $expected, $actual);
+                    $inCompliance = $false;
+                }
+            }
         }
-        elseif ($targetResource['IsMultiSession'] -ne $IsMultiSession) {
-            $isInCompliance = $false;
-        }
-        elseif ($targetResource['DeliveryType'] -ne $DeliveryType) {
-            $isInCompliance = $false;
-        }
-        elseif ($targetResource['Description'] -ne $Description) {
-            $isInCompliance = $false;
-        }
-        elseif ($targetResource['DesktopType'] -ne $DesktopType) {
-            $isInCompliance = $false;
-        }
-        elseif ($targetResource['DisplayName'] -ne $DisplayName) {
-            $isInCompliance = $false;
-        }
-        elseif ($targetResource['Enabled'] -ne $Enabled) {
-            $isInCompliance = $false;
-        }
-        elseif ($targetResource['ColorDepth'] -ne $ColorDepth) {
-            $isInCompliance = $false;
-        }
-        elseif ($targetResource['IsMaintenanceMode'] -ne $IsMaintenanceMode) {
-            $isInCompliance = $false;
-        }
-        elseif ($targetResource['IsRemotePC'] -ne $IsRemotePC) {
-            $isInCompliance = $false;
-        }
-        elseif ($targetResource['IsSecureIca'] -ne $IsSecureIca) {
-            $isInCompliance = $false;
-        }
-        elseif ($targetResource['ShutdownDesktopsAfterUse'] -ne $ShutdownDesktopsAfterUse) {
-            $isInCompliance = $false;
-        }
-        elseif ($targetResource['TurnOnAddedMachine'] -ne $TurnOnAddedMachine) {
-            $isInCompliance = $false;
-        }
-        if ($isInCompliance) {
+        if ($inCompliance) {
             Write-Verbose ($localizedData.ResourceInDesiredState -f $Name);
             return $true;
         }

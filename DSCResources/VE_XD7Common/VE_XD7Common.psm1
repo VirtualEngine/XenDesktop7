@@ -169,7 +169,7 @@ function TestXDModule {
             }
         }
         else {
-            if (FindXDModule @PSBoundParameters) {
+            if (FindXDModule -Name $Name -Path $Path) {
                 return $true;
             }
         }

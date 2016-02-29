@@ -80,7 +80,7 @@ InModuleScope $sut {
                 Test-TargetResource -LicenseServer 'CustomServer' | Should Be $false;
             }
 
-            It 'Returns False when "LicenseServer" is incorrect' {
+            It 'Returns False when "LicenseServerPort" is incorrect' {
                 Test-TargetResource @testSiteLicense -LicenseServerPort 27001 | Should Be $false;
             }
 

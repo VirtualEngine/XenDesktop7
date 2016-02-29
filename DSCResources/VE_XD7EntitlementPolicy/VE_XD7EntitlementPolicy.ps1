@@ -61,8 +61,7 @@ function Get-TargetResource {
                 IncludeUsers = @()
                 ExcludeUsers = @();
                 Ensure = 'Absent';
-                Name = $using:Name;
-                Credential = $using:Credential;
+                Name = $entitlementPolicy.Name;
             }
             $targetResource['IncludeUsers'] += $entitlementPolicy.IncludedUsers | Where Name -ne $null | Select -ExpandProperty Name;
             $targetResource['ExcludeUsers'] += $entitlementPolicy.ExcludedUsers | Where Name -ne $null | Select -ExpandProperty Name;
@@ -132,33 +131,32 @@ function Test-TargetResource {
         }
     } #end begin
     process {
+        $PSBoundParameters['Ensure'] = $Ensure;
         $targetResource = Get-TargetResource @PSBoundParameters;
-        $isInCompliance = $true;
-        if ($targetResource['Ensure'] -ne $Ensure) {
-            $isInCompliance = $false;
+        $inCompliance = $true;
+        foreach ($property in $PSBoundParameters.Keys) {
+            if ($targetResource.ContainsKey($property)) {
+                $expected = $PSBoundParameters[$property];
+                $actual = $targetResource[$property];
+                if ($PSBoundParameters[$property] -is [System.String[]]) {
+                    if (Compare-Object -ReferenceObject $expected -DifferenceObject $actual) {
+                        Write-Verbose ($localizedData.ResourcePropertyMismatch -f $property, ($expected -join ','), ($actual -join ','));
+                        $inCompliance = $false;
+                    }
+                }
+                elseif ($expected -ne $actual) {
+                    Write-Verbose ($localizedData.ResourcePropertyMismatch -f $property, $expected, $actual);
+                    $inCompliance = $false;
+                }
+            }
         }
-        elseif ($targetResource['Enabled'] -ne $Enabled) {
-            $isInCompliance = $false;
-        }
-        elseif ($targetResource['Name'] -ne $Name) {
-            $isInCompliance = $false;
-        }
-        elseif ($targetResource['Description'] -ne ([System.String] $Description)) {
-            $isInCompliance = $false;
-        }
-        elseif (Compare-Object -ReferenceObject $ExcludeUsers -DifferenceObject $targetResource['ExcludeUsers']) {
-            $isInCompliance = $false;
-        }
-        elseif (Compare-Object -ReferenceObject $IncludeUsers -DifferenceObject $targetResource['IncludeUsers']) {
-            $isInCompliance = $false;
-        }
-        if ($isInCompliance) {
-            Write-Verbose ($localizedData.ResourceInDesiredState -f $Name);
+        if ($inCompliance) {
+            Write-Verbose ($localizedData.ResourceInDesiredState -f $DeliveryGroup);
         }
         else {
-            Write-Verbose ($localizedData.ResourceNotInDesiredState -f $Name);
+            Write-Verbose ($localizedData.ResourceNotInDesiredState -f $DeliveryGroup);
         }
-        return $isInCompliance;
+        return $inCompliance;
     } #end process
 } #end function Test-TargetResource
 
@@ -212,11 +210,12 @@ function Set-TargetResource {
                 $entitlementPolicy = Get-BrokerEntitlementPolicyRule -Name $using:Name -DesktopGroupUid $desktopGroup.Uid -ErrorAction SilentlyContinue;
             }
             elseif ($using:EntitlementType -eq 'Application') {
-                $entitlementPolicy = Get-AppBrokerEntitlementPolicyRule -Name $using:Name -DesktopGroupUid $desktopGroup.Uid -ErrorAction SilentlyContinue;
+                $entitlementPolicy = Get-BrokerAppEntitlementPolicyRule -Name $using:Name -DesktopGroupUid $desktopGroup.Uid -ErrorAction SilentlyContinue;
             }
 
             if ($using:Ensure -eq 'Present') {
                 $entitlementPolicyParams = @{
+                    Name = $using:Name;
                     Enabled = $using:Enabled;
                     Description = $using:Description;
                     IncludedUserFilterEnabled = $false;
@@ -249,6 +248,7 @@ function Set-TargetResource {
 
                 if ($entitlementPolicy) {
                     if ($using:EntitlementType -eq 'Desktop') {
+                        $entitlementPolicyParams['PublishedName'] = $using:Name;
                         Write-Verbose ($using:localizedData.UpdatingDesktopEntitlementPolicy -f $using:Name);
                         $entitlementPolicy | Set-BrokerEntitlementPolicyRule @entitlementPolicyParams;
                     }
@@ -258,9 +258,9 @@ function Set-TargetResource {
                     }
                 }
                 else {
-                    $entitlementPolicyParams['Name'] = $using:Name;
                     $entitlementPolicyParams['DesktopGroupUid'] = $desktopGroup.Uid;
                     if ($using:EntitlementType -eq 'Desktop') {
+                        $entitlementPolicyParams['PublishedName'] = $using:Name;
                         Write-Verbose ($using:localizedData.AddingDesktopEntitlementPolicy -f $using:Name);
                         New-BrokerEntitlementPolicyRule @entitlementPolicyParams;
                     }

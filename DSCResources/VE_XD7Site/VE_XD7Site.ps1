@@ -85,26 +85,30 @@ function Test-TargetResource {
     )
     process {
         $targetResource = Get-TargetResource @PSBoundParameters;
-        $inCompliance = $true;
-        if ($targetResource.SiteName -ne $SiteName) {
-            $inCompliance = $false;
-        }
-        elseif ($targetResource.SiteDatabaseName -ne $SiteDatabaseName) {
-            $inCompliance = $false;
-        }
-        elseif ($targetResource.LoggingDatabaseName -ne $LoggingDatabaseName) {
-            $inCompliance = $false;
-        }
-        elseif ($targetResource.MonitorDatabaseName -ne $MonitorDatabaseName) {
-            $inCompliance = $false;
-        }
-        if ($inCompliance) {
-            Write-Verbose ($localizedData.ResourceInDesiredState -f $SiteName);
-        }
-        else {
-            Write-Verbose ($localizedData.ResourceNotInDesiredState -f $SiteName);
-        }
-        return $inCompliance;
+            $inCompliance = $true;
+            foreach ($property in $PSBoundParameters.Keys) {
+                if ($targetResource.ContainsKey($property)) {
+                    $expected = $PSBoundParameters[$property];
+                    $actual = $targetResource[$property];
+                    if ($PSBoundParameters[$property] -is [System.String[]]) {
+                        if (Compare-Object -ReferenceObject $expected -DifferenceObject $actual) {
+                            Write-Verbose ($localizedData.ResourcePropertyMismatch -f $property, ($expected -join ','), ($actual -join ','));
+                            $inCompliance = $false;
+                        }
+                    }
+                    elseif ($expected -ne $actual) {
+                        Write-Verbose ($localizedData.ResourcePropertyMismatch -f $property, $expected, $actual);
+                        $inCompliance = $false;
+                    }
+                }
+            }
+            if ($inCompliance) {
+                Write-Verbose ($localizedData.ResourceInDesiredState -f $DeliveryGroup);
+            }
+            else {
+                Write-Verbose ($localizedData.ResourceNotInDesiredState -f $DeliveryGroup);
+            }
+            return $inCompliance;
     } #end process
 } #end function Test-TargetResource
 

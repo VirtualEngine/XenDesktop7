@@ -31,7 +31,6 @@ function Get-TargetResource {
         $targetResource = @{
             SiteName = $SiteName;
             ExistingControllerName = $ExistingControllerName;
-            Credential = $Credential;
             RetryIntervalSec = $RetryIntervalSec;
             RetryCount = $RetryCount;
         }

@@ -26,7 +26,6 @@ function Get-TargetResource {
             SiteName = $SiteName;
             DataStore = $DataStore;
             DatabaseServer = $DatabaseServer;
-            Credential = $Credential;
             DatabaseName = '';
         }
         if (TestMSSQLDatabase -DatabaseServer $DatabaseServer -DatabaseName $DatabaseName -Credential $Credential) {

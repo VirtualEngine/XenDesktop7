@@ -51,7 +51,6 @@ function Get-TargetResource {
                 PvsAddress = $brokerCatalog.PvsAddress;
                 PvsDomain = $brokerCatalog.PvsDomain;
                 IsMultiSession = $brokerCatalog.SessionSupport -eq 'MultiSession';
-                Credential = $using:Credential;
                 Ensure = $using:Ensure;
             }
             switch ($brokerCatalog.PersistUserChanges) {
@@ -123,10 +122,12 @@ function Test-TargetResource {
         $PSBoundParameters['Ensure'] = $Ensure;
         $targetResource = Get-TargetResource @PSBoundParameters;
         $inCompliance = $true;
-        foreach ($property in $targetResource.Keys) {
-            if ($targetResource.$property -ne $PSBoundParameters.$property) {
-                Write-Verbose ($localizedData.MachineCatalogPropertyMismatch -f $property, $PSBoundParameters.$property, $targetResource.$property);
-                $inCompliance = $false;
+        foreach ($property in $PSBoundParameters.Keys) {
+            if ($targetResource.ContainsKey($property)) {
+                if ($targetResource[$property] -ne $PSBoundParameters[$property]) {
+                    Write-Verbose ($localizedData.ResourcePropertyMismatch -f $property, $PSBoundParameters[$property], $targetResource[$property]);
+                    $inCompliance = $false;
+                }
             }
         }
         if ($inCompliance) {

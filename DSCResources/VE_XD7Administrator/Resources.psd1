@@ -5,6 +5,7 @@ ConvertFrom-StringData @'
     UpdatingAdministrator = Updating Citrix XenDesktop 7.x administrator '{0}'.
     AddingAdministrator = Adding Citrix XenDesktop 7.x administrator '{0}'.
     RemovingAdministrator = Removing Citrix XenDesktop 7.x administrator '{0}'.
+    ResourcePropertyMismatch = Property '{0}' is NOT in desired state; expected '{1}', actual '{2}'.
     ResourceInDesiredState = Citrix XenDesktop 7.x administrator '{0}' is in the desired state.
     ResourceNotInDesiredState = Citrix XenDesktop 7.x administrator '{0}' is NOT in the desired state.
     InvokingScriptBlockWithParams = Invoking script block with parameters: '{0}'.

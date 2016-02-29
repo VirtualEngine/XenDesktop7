@@ -16,15 +16,27 @@ InModuleScope $sut {
             Persistence = 'PVD'; # Discard, Local, PVD
         }
 
-        $stubCatalog = [PSCustomObject] @{
-            Name = 'Test Catalog';
-            AllocationType = 'Permanent'; # Permanent, Random, Static
-            ProvisioningType = 'MCS'; # Manual, PVS, MCS
+        $fakeResource = @{
+            Name = $testCatalog.Name;
+            Allocation = $testCatalog.Allocation;
+            Provisioning = $testCatalog.Provisioning;
+            Persistence = $testCatalog.Persistence;
+            IsMultiSession = $false;
+            Description = 'This is a test machine catalog';
+            PvsAddress = 'pvs.contoso.com';
+            PvsDomain = 'PVSDomain';
+            Ensure = 'Present';
+        }
+
+        $fakeBrokerCatalog = [PSCustomObject] @{
+            Name = $stubCatalog.Name;
+            AllocationType = $stubCatalog.Allocation;
+            ProvisioningType = $stubCatalog.Provisioning;
             PersistUserChanges = 'OnPvd'; # Discard, OnLocal, OnPvd
             SessionSupport = 'SingleSession'; # SingleSession, MultiSession
-            Description = 'This is a test machine catalog';
-            PvsAddress = $null;
-            PvsDomain = $null;
+            Description = $stubCatalog.Description;
+            PvsAddress = $stubCatalog.PvsAddress;
+            PvsDomain = $stubCatalog.PvsDomain;
         };
         $testCredentials = New-Object System.Management.Automation.PSCredential 'DummyUser', (ConvertTo-SecureString 'DummyPassword' -AsPlainText -Force);
 
@@ -33,7 +45,7 @@ InModuleScope $sut {
             Mock -CommandName Add-PSSnapin -MockWith { }
 
             It 'Returns a System.Collections.Hashtable type' {
-                Mock -CommandName Get-BrokerCatalog -MockWith { return $stubCatalog; }
+                Mock -CommandName Get-BrokerCatalog -MockWith { return $fakeBrokerCatalog; }
                 Mock -CommandName Invoke-Command -MockWith { & $ScriptBlock; }
 
                 (Get-TargetResource @testCatalog) -is [System.Collections.Hashtable] | Should Be $true;
@@ -75,6 +87,114 @@ InModuleScope $sut {
             }
 
         } #end context Get-TargetResource
+
+        Context 'Test-TargetResource' {
+            Mock -CommandName AssertXDModule -MockWith { };
+
+            It 'Returns a System.Boolean type' {
+                Mock -CommandName Get-TargetResource -MockWith { return $fakeResource; }
+
+                (Test-TargetResource @testCatalog) -is [System.Boolean] | Should Be $true;
+            }
+
+            It "Passes when catalog mandatory parameters are correct" {
+                Mock -CommandName Get-TargetResource -MockWith { return $fakeResource; }
+
+                $result = Test-TargetResource @testCatalog;
+
+                $result | Should Be $true;
+            }
+
+            $testPresentProperties = @(
+                'IsMultiSession',
+                'Description',
+                'PvsAddress',
+                'PvsDomain',
+                'Ensure'
+            )
+            foreach ($property in $testPresentProperties) {
+
+                It "Passes when catalog '$property' is correct" {
+                    Mock -CommandName Get-TargetResource -MockWith { return $fakeResource; }
+                    $testTargetResourceParams = $testCatalog.Clone();
+                    $testTargetResourceParams[$property] = $fakeResource[$property];
+
+                    $result = Test-TargetResource @testTargetResourceParams;
+
+                    $result | Should Be $true;
+                }
+            }
+
+            $testAbsentProperties = @(
+                'Name',
+                'IsMultiSession',
+                'Description',
+                'PvsAddress',
+                'PvsDomain'
+            )
+            foreach ($property in $testAbsentProperties) {
+
+                It "Fails when catalog '$property' is incorrect" {
+                    Mock -CommandName Get-TargetResource -MockWith { return $fakeResource; }
+                    $testTargetResourceParams = $testCatalog.Clone();
+
+                    if ($fakeResource[$property] -is [System.String]) {
+                        $testTargetResourceParams[$property] = '!{0}' -f $fakeResource[$property];
+
+                    }
+                    elseif ($fakeResource[$property] -is [System.Boolean]) {
+                        $testTargetResourceParams[$property] = -not $fakeResource[$property];
+                    }
+
+                    $result = Test-TargetResource @testTargetResourceParams;
+
+                    $result | Should Be $false;
+                }
+            }
+
+            It "Fails when catalog 'Allocation' is incorrect" {
+                Mock -CommandName Get-TargetResource -MockWith { return $fakeResource; }
+                $missingCatalog = $fakeResource.Clone();
+                $missingCatalog['Allocation'] = 'Static';
+
+                $result = Test-TargetResource @missingCatalog;
+
+                $result | Should Be $false;
+            }
+
+            It "Fails when catalog 'Provisioning' is incorrect" {
+                Mock -CommandName Get-TargetResource -MockWith { return $fakeResource; }
+                $missingCatalog = $fakeResource.Clone();
+                $missingCatalog['Provisioning'] = 'Manual';
+
+                $result = Test-TargetResource @missingCatalog;
+
+                $result | Should Be $false;
+            }
+
+            It "Fails when catalog 'Persistence' is incorrect" {
+                Mock -CommandName Get-TargetResource -MockWith { return $fakeResource; }
+                $missingCatalog = $fakeResource.Clone();
+                $missingCatalog['Persistence'] = 'Discard';
+
+                $result = Test-TargetResource @missingCatalog;
+
+                $result | Should Be $false;
+            }
+
+            It "Fails when catalog 'Ensure' is incorrect" {
+                Mock -CommandName Get-TargetResource -MockWith { return $fakeResource; }
+                $missingCatalog = $fakeResource.Clone();
+                $missingCatalog['Ensure'] = 'Absent';
+
+                $result = Test-TargetResource @missingCatalog;
+
+                $result | Should Be $false;
+            }
+
+
+
+        } #end context Test-TargetResource
 
     } #end describe XD7Catalog
 

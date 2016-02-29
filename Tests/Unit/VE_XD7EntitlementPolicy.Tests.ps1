@@ -8,12 +8,21 @@ InModuleScope $sut {
     function Get-BrokerDesktopGroup { }
     function Get-BrokerEntitlementPolicyRule { }
     function Get-BrokerAppEntitlementPolicyRule { }
+    function Get-BrokerUser { }
+    function New-BrokerUser { }
+    function Set-BrokerEntitlementPolicyRule { }
+    function Set-BrokerAppEntitlementPolicyRule { }
+    function New-BrokerEntitlementPolicyRule { }
+    function New-BrokerAppEntitlementPolicyRule { }
+    function Remove-BrokerEntitlementPolicyRule { }
+    function Remove-BrokerAppEntitlementPolicyRule { }
 
     Describe 'XenDesktop7\VE_XD7EntitlementPolicy' {
 
         $testDeliveryGroupName = 'Test Delivery Group';
         $testEntitlementPolicy = @{
             DeliveryGroup = $testDeliveryGroupName;
+            EntitlementType = 'Desktop';
         }
         $stubBrokerEntitlementPolicy = @{
             Enabled = $true;
@@ -21,15 +30,26 @@ InModuleScope $sut {
             IncludedUsers = @( @{ Name = 'TEST\IncludedUser'; });
             ExcludedUsers = @( @{ Name = 'TEST\ExcludedUser'; });
         }
-        $stubDesktopTargetResource = @{
-            DeliveryGroup = $testDeliveryGroupName;
-            EntitlementType = 'Desktop';
+        $fakeResource = @{
+            DeliveryGroup = $testEntitlementPolicy.DeliveryGroup;
+            Name = '{0}_{1}' -f $testEntitlementPolicy.DeliveryGroup, $testEntitlementPolicy.EntitlementType;
+            EntitlementType = $testEntitlementPolicy.EntitlementType;
             Enabled = $true;
-            Name = "$($testDeliveryGroupName)_Desktop";
-            Description = ''; # Description gets coerced into a [System.String]
+            Description = 'Test Entitlement'; # Description gets coerced into a [System.String]
             IncludeUsers = @('TEST\IncludedUser');
             ExcludeUsers = @('TEST\ExcludedUser');
             Ensure = 'Present';
+        }
+
+        $fakeEntitlementPolicyRule = [PSCustomObject] @{
+            DesktopGroupUid = 1;
+            Name = $fakeResource.Name;
+            Enabled = $fakeResource.Enabled;
+            PublishedName = $fakeResource.PublishedName;
+            IncludedUsers = $fakeResource.IncludedUsers;
+            ExcludedUsers = $fakeResource.ExcludedUsers;
+            Description = $fakeResource.Description;
+
         }
         $testCredentials = New-Object System.Management.Automation.PSCredential 'DummyUser', (ConvertTo-SecureString 'DummyPassword' -AsPlainText -Force);
 
@@ -41,7 +61,7 @@ InModuleScope $sut {
                 Mock -CommandName Get-BrokerDesktopGroup { return $stubBrokerEntitlementPolicy; }
                 Mock -CommandName Invoke-Command -MockWith { & $ScriptBlock; }
 
-                (Get-TargetResource @testEntitlementPolicy -EntitlementType Desktop) -is [System.Collections.Hashtable] | Should Be $true;
+                (Get-TargetResource @testEntitlementPolicy) -is [System.Collections.Hashtable] | Should Be $true;
             }
 
             It 'Calls "Get-BrokerEntitlementPolicyRule" when "EntitlementType" = "Desktop"' {
@@ -49,7 +69,7 @@ InModuleScope $sut {
                 Mock -CommandName Get-BrokerEntitlementPolicyRule -MockWith { }
                 Mock -CommandName Get-BrokerAppEntitlementPolicyRule -MockWith { }
 
-                $targetResource = Get-TargetResource @testEntitlementPolicy -EntitlementType Desktop;
+                $targetResource = Get-TargetResource @testEntitlementPolicy;
 
                 Assert-MockCalled -CommandName Get-BrokerEntitlementPolicyRule -Exactly 1 -Scope It;
                 Assert-MockCalled -CommandName Get-BrokerAppEntitlementPolicyRule -Exactly 0 -Scope It;
@@ -60,7 +80,10 @@ InModuleScope $sut {
                 Mock -CommandName Get-BrokerEntitlementPolicyRule -MockWith { }
                 Mock -CommandName Get-BrokerAppEntitlementPolicyRule -MockWith { }
 
-                $targetResource = Get-TargetResource @testEntitlementPolicy -EntitlementType Application;
+                $getTargetResourceParams = $testEntitlementPolicy.Clone();
+                $getTargetResourceParams['EntitlementType'] = 'Application';
+
+                $targetResource = Get-TargetResource @getTargetResourceParams;
 
                 Assert-MockCalled -CommandName Get-BrokerEntitlementPolicyRule -Exactly 0 -Scope It;
                 Assert-MockCalled -CommandName Get-BrokerAppEntitlementPolicyRule -Exactly 1 -Scope It;
@@ -69,7 +92,7 @@ InModuleScope $sut {
             It 'Invokes script block without credentials by default' {
                 Mock -CommandName Invoke-Command -ParameterFilter { $Credential -eq $null -and $Authentication -eq $null } { }
 
-                $targetResource = Get-TargetResource @testEntitlementPolicy -EntitlementType Desktop;
+                $targetResource = Get-TargetResource @testEntitlementPolicy;
 
                 Assert-MockCalled Invoke-Command -ParameterFilter { $Credential -eq $null -and $Authentication -eq $null } -Exactly 1 -Scope It;
             }
@@ -79,7 +102,7 @@ InModuleScope $sut {
                 $testEntitlementPolicyWithCredentials = $testEntitlementPolicy.Clone();
                 $testEntitlementPolicyWithCredentials['Credential'] = $testCredentials;
 
-                $targetResource = Get-TargetResource @testEntitlementPolicyWithCredentials -EntitlementType Desktop;
+                $targetResource = Get-TargetResource @testEntitlementPolicyWithCredentials;
 
                 Assert-MockCalled Invoke-Command -ParameterFilter { $Credential -eq $testCredentials -and $Authentication -eq 'CredSSP' } -Exactly 1 -Scope It;
             }
@@ -87,7 +110,7 @@ InModuleScope $sut {
             It 'Asserts "Citrix.Broker.Admin.V2" module is registered' {
                 Mock AssertXDModule -ParameterFilter { $Name -eq 'Citrix.Broker.Admin.V2' } -MockWith { }
 
-                Set-TargetResource @testEntitlementPolicy -EntitlementType Desktop
+                Set-TargetResource @testEntitlementPolicy;
 
                 Assert-MockCalled AssertXDModule -ParameterFilter { $Name -eq 'Citrix.Broker.Admin.V2' } -Scope It;
             }
@@ -96,123 +119,94 @@ InModuleScope $sut {
 
         Context 'Test-TargetResource' {
 
+            Mock -CommandName AssertXDModule -MockWith { };
+
             It 'Returns a System.Boolean type' {
-                Mock -CommandName Get-TargetResource -MockWith { return $stubDesktopTargetResource; }
+                Mock -CommandName Get-TargetResource -MockWith { return $fakeResource; }
 
-                (Test-TargetResource @testEntitlementPolicy -EntitlementType Desktop) -is [System.Boolean] | Should Be $true;
+                $result = Test-TargetResource @testEntitlementPolicy;
+
+                $result -is [System.Boolean] | Should Be $true;
             }
 
-            It 'Returns True when all properties are equal' {
-                Mock -CommandName Get-TargetResource -MockWith { return $stubDesktopTargetResource; }
-                $targetResourceParams = @{
-                    DeliveryGroup = $testDeliveryGroupName;
-                    EntitlementType = 'Desktop';
-                    IncludeUsers = 'TEST\IncludedUser';
-                    ExcludeUsers = 'TEST\ExcludedUser';
+            It "Passes when entitlement mandatory parameters are correct" {
+                Mock -CommandName Get-TargetResource -MockWith { return $fakeResource; }
+
+                $result = Test-TargetResource @testEntitlementPolicy;
+
+                $result | Should Be $true;
+            }
+
+            $testPresentProperties = @(
+                'Enabled',
+                'Description',
+                'IncludeUsers',
+                'ExcludeUsers',
+                'Ensure'
+            )
+            foreach ($property in $testPresentProperties) {
+
+                It "Passes when entitlement '$property' is correct" {
+                    Mock -CommandName Get-TargetResource -MockWith { return $fakeResource; }
+                    $testTargetResourceParams = $testEntitlementPolicy.Clone();
+                    $testTargetResourceParams[$property] = $fakeResource[$property];
+
+                    $result = Test-TargetResource @testTargetResourceParams;
+
+                    $result | Should Be $true;
                 }
-
-                Test-TargetResource @targetResourceParams | Should Be $true;
             }
 
-            It 'Returns False when "Ensure" is incorrect' {
-                Mock -CommandName Get-TargetResource -MockWith { return $stubDesktopTargetResource; }
-                $targetResourceParams = @{
-                    DeliveryGroup = $testDeliveryGroupName;
-                    EntitlementType = 'Desktop';
-                    IncludeUsers = 'TEST\IncludedUser';
-                    ExcludeUsers = 'TEST\ExcludedUser';
-                    Ensure = 'Absent';
+            $testAbsentProperties = @(
+                'Enabled',
+                'Description',
+                'IncludeUsers',
+                'ExcludeUsers'
+            )
+            foreach ($property in $testAbsentProperties) {
+
+                It "Fails when entitlement '$property' is incorrect" {
+                    Mock -CommandName Get-TargetResource -MockWith { return $fakeResource; }
+                    $testTargetResourceParams = $testEntitlementPolicy.Clone();
+
+                    if ($fakeResource[$property] -is [System.Object[]]) {
+                        $testTargetResourceParams[$property] = @('Random','Things');
+                    }
+                    elseif ($fakeResource[$property] -is [System.String]) {
+                        $testTargetResourceParams[$property] = '!{0}' -f $fakeResource[$property];
+
+                    }
+                    elseif ($fakeResource[$property] -is [System.Boolean]) {
+                        $testTargetResourceParams[$property] = -not $fakeResource[$property];
+                    }
+
+                    $result = Test-TargetResource @testTargetResourceParams;
+
+                    $result | Should Be $false;
                 }
-
-                Test-TargetResource @targetResourceParams | Should Be $false;
             }
 
-            It 'Returns False when "Enabled" is incorrect' {
-                Mock -CommandName Get-TargetResource -MockWith { return $stubDesktopTargetResource; }
-                $targetResourceParams = @{
-                    DeliveryGroup = $testDeliveryGroupName;
-                    EntitlementType = 'Desktop';
-                    IncludeUsers = 'TEST\IncludedUser';
-                    ExcludeUsers = 'TEST\ExcludedUser';
-                    Enabled = $false;
-                }
+             #region ValidateSet parameters
+            It "Fails when entitlement 'EntitlementType' parameter is incorrect" {
+                Mock -CommandName Get-TargetResource -MockWith { return $fakeResource; }
+                $testTargetResourceParams = $testEntitlementPolicy.Clone();
+                $testTargetResourceParams['EntitlementType'] = 'Application';
 
-                Test-TargetResource @targetResourceParams | Should Be $false;
+                $result = Test-TargetResource @testTargetResourceParams;
+
+                $result | Should Be $false;
             }
 
-            It 'Returns False when "Name" is incorrect' {
-                Mock -CommandName Get-TargetResource -MockWith { return $stubDesktopTargetResource; }
-                $targetResourceParams = @{
-                    DeliveryGroup = $testDeliveryGroupName;
-                    EntitlementType = 'Desktop';
-                    IncludeUsers = 'TEST\IncludedUser';
-                    ExcludeUsers = 'TEST\ExcludedUser';
-                    Name = 'My Custom Name';
-                }
+            It "Fails when entitlement 'Ensure' parameter is incorrect" {
+                Mock -CommandName Get-TargetResource -MockWith { return $fakeResource; }
+                $testTargetResourceParams = $testEntitlementPolicy.Clone();
+                $testTargetResourceParams['Ensure'] = 'Absent';
 
-                Test-TargetResource @targetResourceParams | Should Be $false;
+                $result = Test-TargetResource @testTargetResourceParams;
+
+                $result | Should Be $false;
             }
-
-            It 'Returns False when "Description" is incorrect' {
-                Mock -CommandName Get-TargetResource -MockWith { return $stubDesktopTargetResource; }
-                $targetResourceParams = @{
-                    DeliveryGroup = $testDeliveryGroupName;
-                    EntitlementType = 'Desktop';
-                    IncludeUsers = 'TEST\IncludedUser';
-                    ExcludeUsers = 'TEST\ExcludedUser';
-                    Description = 'My Custom Description';
-                }
-
-                Test-TargetResource @targetResourceParams | Should Be $false;
-            }
-
-            It 'Returns False when "ExcludeUsers" has additional members' {
-                Mock -CommandName Get-TargetResource -MockWith { return $stubDesktopTargetResource; }
-                $targetResourceParams = @{
-                    DeliveryGroup = $testDeliveryGroupName;
-                    EntitlementType = 'Desktop';
-                    IncludeUsers = 'TEST\IncludedUser';
-                    ExcludeUsers = 'TEST\ExcludedUser','TEST\IncludedUser';
-                }
-
-                Test-TargetResource @targetResourceParams | Should Be $false;
-            }
-
-            It 'Returns False when "ExcludeUsers" has missing members' {
-                Mock -CommandName Get-TargetResource -MockWith { return $stubDesktopTargetResource; }
-                $targetResourceParams = @{
-                    DeliveryGroup = $testDeliveryGroupName;
-                    EntitlementType = 'Desktop';
-                    IncludeUsers = 'TEST\IncludedUser';
-                    ExcludeUsers = '';
-                }
-
-                Test-TargetResource @targetResourceParams | Should Be $false;
-            }
-
-            It 'Returns False when "IncludeUsers" has additional members' {
-                Mock -CommandName Get-TargetResource -MockWith { return $stubDesktopTargetResource; }
-                $targetResourceParams = @{
-                    DeliveryGroup = $testDeliveryGroupName;
-                    EntitlementType = 'Desktop';
-                    IncludeUsers = 'TEST\IncludedUser','TEST\ExcludedUser';
-                    ExcludeUsers = 'TEST\ExcludedUser';
-                }
-
-                Test-TargetResource @targetResourceParams | Should Be $false;
-            }
-
-            It 'Returns False when "IncludeUsers" has missing members' {
-                Mock -CommandName Get-TargetResource -MockWith { return $stubDesktopTargetResource; }
-                $targetResourceParams = @{
-                    DeliveryGroup = $testDeliveryGroupName;
-                    EntitlementType = 'Desktop';
-                    IncludeUsers = '';
-                    ExcludeUsers = 'TEST\ExcludedUser';
-                }
-
-                Test-TargetResource @targetResourceParams | Should Be $false;
-            }
+            #endregion ValidateSet parameters
 
         } #end context Test-TargetResource
 

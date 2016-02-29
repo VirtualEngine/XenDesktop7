@@ -29,7 +29,6 @@ function Get-TargetResource {
                 Name = $using:Name;
                 Members = $brokerMachines;
                 Ensure = $using:Ensure;
-                Credential = $using:Credential;
             }
             return $targetResource;
         } #end scriptBlock
@@ -70,6 +69,7 @@ function Test-TargetResource {
     process {
         $targetResource = Get-TargetResource @PSBoundParameters;
         if (TestXDMachineMembership -RequiredMembers $Members -ExistingMembers $targetResource.Members -Ensure $Ensure) {
+            Write-Verbose ($localizedData.ResourcePropertyMismatch -f 'Members', $Members, $targetResource.Members);
             Write-Verbose ($localizedData.ResourceInDesiredState -f $Name);
             return $true;
         }

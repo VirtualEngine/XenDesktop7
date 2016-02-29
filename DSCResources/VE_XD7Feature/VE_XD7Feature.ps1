@@ -22,7 +22,6 @@ function Get-TargetResource {
         $targetResource = @{
             Role = $Role;
             SourcePath = $SourcePath;
-            Credential = $Credential;
             Ensure = 'Absent';
         }
         if (TestXDInstalledRole -Role $Role) {
