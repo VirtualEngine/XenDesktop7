@@ -171,7 +171,6 @@ function Set-TargetResource {
         if ($PSBoundParameters.ContainsKey('Credential')) {
             $startWaitProcessParams['Credential'] = $Credential;
         }
-        else {
         $exitCode = StartWaitProcess @startWaitProcessParams;
         # The Citrix XenDesktop VDA requires a reboot
         $global:DSCMachineStatus = 1;
