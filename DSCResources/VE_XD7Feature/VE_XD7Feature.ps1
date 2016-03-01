@@ -102,8 +102,15 @@ function Set-TargetResource {
         }
         Write-Verbose ($localizedData.LogDirectorySet -f $logPath);
         Write-Verbose ($localizedData.SourceDirectorySet -f $SourcePath);
-        $installMediaPath = ResolveXDSetupMedia -Role $Role -SourcePath $SourcePath;
-        $exitCode = StartWaitProcess -FilePath $installMediaPath -ArgumentList $installarguments -Credential $Credential;
+        $startWaitProcessParams = @{
+            FilePath = ResolveXDSetupMedia -Role $Role -SourcePath $SourcePath;
+            ArgumentList = $installArguments;
+        }
+        if ($PSBoundParameters.ContainsKey('Credential')) {
+            $startWaitProcessParams['Credential'] = $Credential;
+        }
+        else {
+        $exitCode = StartWaitProcess @startWaitProcessParams;
         # Check for reboot
         if (($exitCode -eq 3010) -or ($Role -eq 'Controller')) {
             $global:DSCMachineStatus = 1;

@@ -44,7 +44,7 @@ XD7AccessPolicy [string]
 * **AccessType**: The access policy filter type.
 * **Enabled**: Whether the access policy is enabled. If not specified, it defaults to True.
 * **AllowRestart**: Whether users are permitted to restart desktop group machines. If not specified, it defaults to True.
-* **Name**: Name of the access policy. If not specified, it defaults to DesktopGroup_Direct or DesktopGroup_AG.
+* **Name**: Name of the access policy. If not specified, it defaults to `DesktopGroup_Direct` or `DesktopGroup_AG`.
 * **Description**: Custom description assigned to the access policy rule.
 * **Protocol**: Permitted protocols. If not specified, it defaults to both HDX and RDP.
 * **IncludeUsers**: List of associated Active Directory user and groups assigned to the access policy.
@@ -307,7 +307,7 @@ XD7DesktopGroupMember [string]
 }
 ```
 ###Properties
-* **Name**: Name of the desktop group to allocate members to. 
+* **Name**: Name of the desktop group to allocate members to.
 * **Members**: Active Directory computer account names to assign to the desktop group.
 * **Ensure**: Specifies whether the specified Active Directory computer accounts are present in the desktop group or not. If not specified, this value defaults to Present.
 * **Credential**: Specifies optional credential of a user which has permissions to modify the desktop group. __This property is required for Powershell 4.0.__
@@ -398,7 +398,7 @@ XD7EntitlementPolicy [string]
 * **DeliveryGroup**: The name of the delivery group to include and/or exclude users to.
 * **EntitlementType**: Whether the entitlement is applies to a desktop or an application.
 * **Enabled**: Flags whether the entitlement is enabled. If not specified, this value defaults to True.
-* **Name**: Name of entitlement. If not specified, it defaults to ...
+* **Name**: Name of entitlement. If not specified, it defaults to `DeliveryGroup_EntitlementType`.
 * **Description**: Optional description of the entitlement.
 * **IncludeUser**: Users(s) explicitly included in the entitlement.
 * **ExcludeUser**: User(s) explicitly excluded from the entitlement.
@@ -513,7 +513,7 @@ Configuration XD7SiteExample {
         SiteDatabaseName = 'MySiteDatabase'
         LoggingDatabaseName = 'MyLoggingDatabase'
         MonitorDatabaseName = 'MyMonitorDatabase'
-    }    
+    }
 }
 ```
 XD7SiteLicense
@@ -545,7 +545,7 @@ Configuration XD7SiteLicenseExample {
     Import-DscResource -ModuleName XenDesktop7
     XD7SiteLicense XD7SiteLicensing {
         LicenseServer = 'citrixls.lab.local'
-    }    
+    }
 }
 ```
 XD7VDAController
@@ -572,7 +572,7 @@ Configuration XD7VDAControllerExample {
     }
     XD7VDAController XD7VDAController2 {
         Name = 'controller2.lab.local'
-    }    
+    }
 }
 ```
 XD7VDAFeature
@@ -625,7 +625,7 @@ XD7WaitForSite [string]
     ExistingControllerName = [string]
     [RetryIntervalSec = [uint64]]
     [RetryCount = [uint32]]
-    [Credential = [PSCredential]]    
+    [Credential = [PSCredential]]
 }
 ```
 ###Properties

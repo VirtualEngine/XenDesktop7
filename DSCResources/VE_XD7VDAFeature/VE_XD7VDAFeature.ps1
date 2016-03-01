@@ -143,7 +143,6 @@ function Set-TargetResource {
     process {
         Write-Verbose ($localizedData.LogDirectorySet -f $logPath);
         Write-Verbose ($localizedData.SourceDirectorySet -f $SourcePath);
-        $installMediaPath = ResolveXDSetupMedia -Role $Role -SourcePath $SourcePath;
 
         $resolveXDVdaSetupArgumentParams = @{
             Role = $Role;
@@ -164,8 +163,17 @@ function Set-TargetResource {
             $resolveXDVdaSetupArgumentParams['InstallReceiver'] = $InstallReceiver;
             $installArguments = ResolveXDVdaSetupArguments @resolveXDVdaSetupArgumentParams -Uninstall;
         }
-        $exitCode = StartWaitProcess -FilePath $installMediaPath -ArgumentList $installarguments -Credential $Credential;
-        # The Citrix XenDesktop requires a reboot
+
+        $startWaitProcessParams = @{
+            FilePath = ResolveXDSetupMedia -Role $Role -SourcePath $SourcePath;
+            ArgumentList = $installArguments;
+        }
+        if ($PSBoundParameters.ContainsKey('Credential')) {
+            $startWaitProcessParams['Credential'] = $Credential;
+        }
+        else {
+        $exitCode = StartWaitProcess @startWaitProcessParams;
+        # The Citrix XenDesktop VDA requires a reboot
         $global:DSCMachineStatus = 1;
     } #end process
 } #end function Set-TargetResource
