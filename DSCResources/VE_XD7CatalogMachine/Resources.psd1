@@ -1,4 +1,4 @@
-<# XD7MachineCatalogMachine\Resources.psd1 #>
+<# XD7CatalogMachine\Resources.psd1 #>
 ConvertFrom-StringData @'
     XenDesktopSDKNotFoundError = The Citrix Powershell SDK/Snap-in was not found.
     InvokingScriptBlockWithParams = Invoking script block with parameters: '{0}'.

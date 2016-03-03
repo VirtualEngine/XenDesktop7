@@ -1,3 +1,4 @@
+<# XD7Administrator\Resources.psd1 #>
 ConvertFrom-StringData @'
     XenDesktopSDKNotFoundError = Citrix XenDesktop 7.x Powershell SDK/Snap-in was not found.
     MissingAdministrator = Citrix XenDesktop 7.x administrator '{0}' is missing and will be added.

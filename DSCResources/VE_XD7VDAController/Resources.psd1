@@ -1,3 +1,4 @@
+<# XD7VDAController\Resources.psd1 #>
 ConvertFrom-StringData @'
     MissingDeliveryController = Citrix XenDesktop 7.x delivery controller '{0}' is missing and will be added.
     AdditionalDeliveryController = Citrix XenDesktop 7.x delivery controller '{0}' is present and will be removed.

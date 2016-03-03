@@ -142,6 +142,10 @@ function FindXDModule {
     )
     process {
         $module = Get-ChildItem -Path $Path -Include "$Name.psd1" -File -Recurse;
+        if (-not $module) {
+            # If we have no .psd1 file, search for a .psm1 (for StoreFront)
+            $module = Get-ChildItem -Path $Path -Include "$Name.psm1" -File -Recurse;
+        }
         return $module.FullName;
     } #end process
 } #end function FindModule

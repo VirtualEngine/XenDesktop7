@@ -14,6 +14,7 @@ Included Resources
 * XD7Role
 * XD7Site
 * XD7SiteLicense
+* XD7StoreFrontBaseUrl
 * XD7VDAController
 * XD7VDAFeature
 * XD7WaitForSite
@@ -545,6 +546,28 @@ Configuration XD7SiteLicenseExample {
     Import-DscResource -ModuleName XenDesktop7
     XD7SiteLicense XD7SiteLicensing {
         LicenseServer = 'citrixls.lab.local'
+    }
+}
+```
+XD7StoreFrontBaseUrl
+================
+Configures the base URL of a Citrix StoreFront 2.x or 3.x server.
+###Syntax
+```
+XD7StoreFrontBaseUrl [string]
+{
+    BaseUrl = [string]
+}
+```
+###Properties
+* **BaseUrl**: Base URL to assign to the StoreFront server/group, e.g. https://storefront.lab.local/
+
+###Configuration
+```
+Configuration XD7StoreFrontBaseUrlExample {
+    Import-DscResource -ModuleName XenDesktop7
+    XD7StoreFrontBaseUrl 'storefront_lab_local' {
+        BaseUrl = 'https://storefront.lab.local/'
     }
 }
 ```

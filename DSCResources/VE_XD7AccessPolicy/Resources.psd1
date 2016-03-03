@@ -1,3 +1,4 @@
+<# XD7AccessPolicy\Resources.psd1 #>
 ConvertFrom-StringData @'
     XenDesktopSDKNotFoundError = Citrix XenDesktop 7.x Powershell SDK/Snap-in was not found.
     ImmutablePropertyError = Citrix XenDesktop 7.x access policy property '{0}' cannot be changed.

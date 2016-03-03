@@ -1,3 +1,4 @@
+<# XD7WaitForSite\Resources.psd1 #>
 ConvertFrom-StringData @'
     XenDesktopSDKNotFoundError = The Citrix Powershell SDK/Snap-in was not found.
     TestingXDSite = Testing for Citrix XenDesktop 7.x '{0}' site availability on controller '{1}'.
