@@ -59,7 +59,7 @@ function Get-TargetResource {
             $targetResource = @{
                 Name = $using:Name;
                 Path = $application.CommandLineExecutable;
-                ApplicationType = $application.ApplicationType;
+                ApplicationType = $application.ApplicationType.ToString();
                 Arguments = $application.CommandLineArguments;
                 WorkingDirectory = $application.WorkingDirectory;
                 Description = $application.Description;
