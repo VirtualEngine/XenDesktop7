@@ -59,7 +59,7 @@ function Get-TargetResource {
             $targetResource = @{
                 Name = $using:Name;
                 Path = $application.CommandLineExecutable;
-                ApplicationType = $application.ApplicationType.ToString();
+                ApplicationType = if ($application) { $application.ApplicationType.ToString() };
                 Arguments = $application.CommandLineArguments;
                 WorkingDirectory = $application.WorkingDirectory;
                 Description = $application.Description;
@@ -255,11 +255,16 @@ function Set-TargetResource {
             else {
                 if ($using:Ensure -eq 'Present') {
                     Write-Verbose -Message ($localizedData.AddingApplicationIcon -f $using:Name);
-                    $icon = Get-CTXIcon -file $using:Path | Select-Object -First 1 | New-BrokerIcon
+                    try {
+                        $icon = Get-CTXIcon -file $using:Path | Select-Object -First 1 | New-BrokerIcon
+                        $applicationParams['IconUid'] = $icon.Uid;
+                    }
+                    catch {
+                        Write-Warning -Message ($localizedData.CannotLocateIconWarning -f $using:Path);
+                    }
                     $applicationParams['Name'] = $using:Name;
                     $applicationParams['ApplicationType'] = $using:ApplicationType;
                     $applicationParams['DesktopGroup'] = $desktopGroup;
-                    $applicationParams['IconUid'] = $icon.Uid;
                     Write-Verbose -Message ($localizedData.AddingApplication -f $using:Name);
                     [ref] $null = New-BrokerApplication @applicationParams;
                 }

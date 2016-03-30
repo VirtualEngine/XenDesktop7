@@ -2,6 +2,7 @@
 ConvertFrom-StringData @'
     XenDesktopSDKNotFoundError = Citrix XenDesktop 7.x Powershell SDK/Snap-in was not found.
     ImmutablePropertyError = Citrix XenDesktop 7.x property '{0}' cannot be modified post-creation. Remove the object and then recreate.
+    CannotLocateIconWarning = Cannot locate icon for file '{0}'.
     ApplicationPropertyMismatch = Application property '{0}' mismatch; expected '{1}', actual '{2}'.
     AddingApplicationIcon = Adding Citrix XenDesktop 7.x '{0}' application icon.
     AddingApplication = Adding Citrix XenDesktop 7.x application '{0}'.
