@@ -186,29 +186,29 @@ function Set-TargetResource {
                 if ($brokerCatalog) {
                     $recreateMachineCatalog = $false;
                     if ($brokerCatalog.AllocationType -ne $using:Allocation) {
-                        Write-Warning ($localizedData.ChangingMachineCatalogUnsupportedWarning -f $using:Name, 'Allocation');
+                        Write-Warning ($using:localizedData.ChangingMachineCatalogUnsupportedWarning -f $using:Name, 'Allocation');
                         $recreateMachineCatalog = $true;
                     }
                     elseif ($brokerCatalog.ProvisioningType -ne $using:Provisioning) {
-                        Write-Warning ($localizedData.ChangingMachineCatalogUnsupportedWarning -f $using:Name, 'Provisioning');
+                        Write-Warning ($using:localizedData.ChangingMachineCatalogUnsupportedWarning -f $using:Name, 'Provisioning');
                         $recreateMachineCatalog = $true;
                     }
                     elseif (($brokerCatalog.PersistUserChanges -replace 'On', '') -ne $using:Persistence) {
-                        Write-Warning ($localizedData.ChangingMachineCatalogUnsupportedWarning -f $using:Name, 'Persistence');
+                        Write-Warning ($using:localizedData.ChangingMachineCatalogUnsupportedWarning -f $using:Name, 'Persistence');
                         $recreateMachineCatalog = $true;
                     }
                     elseif ($brokerCatalog.SessionSupport -eq 'Multisession' -and $using:IsMultiSession -ne $true) {
-                        Write-Warning ($localizedData.ChangingMachineCatalogUnsupportedWarning -f $using:Name, 'Session');
+                        Write-Warning ($using:localizedData.ChangingMachineCatalogUnsupportedWarning -f $using:Name, 'Session');
                         $recreateMachineCatalog = $true;
                     }
 
                     if ($recreateMachineCatalog) {
-                        Write-Verbose ($localizedData.RemovingMachineCatalog -f $using:Name);
+                        Write-Verbose ($using:localizedData.RemovingMachineCatalog -f $using:Name);
                         [ref] $null = Remove-BrokerCatalog -Name $using:Name;
                         $brokerCatalog = $null;
                     }
                     else {
-                        Write-Verbose ($localizedData.UpdatingMachineCatalog -f $using:Name);
+                        Write-Verbose ($using:localizedData.UpdatingMachineCatalog -f $using:Name);
                         $setBrokerCatalogParams = @{
                             Name = $using:Name;
                             Description = $using:Description;
@@ -257,7 +257,7 @@ function Set-TargetResource {
                 }
             }
             else {
-                Write-Verbose ($localizedData.RemovingMachineCatalog -f $using:Name);
+                Write-Verbose ($using:localizedData.RemovingMachineCatalog -f $using:Name);
                 [ref] $null = Remove-BrokerCatalog -Name $using:Name;
             }
         } #end scriptBlock

@@ -273,7 +273,7 @@ function Set-TargetResource {
                         $brokerDeliveryGroupParams['SessionSupport'] = 'SingleSession';
                     }
                     $brokerDeliveryGroupParams['DesktopKind'] = $using:DesktopType;
-                    Write-Verbose ($localizedData.AddingDeliveryGroup -f $using:Name);
+                    Write-Verbose ($using:localizedData.AddingDeliveryGroup -f $using:Name);
                     New-BrokerDesktopGroup @brokerDeliveryGroupparams;
                 }
             }

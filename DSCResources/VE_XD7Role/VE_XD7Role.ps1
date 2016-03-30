@@ -146,8 +146,7 @@ function Set-TargetResource {
             Add-PSSnapin -Name 'Citrix.DelegatedAdmin.Admin.V1' -ErrorAction Stop;
             if ($using:Ensure -eq 'Present') {
                 foreach ($member in $using:Members) {
-                    $addingRoleMember = 'Adding Citrix XenDesktop 7.x Administrator ''{0}'' to role ''{1}''.';
-                    Write-Verbose ($addingRoleMember -f $member, $using:Name);
+                    Write-Verbose ($using:localizedData.AddingRoleMember -f $member, $using:Name);
                     Add-AdminRight -Administrator $member -Role $using:Name -Scope $using:RoleScope;
                 }
             }
@@ -157,8 +156,7 @@ function Set-TargetResource {
                         $_.RoleName -eq $using:Name -and $_.ScopeName -eq $using:RoleScope
                     };
                     if ($hasAdminRights) {
-                        $removingRoleMember = 'Removing Citrix XenDesktop 7.x Administrator ''{0}'' from role ''{1}''.';
-                        Write-Verbose ($removingRoleMember -f $member, $using:Name);
+                        Write-Verbose ($using:localizedData.RemovingRoleMember -f $member, $using:Name);
                         Remove-AdminRight -Administrator $member -Role $using:Name -Scope $using:RoleScope;
                     }
                 }

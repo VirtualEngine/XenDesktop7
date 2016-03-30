@@ -244,28 +244,28 @@ function Set-TargetResource {
 
             if ($application) {
                 if ($using:Ensure -eq 'Present') {
-                    Write-Verbose -Message ($localizedData.UpdatingApplication -f $using:Name);
+                    Write-Verbose -Message ($using:localizedData.UpdatingApplication -f $using:Name);
                     Set-BrokerApplication -InputObject $application @applicationParams;
                 }
                 else {
-                    Write-Verbose -Message ($localizedData.RemovingApplication -f $using:Name);
+                    Write-Verbose -Message ($using:localizedData.RemovingApplication -f $using:Name);
                     Remove-BrokerApplication -InputObject $application;
                 }
             }
             else {
                 if ($using:Ensure -eq 'Present') {
-                    Write-Verbose -Message ($localizedData.AddingApplicationIcon -f $using:Name);
+                    Write-Verbose -Message ($using:localizedData.AddingApplicationIcon -f $using:Name);
                     try {
-                        $icon = Get-CTXIcon -file $using:Path | Select-Object -First 1 | New-BrokerIcon
+                        $icon = Get-CTXIcon -FilePath $using:Path -ErrorAction Stop | Select-Object -First 1 | New-BrokerIcon;
                         $applicationParams['IconUid'] = $icon.Uid;
                     }
                     catch {
-                        Write-Warning -Message ($localizedData.CannotLocateIconWarning -f $using:Path);
+                        Write-Warning -Message ($using:localizedData.CannotLocateIconWarning -f $using:Path);
                     }
                     $applicationParams['Name'] = $using:Name;
                     $applicationParams['ApplicationType'] = $using:ApplicationType;
                     $applicationParams['DesktopGroup'] = $desktopGroup;
-                    Write-Verbose -Message ($localizedData.AddingApplication -f $using:Name);
+                    Write-Verbose -Message ($using:localizedData.AddingApplication -f $using:Name);
                     [ref] $null = New-BrokerApplication @applicationParams;
                 }
             }
