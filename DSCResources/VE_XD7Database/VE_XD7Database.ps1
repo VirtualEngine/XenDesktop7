@@ -28,8 +28,15 @@ function Get-TargetResource {
             DatabaseServer = $DatabaseServer;
             DatabaseName = '';
         }
-        if (TestMSSQLDatabase -DatabaseServer $DatabaseServer -DatabaseName $DatabaseName -Credential $Credential) {
-            $targetResource['DatabaseName'] = $DatabaseName;
+        if ($PSBoundParameters.ContainsKey('Credential')) {
+            if (TestMSSQLDatabase -DatabaseServer $DatabaseServer -DatabaseName $DatabaseName -Credential $Credential) {
+                $targetResource['DatabaseName'] = $DatabaseName;
+            }
+        }
+        else {
+            if (TestMSSQLDatabase -DatabaseServer $DatabaseServer -DatabaseName $DatabaseName) {
+                $targetResource['DatabaseName'] = $DatabaseName;
+            }
         }
         return $targetResource;
     } #end process
@@ -103,7 +110,9 @@ function Set-TargetResource {
                 DatabaseName = $using:DatabaseName;
                 DataStore = $using:DataStore;
                 SiteName = $using:SiteName;
-                DatabaseCredentials = $using:Credential;
+            }
+            if ($using:Credential) {
+                $newXDDatabaseParams['DatabaseCredentials'] = $using:Credential;
             }
             Write-Verbose ($using:localizedData.CreatingXDDatabase -f $using:DataStore, $using:DatabaseName, $using:DatabaseServer);
             New-XDDatabase @newXDDatabaseParams;
