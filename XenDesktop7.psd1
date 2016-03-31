@@ -9,4 +9,12 @@
     CLRVersion = '4.0';
     FunctionsToExport = '*';
     CmdletsToExport = '*';
+    PrivateData = @{
+        PSData = @{
+            Tags = @('VirtualEngine','Citrix','XenDesktop','DSC');
+            LicenseUri = 'https://github.com/VirtualEngine/XenDesktop7/blob/master/LICENSE';
+            ProjectUri = 'https://github.com/VirtualEngine/XenDesktop7';
+            IconUri = 'https://raw.githubusercontent.com/VirtualEngine/XenDesktop7/master/CitrixReceiver.png';
+        } # End of PSData hashtable
+    } # End of PrivateData hashtable
 }
