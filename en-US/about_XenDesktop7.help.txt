@@ -16,12 +16,14 @@ LONG DESCRIPTION
     * XD7Controller
     * XD7Database
     * XD7DesktopGroup
+    * XD7DesktopGroupApplication
     * XD7DesktopGroupMember
     * XD7EntitlementPolicy
     * XD7Feature
     * XD7Role
     * XD7Site
     * XD7SiteLicense
+    * XD7StoreFrontBaseUrl
     * XD7VDAController
     * XD7VDAFeature
     * XD7WaitForSite
@@ -30,6 +32,9 @@ CREDITS
     The XD7Role resource is a derivitive of the works of Brian Ehlert (@brianeh) of Citrix Systems, Inc. and the
     Citrix XenDesktop Desired State Configuration Resource provider
     (http://blogs.citrix.com/2014/10/09/tech-preview-xendesktop-desired-state-configuration-resource-provider/)
+
+    Image attribution
+    http://osullivanluke.deviantart.com/art/ORB-OS-X-Icon-Pack-by-Luke-O-Sullivan-UPDATEDx2-455360778
 
 KEYWORDS
     DSC, DSC Resource, Citrix, XenDesktop
