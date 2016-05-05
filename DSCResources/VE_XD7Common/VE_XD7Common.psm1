@@ -1,4 +1,4 @@
-Import-LocalizedData -BindingVariable localizedData -FileName Resources.psd1;
+Import-LocalizedData -BindingVariable localized -FileName Resources.psd1;
 
 #region Private Functions
 
@@ -107,20 +107,20 @@ function StartWaitProcess {
             $displayParams = [System.String]::Join(' ', $ArgumentList);
             $startProcessParams['ArgumentList'] = $ArgumentList;
         }
-        Write-Verbose ($localizedData.StartingProcess -f $FilePath, $displayParams);
+        Write-Verbose ($localized.StartingProcess -f $FilePath, $displayParams);
         if ($Credential) {
-            Write-Verbose ($localizedData.StartingProcessAs -f $Credential.UserName);
+            Write-Verbose ($localized.StartingProcessAs -f $Credential.UserName);
             $startProcessParams['Credential'] = $Credential;
         }
         if ($PSCmdlet.ShouldProcess($FilePath, 'Start Process')) {
             $process = Start-Process @startProcessParams -ErrorAction Stop;
         }
         if ($PSCmdlet.ShouldProcess($FilePath, 'Wait Process')) {
-            Write-Verbose ($localizedData.ProcessLaunched -f $process.Id);
-            Write-Verbose ($localizedData.WaitingForProcessToExit -f $process.Id);
+            Write-Verbose ($localized.ProcessLaunched -f $process.Id);
+            Write-Verbose ($localized.WaitingForProcessToExit -f $process.Id);
             $process.WaitForExit();
             $exitCode = [System.Convert]::ToInt32($process.ExitCode);
-            Write-Verbose ($localizedData.ProcessExited -f $process.Id, $exitCode);
+            Write-Verbose ($localized.ProcessExited -f $process.Id, $exitCode);
         }
         return $exitCode;
     } #end process
@@ -200,7 +200,7 @@ function AssertXDModule {
     process {
         foreach ($moduleName in $Name) {
             if (-not (TestXDModule -Name $moduleName -Path $Path -IsSnapin:$IsSnapin)) {
-                ThrowInvalidProgramException -ErrorId $moduleName -ErrorMessage $localizedData.XenDesktopSDKNotFoundError;
+                ThrowInvalidProgramException -ErrorId $moduleName -ErrorMessage $localized.XenDesktopSDKNotFoundError;
             }
         } #end foreach module
     } #end process
@@ -228,11 +228,11 @@ function GetXDBrokerMachine {
         $brokerMachine = Get-BrokerMachine -MachineName "*\$MachineName" -ErrorAction SilentlyContinue;
     }
     if ($brokerMachine -eq $null) {
-        Write-Error -ErrorId 'MachineNotFound' -Message ($localizedData.MachineNotFoundError -f $Machine);
+        Write-Error -ErrorId 'MachineNotFound' -Message ($localized.MachineNotFoundError -f $Machine);
         return;
     }
     elseif (($brokerMachine).Count -gt 1) {
-        Write-Error -ErrorId 'AmbiguousMachineReference' -Message ($localizedData.AmbiguousMachineReferenceError -f $MachineName);
+        Write-Error -ErrorId 'AmbiguousMachineReference' -Message ($localized.AmbiguousMachineReferenceError -f $MachineName);
         return;
     }
     else {
@@ -253,7 +253,7 @@ function TestXDMachineIsExistingMember {
         [System.String[]] $ExistingMembers
     )
     if ((-not $MachineName.Contains('\')) -and (-not $MachineName.Contains('.'))) {
-        Write-Warning -Message ($localizedData.MachineNameNotFullyQualifiedWarning -f $MachineName);
+        Write-Warning -Message ($localized.MachineNameNotFullyQualifiedWarning -f $MachineName);
         $netBIOSName = $MachineName;
     }
     elseif ($MachineName.Contains('\')) {
@@ -291,13 +291,13 @@ function TestXDMachineMembership {
         foreach ($member in $RequiredMembers) {
             if (TestXDMachineIsExistingMember -MachineName $member -ExistingMembers $ExistingMembers) {
                 if ($Ensure -eq 'Absent') {
-                    Write-Verbose ($localizedData.SurplusMachineReference -f $member);
+                    Write-Verbose ($localized.SurplusMachineReference -f $member);
                     $isInCompliance = $false;
                 }
             }
             else {
                 if ($Ensure -eq 'Present') {
-                    Write-Verbose ($localizedData.MissingMachineReference -f $member);
+                    Write-Verbose ($localized.MissingMachineReference -f $member);
                     $isInCompliance = $false;
                 }
             }
@@ -492,7 +492,7 @@ function ResolveXDSetupMedia {
         $sourceArchitecturePath = Join-Path -Path $SourcePath -ChildPath $architecture;
         $installMediaPath = Get-ChildItem -Path $sourceArchitecturePath -Filter $installMedia -Recurse -File;
         if (-not $installMediaPath) {
-            throw ($localizedData.NoValidSetupMediaError -f $installMedia, $sourceArchitecturePath);
+            throw ($localized.NoValidSetupMediaError -f $installMedia, $sourceArchitecturePath);
         }
         return $installMediaPath.FullName;
     } #end process
