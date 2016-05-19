@@ -256,7 +256,7 @@ function Set-TargetResource {
                 if ($using:Ensure -eq 'Present') {
                     Write-Verbose -Message ($using:localizedData.AddingApplicationIcon -f $using:Name);
                     try {
-                        $icon = Get-CTXIcon -FilePath $using:Path -ErrorAction Stop | Select-Object -First 1 | New-BrokerIcon;
+                        $icon = Get-CTXIcon -FileName $using:Path -ErrorAction Stop | Select-Object -First 1 | New-BrokerIcon;
                         $applicationParams['IconUid'] = $icon.Uid;
                     }
                     catch {
