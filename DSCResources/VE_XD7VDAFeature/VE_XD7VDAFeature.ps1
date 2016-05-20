@@ -88,6 +88,13 @@ function Test-TargetResource {
         [System.String] $LogPath = (Join-Path -Path $env:TMP -ChildPath '\Citrix\XenDesktop Installer')
     )
     process {
+        $windowsVersion = (Get-CimInstance -ClassName Win32_OperatingSystem | Select-Object -ExpandProperty Version) -as [System.Version];
+        if ($windowsVersion -ge (New-Object -TypeName 'System.Version' -ArgumentList 6,2)) {
+            if (Confirm-SecureBootUEFI -ErrorAction SilentlyContinue) {
+                throw ($localizedData.SecureBootEnabledError);
+            }
+        }
+
         $targetResource = Get-TargetResource @PSBoundParameters;
         if ($targetResource.Ensure -eq $Ensure) {
             Write-Verbose ($localizedData.ResourceInDesiredState -f $Role);
