@@ -70,7 +70,7 @@ InModuleScope $sut {
             } #end foreach $role
 
             It 'DesktopVDI returns /servervdi argument on server operating system.' {
-                Mock -CommandName Get-WmiObject -MockWith { return @{ Caption = 'Windows Server 2012'; }; }
+                Mock -CommandName Get-CimInstance -MockWith { return @{ Caption = 'Windows Server 2012'; }; }
 
                 $arguments = ResolveXDVdaSetupArguments  -Role DesktopVDA;
 
