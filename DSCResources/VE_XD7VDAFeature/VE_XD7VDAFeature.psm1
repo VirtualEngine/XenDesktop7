@@ -94,8 +94,13 @@ function Test-TargetResource {
 
         $windowsVersion = (Get-CimInstance -ClassName Win32_OperatingSystem | Select-Object -ExpandProperty Version) -as [System.Version];
         if ($windowsVersion -ge (New-Object -TypeName 'System.Version' -ArgumentList 6,2)) {
-            if (Confirm-SecureBootUEFI -ErrorAction SilentlyContinue) {
-                throw ($localizedData.SecureBootEnabledError);
+            try {
+                if (Confirm-SecureBootUEFI -ErrorAction SilentlyContinue) {
+                    throw ($localizedData.SecureBootEnabledError);
+                }
+            }
+            catch [System.NotSupportedException] {
+                ## Swallow the exception as it's probably a Generation 1 VM
             }
         }
 
