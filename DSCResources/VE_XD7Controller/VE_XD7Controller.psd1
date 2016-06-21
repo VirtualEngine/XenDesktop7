@@ -1,4 +1,4 @@
-<# XD7Controller\Resources.psd1 #>
+<# VE_XD7Controller\VE_XD7Controller.psd1 #>
 ConvertFrom-StringData @'
     XenDesktopSDKNotFoundError = Citrix XenDesktop 7.x Powershell SDK/Snap-in was not found.
     AddingXDController = Adding Citrix XenDesktop 7.x controller '{0}' to site '{1}'.

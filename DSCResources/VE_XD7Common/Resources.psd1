@@ -1,4 +1,4 @@
-﻿<# XD7Common\Resources.psd1 #>
+﻿<# VE_XD7Common\Resources.psd1 #>
 ConvertFrom-StringData @'
     XenDesktopSDKNotFoundError = Citrix XenDesktop 7.x Powershell SDK/Snap-in was not found.
     MachineNotFoundError = Citrix XenDesktop 7.x machine name '{0}' was not found.
