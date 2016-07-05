@@ -1,4 +1,4 @@
-<# VE_XD7Feature\VE_XD7Feature.Resources.psd1 #>
+<# VE_XD7Feature\VE_XD7Features.Resources.psd1 #>
 ConvertFrom-StringData @'
     InvalidSourcePathError    = Invalid XenDesktop source path '{0}' specified.
     NoValidSetupMediaError    = No valid '{0}' setup media found in path '{1}'.

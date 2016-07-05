@@ -464,14 +464,17 @@ function TestXDInstalledRole {
     param (
         ## Citrix XenDesktop 7.x role to query.
         [Parameter(Mandatory)] [ValidateSet('Controller','Studio','Storefront','Licensing','Director','DesktopVDA','SessionVDA')]
-        [System.String] $Role
+        [System.String[]] $Role
     )
     process {
 
-        if (GetXDInstalledRole -Role $Role) {
-            return $true;
+        $installedRoles = GetXDInstalledRole -Role $Role;
+        foreach ($r in $Role) {
+            if ($installedRoles -notcontains $r) {
+                return $false;
+            }
         }
-        return $false;
+        return $true;
 
     } #end process
 } #end function TestXDRole
@@ -480,49 +483,59 @@ function TestXDInstalledRole {
 function GetXDInstalledRole {
 <#
     .SYNOPSIS
-        Returns installed Citrix XenDesktop 7.x installed product by role.
+        Returns installed Citrix XenDesktop 7.x installed products.
 #>
     [CmdletBinding()]
+    [OutputType([System.String[]])]
     param (
         ## Citrix XenDesktop 7.x role to query.
         [Parameter(Mandatory)] [ValidateSet('Controller','Studio','Storefront','Licensing','Director','DesktopVDA','SessionVDA')]
-        [System.String] $Role
+        [System.String[]] $Role
     )
     process {
 
         $installedProducts = Get-ItemProperty 'HKLM:\SOFTWARE\Classes\Installer\Products\*' -ErrorAction SilentlyContinue |
             Where-Object { $_.ProductName -like '*Citrix*' -and $_.ProductName -notlike '*snap-in' } |
                 Select-Object -ExpandProperty ProductName;
-        switch ($Role) {
-            'Controller' {
-                $filter = 'Citrix Broker Service';
+
+        $installedRoles = @();
+        foreach ($r in $Role) {
+
+            switch ($r) {
+                'Controller' {
+                    $filter = 'Citrix Broker Service';
+                }
+                'Studio' {
+                    $filter = 'Citrix Studio';
+                }
+                'Storefront' {
+                    $filter = 'Citrix Storefront';
+                }
+                'Licensing' {
+                    $filter = 'Citrix Licensing';
+                }
+                'Director' {
+                    $filter = 'Citrix Director(?!.VDA Plugin)';
+                }
+                'DesktopVDA' {
+                    $filter = 'Citrix Virtual Desktop Agent';
+                }
+                'SessionVDA' {
+                    $filter = 'Citrix Virtual Desktop Agent';
+                }
             }
-            'Studio' {
-                $filter = 'Citrix Studio';
+
+            $result = $installedProducts -match $filter;
+            if ([System.String]::IsNullOrEmpty($result)) {
+
             }
-            'Storefront' {
-                $filter = 'Citrix Storefront';
+            elseif ($result) {
+                $installedRoles += $r;
             }
-            'Licensing' {
-                $filter = 'Citrix Licensing';
-            }
-            'Director' {
-                $filter = 'Citrix Director(?!.VDA Plugin)';
-            }
-            'DesktopVDA' {
-                $filter = 'Citrix Virtual Desktop Agent';
-            }
-            'SessionVDA' {
-                $filter = 'Citrix Virtual Desktop Agent';
-            }
+
         }
-        $result = $installedProducts -match $filter;
-        if ([System.String]::IsNullOrEmpty($result)) {
-            return $false;
-        }
-        else {
-            return $result;
-        }
+
+        return $installedRoles;
 
     } #end process
 } #end functoin GetXDInstalledProduct
@@ -539,7 +552,7 @@ function ResolveXDSetupMedia {
     param (
         ## Citrix XenDesktop 7.x role to install/uninstall.
         [Parameter(Mandatory)] [ValidateSet('Controller','Studio','Storefront','Licensing','Director','DesktopVDA','SessionVDA')]
-        [System.String] $Role,
+        [System.String[]] $Role,
 
         ## Citrix XenDesktop 7.x installation media path.
         [Parameter(Mandatory)] [ValidateNotNullOrEmpty()]
@@ -551,17 +564,17 @@ function ResolveXDSetupMedia {
         if ([System.Environment]::Is64BitOperatingSystem) {
             $architecture = 'x64';
         }
-        switch ($Role) {
-            'DesktopVDA' {
-                $installMedia = 'XenDesktopVdaSetup.exe';
-            }
-            'SessionVDA' {
-                $installMedia = 'XenDesktopVdaSetup.exe';
-            }
-            Default {
-                $installMedia = 'XenDesktopServerSetup.exe';
-            }
+
+        if ($Role -contains 'DesktopVDA') {
+            $installMedia = 'XenDesktopVdaSetup.exe';
         }
+        elseif ($Role -contains 'SessionVDA') {
+            $installMedia = 'XenDesktopVdaSetup.exe';
+        }
+        else {
+            $installMedia = 'XenDesktopServerSetup.exe';
+        }
+
         $sourceArchitecturePath = Join-Path -Path $SourcePath -ChildPath $architecture;
         $installMediaPath = Get-ChildItem -Path $sourceArchitecturePath -Filter $installMedia -Recurse -File;
         if (-not $installMediaPath) {
@@ -571,5 +584,73 @@ function ResolveXDSetupMedia {
 
     } #end process
 } #end function ResolveXDSetupMedia
+
+
+function ResolveXDServerSetupArguments {
+<#
+    .SYNOPSIS
+        Resolve the installation arguments for the associated XenDesktop role.
+#>
+    [CmdletBinding()]
+    [OutputType([System.String])]
+    param (
+        ## Citrix XenDesktop 7.x role to install/uninstall.
+        [Parameter(Mandatory)] [ValidateSet('Controller','Studio','Storefront','Licensing','Director')]
+        [System.String[]] $Role,
+
+        ## Citrix XenDesktop 7.x installation media path.
+        [Parameter()] [ValidateNotNullOrEmpty()]
+        [System.String] $LogPath = (Join-Path -Path $env:TMP -ChildPath '\Citrix\XenDesktop Installer'),
+
+        ## Uninstall Citrix XenDesktop 7.x product.
+        [Parameter()]
+        [System.Management.Automation.SwitchParameter] $Uninstall
+    )
+    process {
+
+        $arguments = New-Object -TypeName System.Collections.ArrayList -ArgumentList @();
+        $arguments.AddRange(@('/QUIET', '/LOGPATH', "`"$LogPath`"", '/NOREBOOT', '/COMPONENTS'));
+
+        $components = @();
+        foreach ($r in $Role) {
+
+            switch ($Role) {
+                ## Install/uninstall component names by role
+                'Controller' {
+                    $components += 'CONTROLLER';
+                }
+                'Studio' {
+                    $components += 'DESKTOPSTUDIO';
+                }
+                'Storefront' {
+                    $components += 'STOREFRONT';
+                }
+                'Licensing' {
+                    $components += 'LICENSESERVER';
+                }
+                'Director' {
+                    $components += 'DESKTOPDIRECTOR';
+                }
+            } #end switch Role
+        }
+
+        $componentString = [System.String]::Join(',', $components);
+        [ref] $null = $arguments.Add($componentString);
+
+        if ($Uninstall) {
+            [ref] $null = $arguments.Add('/REMOVE');
+        }
+        else {
+            ## Additional install parameters per role
+            if ($Role -contains 'Controller') {
+                [ref] $null = $arguments.Add('/NOSQL');
+            }
+            [ref] $null = $arguments.Add('/CONFIGURE_FIREWALL');
+
+        }
+        return [System.String]::Join(' ', $arguments.ToArray());
+
+    } #end process
+} #end function ResolveXDSetupArguments
 
 #endregion Private Functions

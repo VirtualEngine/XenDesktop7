@@ -1,15 +1,15 @@
-Import-LocalizedData -BindingVariable localizedData -FileName VE_XD7Feature.Resources.psd1;
+Import-LocalizedData -BindingVariable localizedData -FileName VE_XD7Features.Resources.psd1;
 
 function Get-TargetResource {
     [CmdletBinding()]
     [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSDSCUseVerboseMessageInDSCResource', '')]
     [OutputType([System.Collections.Hashtable])]
     param (
-        [Parameter(Mandatory)] [ValidateSet('Controller','Studio','Storefront','Licensing','Director')]
-        [System.String] $Role,
-
         [Parameter(Mandatory)] [ValidateNotNullOrEmpty()]
         [System.String] $SourcePath,
+
+        [Parameter(Mandatory)] [ValidateSet('Controller','Studio','Storefront','Licensing','Director')]
+        [System.String[]] $Role,
 
         [Parameter()] [AllowNull()]
         [System.Management.Automation.PSCredential]
@@ -22,8 +22,8 @@ function Get-TargetResource {
     process {
 
         $targetResource = @{
-            Role = $Role;
             SourcePath = $SourcePath;
+            Role = GetXDInstalledRole -Role $Role;
             Ensure = 'Absent';
         }
         if (TestXDInstalledRole -Role $Role) {
@@ -39,11 +39,11 @@ function Test-TargetResource {
     [CmdletBinding()]
     [OutputType([System.Boolean])]
     param (
-        [Parameter(Mandatory)] [ValidateSet('Controller','Studio','Storefront','Licensing','Director')]
-        [System.String] $Role,
-
         [Parameter(Mandatory)] [ValidateNotNullOrEmpty()]
         [System.String] $SourcePath,
+
+        [Parameter(Mandatory)] [ValidateSet('Controller','Studio','Storefront','Licensing','Director')]
+        [System.String[]] $Role,
 
         [Parameter()] [AllowNull()]
         [System.Management.Automation.PSCredential]
@@ -76,11 +76,11 @@ function Set-TargetResource {
     [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseShouldProcessForStateChangingFunctions', '')]
     [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidGlobalVars', 'global:DSCMachineStatus')]
     param (
-        [Parameter(Mandatory)] [ValidateSet('Controller','Studio','Storefront','Licensing','Director')]
-        [System.String] $Role,
-
         [Parameter(Mandatory)] [ValidateNotNullOrEmpty()]
         [System.String] $SourcePath,
+
+        [Parameter(Mandatory)] [ValidateSet('Controller','Studio','Storefront','Licensing','Director')]
+        [System.String[]] $Role,
 
         [Parameter()] [AllowNull()]
         [System.Management.Automation.PSCredential]
@@ -103,12 +103,12 @@ function Set-TargetResource {
     process {
 
         if ($Ensure -eq 'Present') {
-            Write-Verbose ($localizedData.InstallingRole -f $Role);
+            Write-Verbose ($localizedData.InstallingRole -f ($Role -join ','));
             $installArguments = ResolveXDServerSetupArguments -Role $Role -LogPath $LogPath;
         }
         else {
             ## Uninstall
-            Write-Verbose ($localizedData.UninstallingRole -f $Role);
+            Write-Verbose ($localizedData.UninstallingRole -f ($Role -join ','));
             $installArguments = ResolveXDServerSetupArguments -Role $Role -LogPath $LogPath -Uninstall;
         }
         Write-Verbose ($localizedData.LogDirectorySet -f $logPath);

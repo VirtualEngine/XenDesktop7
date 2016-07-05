@@ -11,6 +11,7 @@ Included Resources
 * XD7DesktopGroupApplication
 * XD7EntitlementPolicy
 * XD7Feature
+* XD7Features
 * XD7Role
 * XD7Site
 * XD7SiteLicense
@@ -418,7 +419,7 @@ Configuration XD7EntitlementPolicyExample {
 }
 ```
 XD7Feature
-===========
+==========
 Installs Citrix XenDesktop 7 server role/feature.
 ###Syntax
 ```
@@ -442,6 +443,38 @@ Configuration XD7FeatureExample {
     Import-DscResource -ModuleName XenDesktop7
     XD7Feature XD7ControllerFeature {
         Role = 'Controller'
+        SourcePath = 'C:\Sources\XenDesktop76'
+        Ensure = 'Present'
+    }
+}
+```
+XD7Features
+===========
+Installs multiple Citrix XenDesktop 7 server roles/features in a single pass, reducing the number of reboots.
+###Syntax
+```
+XD7Features [string]
+{
+    IsSingleInstance = [string] { Yes }
+    Role = [string[]] { Controller | Licensing | Storefront | Studio | Director }
+    SourcePath = [string]
+    [[Ensure = [string] { Present | Absent }]
+    [Credential = [PSCredential]]
+}
+```
+###Properties
+* **Role**: The Citrix XenDesktop 7.x roles/features to install.
+* **SourcePath**: Location of the extracted Citrix XenDesktop 7.x setup media.
+* **Ensure**: Whether the role is to be installed or not. Supported values are Present or Absent. If not specified, it defaults to Present.
+* **Credential**: Specifies optional credential of a user which has permissions to access the source media and/or install/uninstall the specified role.
+
+###Configuration
+```
+Configuration XD7FeaturesExample {
+    Import-DscResource -ModuleName XenDesktop7
+    XD7Features XD7MultiFeatures {
+        IsSingleInstance = 'Yes'
+        Role = 'Controller','Studio'
         SourcePath = 'C:\Sources\XenDesktop76'
         Ensure = 'Present'
     }

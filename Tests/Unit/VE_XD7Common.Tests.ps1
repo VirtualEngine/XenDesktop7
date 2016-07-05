@@ -10,25 +10,25 @@ InModuleScope $sut {
     Describe 'XenDesktop7\VE_XD7Common' {
 
         Context 'AddInvokeScriptBlockCredentials' {
-            $testCredentials = New-Object System.Management.Automation.PSCredential 'DummyUser', (ConvertTo-SecureString 'DummyPassword' -AsPlainText -Force);
+            $testCredential = [System.Management.Automation.PSCredential]::Empty;
             $testHashtable = @{};
 
             It 'Adds "ComputerName" key' {
-                AddInvokeScriptBlockCredentials -Hashtable $testHashtable -Credential $testCredentials;
+                AddInvokeScriptBlockCredentials -Hashtable $testHashtable -Credential $testCredential;
 
                 $testHashtable['ComputerName'] | Should Be $env:COMPUTERNAME;
             }
 
             It 'Adds "Authentication" key' {
-                AddInvokeScriptBlockCredentials -Hashtable $testHashtable -Credential $testCredentials;
+                AddInvokeScriptBlockCredentials -Hashtable $testHashtable -Credential $testCredential;
 
                 $testHashtable['Authentication'] | Should Be 'CredSSP';
             }
 
             It 'Adds "Credential" key' {
-                AddInvokeScriptBlockCredentials -Hashtable $testHashtable -Credential $testCredentials;
+                AddInvokeScriptBlockCredentials -Hashtable $testHashtable -Credential $testCredential;
 
-                $testHashtable['Credential'] | Should Be $testCredentials;
+                $testHashtable['Credential'] | Should Be $testCredential;
             }
 
         } #end context AddInvokeScriptBlockCredentials
@@ -271,7 +271,7 @@ InModuleScope $sut {
 
             foreach ($role in $roles) {
 
-                It "Returns True when ""$($role.Role)"" is installed" {
+                It "Returns role ""$($role.Role)"" is installed" {
                     $getItemProperty = @(
                         ## Needs multiple Citrix* products to keep the pipeline alive
                         [PSCustomObject] @{ Role = $role.role; ProductName = $role.ProductName; },
@@ -279,14 +279,14 @@ InModuleScope $sut {
                     );
                     Mock -CommandName Get-ItemProperty -MockWith { return $getItemProperty; }
 
-                    GetXDInstalledRole -Role $role.Role | Should Be $true;
+                    GetXDInstalledRole -Role $role.Role -Verbose | Should Be $role.Role;
                 }
 
             }
 
             foreach ($role in $roles) {
 
-                It "Returns False when ""$($role.Role)"" is not installed" {
+                It "Does not return role ""$($role.Role)"" is installed" {
                     $getItemProperty = @(
                         ## Needs multiple Citrix* products to keep the pipeline alive
                         [PSCustomObject] @{ Role = 'Citrix New Product'; ProductName = 'Citrix New Product snap-in'; },
@@ -294,7 +294,7 @@ InModuleScope $sut {
                     );
                     Mock -CommandName Get-ItemProperty -MockWith { return $getItemProperty; }
 
-                    GetXDInstalledRole -Role $role.Role | Should Be $false;
+                    GetXDInstalledRole -Role $role.Role -Verbose | Should BeNullOrEmpty;
                 }
 
             }
@@ -307,9 +307,55 @@ InModuleScope $sut {
                 );
                 Mock -CommandName Get-ItemProperty -MockWith { return $getItemProperty; }
 
-                GetXDInstalledRole -Role 'Director' | Should Be $false;
+                GetXDInstalledRole -Role 'Director' | Should BeNullOrEmpty;
             }
-        }
+        } #end context GetXDInstalledRole
+
+        Context 'TestXDInstalledRole' {
+
+            It "Returns true when when specified single role is installed" {
+                $roles = 'Licensing';
+                Mock -CommandName GetXDInstalledRole -MockWith { return $roles; }
+
+                TestXDInstalledRole -Role $roles | Should Be $true;
+            }
+
+            It "Returns true when when specified multiple roles are installed" {
+                $roles = 'Controller','Studio';
+                Mock -CommandName GetXDInstalledRole -MockWith { return $roles; }
+
+                TestXDInstalledRole -Role $roles | Should Be $true;
+            }
+
+            It "Returns false when when specified single role is not installed" {
+                $roles = 'Licensing';
+                Mock -CommandName GetXDInstalledRole -MockWith { return @(); }
+
+                TestXDInstalledRole -Role $roles | Should Be $false;
+            }
+
+            It "Returns false when when specified multiple roles are not installed" {
+                $roles = 'Controller','Studio';
+                Mock -CommandName GetXDInstalledRole -MockWith { return @(); }
+
+                TestXDInstalledRole -Role $roles | Should Be $false;
+            }
+
+            It "Returns false when when specified single role is not installed" {
+                $roles = 'Licensing';
+                Mock -CommandName GetXDInstalledRole -MockWith { return @('Director'); }
+
+                TestXDInstalledRole -Role $roles | Should Be $false;
+            }
+
+           It "Returns false when when one of specified multiple roles are not installed" {
+                $roles = 'Controller','Studio';
+                Mock -CommandName GetXDInstalledRole -MockWith { return @('Studio'); }
+
+                TestXDInstalledRole -Role $roles | Should Be $false;
+            }
+
+        } #end context TestXDInstalledRole
 
         Context 'ResolveXDSetupMedia' {
             $testDrivePath = (Get-PSDrive -Name TestDrive).Root
@@ -341,6 +387,140 @@ InModuleScope $sut {
             }
 
         } #end context ResolveXDSetupMedia
+
+        Context 'ResolveXDServerSetupArguments' {
+
+            It 'Defaults log path to "%TMP%\Citrix\XenDesktop Installer".' {
+                $role = 'Controller';
+                $arguments = ResolveXDServerSetupArguments  -Role $role;
+                $arguments -match '/logpath' | Should Be $true;
+                $escapedPathRegex = (Join-Path $env:TMP -ChildPath '\Citrix\XenDesktop Installer').Replace('\', '\\');
+                $arguments -match $escapedPathRegex | Should Be $true;
+            }
+
+            It 'Returns expected Controller install arguments.' {
+                $role = 'Controller';
+                $arguments = ResolveXDServerSetupArguments  -Role $role;
+                $arguments -match '/quiet' | Should Be $true;
+                $arguments -match '/logpath' | Should Be $true;
+                $arguments -match '/noreboot' | Should Be $true;
+                $arguments -match '/components Controller' | Should Be $true;
+                $arguments -match '/configure_firewall' | Should Be $true;
+                $arguments -match '/nosql' | Should Be $true;
+
+                $arguments -match '/remove' | Should Be $false;
+            }
+
+            It 'Returns expected Controller uninstall arguments.' {
+                $role = 'Controller';
+                $arguments = ResolveXDServerSetupArguments  -Role $role -Uninstall;
+                $arguments -match '/quiet' | Should Be $true;
+                $arguments -match '/logpath' | Should Be $true;
+                $arguments -match '/noreboot' | Should Be $true;
+                $arguments -match '/components Controller' | Should Be $true;
+                $arguments -match '/remove' | Should Be $true;
+
+                $arguments -match '/configure_firewall' | Should Be $false;
+                $arguments -match '/nosql' | Should Be $false;
+            }
+
+            It 'Returns expected Studio install arguments.' {
+                $role = 'Studio';
+                $arguments = ResolveXDServerSetupArguments  -Role $role;
+                $arguments -match '/quiet' | Should Be $true;
+                $arguments -match '/logpath' | Should Be $true;
+                $arguments -match '/noreboot' | Should Be $true;
+                $arguments -match '/components DesktopStudio' | Should Be $true;
+                $arguments -match '/configure_firewall' | Should Be $true;
+
+                $arguments -match '/remove' | Should Be $false;
+            }
+
+            It 'Returns expected Studio uninstall arguments.' {
+                $role = 'Studio';
+                $arguments = ResolveXDServerSetupArguments  -Role $role -Uninstall;
+                $arguments -match '/quiet' | Should Be $true;
+                $arguments -match '/logpath' | Should Be $true;
+                $arguments -match '/noreboot' | Should Be $true;
+                $arguments -match '/components DesktopStudio' | Should Be $true;
+                $arguments -match '/remove' | Should Be $true;
+
+                $arguments -match '/configure_firewall' | Should Be $false;
+            }
+
+            It 'Returns expected Storefront install arguments.' {
+                $role = 'Storefront';
+                $arguments = ResolveXDServerSetupArguments  -Role $role;
+                $arguments -match '/quiet' | Should Be $true;
+                $arguments -match '/logpath' | Should Be $true;
+                $arguments -match '/noreboot' | Should Be $true;
+                $arguments -match '/components Storefront' | Should Be $true;
+                $arguments -match '/configure_firewall' | Should Be $true;
+
+                $arguments -match '/remove' | Should Be $false;
+            }
+
+            It 'Returns expected Storefront uninstall arguments.' {
+                $role = 'Storefront';
+                $arguments = ResolveXDServerSetupArguments  -Role $role -Uninstall;
+                $arguments -match '/quiet' | Should Be $true;
+                $arguments -match '/logpath' | Should Be $true;
+                $arguments -match '/noreboot' | Should Be $true;
+                $arguments -match '/components Storefront' | Should Be $true;
+                $arguments -match '/remove' | Should Be $true;
+
+                $arguments -match '/configure_firewall' | Should Be $false;
+            }
+
+            It 'Returns expected Licensing install arguments.' {
+                $role = 'Licensing';
+                $arguments = ResolveXDServerSetupArguments  -Role $role;
+                $arguments -match '/quiet' | Should Be $true;
+                $arguments -match '/logpath' | Should Be $true;
+                $arguments -match '/noreboot' | Should Be $true;
+                $arguments -match '/components LicenseServer' | Should Be $true;
+                $arguments -match '/configure_firewall' | Should Be $true;
+
+                $arguments -match '/remove' | Should Be $false;
+            }
+
+            It 'Returns expected Licensing uninstall arguments.' {
+                $role = 'Licensing';
+                $arguments = ResolveXDServerSetupArguments  -Role $role -Uninstall;
+                $arguments -match '/quiet' | Should Be $true;
+                $arguments -match '/logpath' | Should Be $true;
+                $arguments -match '/noreboot' | Should Be $true;
+                $arguments -match '/components LicenseServer' | Should Be $true;
+                $arguments -match '/remove' | Should Be $true;
+
+                $arguments -match '/configure_firewall' | Should Be $false;
+            }
+
+            It 'Returns expected Director install arguments.' {
+                $role = 'Director';
+                $arguments = ResolveXDServerSetupArguments  -Role $role;
+                $arguments -match '/quiet' | Should Be $true;
+                $arguments -match '/logpath' | Should Be $true;
+                $arguments -match '/noreboot' | Should Be $true;
+                $arguments -match '/components DesktopDirector' | Should Be $true;
+                $arguments -match '/configure_firewall' | Should Be $true;
+
+                $arguments -match '/remove' | Should Be $false;
+            }
+
+            It 'Returns expected Director uninstall arguments.' {
+                $role = 'Director';
+                $arguments = ResolveXDServerSetupArguments  -Role $role -Uninstall;
+                $arguments -match '/quiet' | Should Be $true;
+                $arguments -match '/logpath' | Should Be $true;
+                $arguments -match '/noreboot' | Should Be $true;
+                $arguments -match '/components DesktopDirector' | Should Be $true;
+                $arguments -match '/remove' | Should Be $true;
+
+                $arguments -match '/configure_firewall' | Should Be $false;
+            }
+
+        } #end context ResolveXDServerSetupArguments
 
     } #end describe cXD7Role\ResolveXDSetupMedia
 

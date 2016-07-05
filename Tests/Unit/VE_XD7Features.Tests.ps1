@@ -1,4 +1,4 @@
-[System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidGlobalVars', '')]
+[Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidGlobalVars', '')]
 param ()
 
 $here = Split-Path -Parent $MyInvocation.MyCommand.Path;
@@ -8,7 +8,7 @@ Import-Module (Join-Path $moduleRoot -ChildPath "\DSCResources\$sut\$sut.psm1") 
 
 InModuleScope $sut {
 
-    Describe 'XenDesktop7\VE_XD7Feature' {
+    Describe 'XenDesktop7\VE_XD7Features' {
 
         Context 'Get-TargetResourece' {
             $testDrivePath = (Get-PSDrive -Name TestDrive).Root;
@@ -68,7 +68,7 @@ InModuleScope $sut {
             }
 
         } #end context Test-TargetResource
-
+#>
         Context 'Set-TargetResource' {
             $testDrivePath = (Get-PSDrive -Name TestDrive).Root
 
@@ -83,21 +83,23 @@ InModuleScope $sut {
             }
 
             foreach ($state in @('Present','Absent')) {
-                It "Flags reboot when ""Ensure"" = ""$state"", ""Role"" = ""Controller"" and exit code ""0""" {
-                    [System.Int32] $global:DSCMachineStatus = 0;
-                    Mock -CommandName StartWaitProcess -MockWith { return 0; }
-                    Mock -CommandName ResolveXDSetupMedia -MockWith { return $testDrivePath; }
-                    Mock -CommandName ResolveXDServerSetupArguments -MockWith { }
-                    Mock -CommandName Test-Path -MockWith { return $true; }
-                    Set-TargetResource -Role 'Controller' -SourcePath $testDrivePath -Ensure $state;
-                    [System.Int32] $global:DSCMachineStatus | Should Be 1;
-                    Assert-MockCalled -CommandName StartWaitProcess -Exactly 1 -Scope It;
+                foreach ($role in @('Controller',@('Controller','Studio'), @('Controller','Studio','Storefront'))) {
+                    It "Flags reboot when ""Ensure"" = ""$state"", ""Role"" = ""$($role -join ',')"" and exit code ""0""" {
+                        [System.Int32] $global:DSCMachineStatus = 0;
+                        Mock -CommandName StartWaitProcess -MockWith { return 0; }
+                        Mock -CommandName ResolveXDSetupMedia -MockWith { return $testDrivePath; }
+                        Mock -CommandName ResolveXDServerSetupArguments -MockWith { }
+                        Mock -CommandName Test-Path -MockWith { return $true; }
+                        Set-TargetResource -Role $role -SourcePath $testDrivePath -Ensure $state;
+                        [System.Int32] $global:DSCMachineStatus | Should Be 1;
+                        Assert-MockCalled -CommandName StartWaitProcess -Exactly 1 -Scope It;
+                    }
                 }
             }
 
             foreach ($state in @('Present','Absent')) {
-                foreach ($role in @('Studio','Storefront','Licensing','Director')) {
-                    It "Does not flag reboot when ""Ensure"" = ""$state"", ""Role"" = ""$role"" and exit code ""0""" {
+                foreach ($role in @('Studio','Licensing','Storefront','Director',@('Storefront','Director'))) {
+                    It "Does not flag reboot when ""Ensure"" = ""$state"", ""Role"" = ""$($role -join ',')"" and exit code ""0""" {
                         [System.Int32] $global:DSCMachineStatus = 0;
                         Mock -CommandName StartWaitProcess -MockWith { return 0; }
                         Mock -CommandName ResolveXDSetupMedia -MockWith { return $testDrivePath; }
@@ -111,8 +113,8 @@ InModuleScope $sut {
             }
 
             foreach ($state in @('Present','Absent')) {
-                foreach ($role in @('Controller','Studio','Storefront','Licensing','Director')) {
-                    It "Flags reboot when ""Ensure"" = ""$state"", ""Role"" = ""$role"" and exit code = ""3010""" {
+                foreach ($role in @('Controller','Studio','Licensing',@('Storefront','Director'))) {
+                    It "Flags reboot when ""Ensure"" = ""$state"", ""Role"" = ""$($role -join ',')"" and exit code = ""3010""" {
                         [System.Int32] $global:DSCMachineStatus = 0;
                         Mock -CommandName StartWaitProcess -MockWith { return 3010; }
                         Mock -CommandName ResolveXDSetupMedia -MockWith { return $testDrivePath; }
@@ -126,5 +128,5 @@ InModuleScope $sut {
             }
 
         } #end context Set-TargetResource
-    } #end describe XD7Feature
+    } #end describe XD7Features
 } #end inmodulescope
