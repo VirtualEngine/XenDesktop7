@@ -1,4 +1,4 @@
-Import-LocalizedData -BindingVariable localizedData -FileName VE_XD7SiteLicense.psd1;
+Import-LocalizedData -BindingVariable localizedData -FileName VE_XD7SiteLicense.Resources.psd1;
 
 function Get-TargetResource {
     [CmdletBinding()]

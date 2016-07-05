@@ -1,4 +1,4 @@
-Import-LocalizedData -BindingVariable localized -FileName Resources.psd1;
+Import-LocalizedData -BindingVariable localized -FileName VE_XD7Common.Resources.psd1;
 
 #region Private Functions
 
