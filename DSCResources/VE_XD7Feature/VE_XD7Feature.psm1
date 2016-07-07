@@ -120,7 +120,7 @@ function Set-TargetResource {
         if ($PSBoundParameters.ContainsKey('Credential')) {
             $startWaitProcessParams['Credential'] = $Credential;
         }
-        $exitCode = StartWaitProcess @startWaitProcessParams;
+        $exitCode = StartWaitProcess @startWaitProcessParams -Verbose:$Verbose;
         # Check for reboot
         if (($exitCode -eq 3010) -or ($Role -eq 'Controller')) {
             $global:DSCMachineStatus = 1;

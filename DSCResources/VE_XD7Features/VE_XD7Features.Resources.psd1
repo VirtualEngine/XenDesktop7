@@ -1,7 +1,6 @@
 <# VE_XD7Feature\VE_XD7Features.Resources.psd1 #>
 ConvertFrom-StringData @'
     InvalidSourcePathError    = Invalid XenDesktop source path '{0}' specified.
-    NoValidSetupMediaError    = No valid '{0}' setup media found in path '{1}'.
     SourceDirectorySet        = Installation source path set to '{0}'.
     LogDirectorySet           = Installation log directory set to '{0}'.
     InstallingRole            = Installing Citrix XenDesktop 7.x '{0}' role.

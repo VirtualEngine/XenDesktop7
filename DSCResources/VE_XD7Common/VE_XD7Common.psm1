@@ -614,7 +614,7 @@ function ResolveXDServerSetupArguments {
         $components = @();
         foreach ($r in $Role) {
 
-            switch ($Role) {
+            switch ($r) {
                 ## Install/uninstall component names by role
                 'Controller' {
                     $components += 'CONTROLLER';

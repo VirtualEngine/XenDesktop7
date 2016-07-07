@@ -5,6 +5,9 @@ function Get-TargetResource {
     [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSDSCUseVerboseMessageInDSCResource', '')]
     [OutputType([System.Collections.Hashtable])]
     param (
+        [Parameter(Mandatory)] [ValidateSet('Yes')]
+        [System.String] $IsSingleInstance,
+
         [Parameter(Mandatory)] [ValidateNotNullOrEmpty()]
         [System.String] $SourcePath,
 
@@ -22,6 +25,7 @@ function Get-TargetResource {
     process {
 
         $targetResource = @{
+            IsSingleInstace = $IsSingleInstance;
             SourcePath = $SourcePath;
             Role = GetXDInstalledRole -Role $Role;
             Ensure = 'Absent';
@@ -39,6 +43,9 @@ function Test-TargetResource {
     [CmdletBinding()]
     [OutputType([System.Boolean])]
     param (
+        [Parameter(Mandatory)] [ValidateSet('Yes')]
+        [System.String] $IsSingleInstance,
+
         [Parameter(Mandatory)] [ValidateNotNullOrEmpty()]
         [System.String] $SourcePath,
 
@@ -60,11 +67,11 @@ function Test-TargetResource {
 
         $targetResource = Get-TargetResource @PSBoundParameters;
         if ($Ensure -eq $targetResource.Ensure) {
-            Write-Verbose ($localizedData.ResourceInDesiredState -f $Role);
+            Write-Verbose ($localizedData.ResourceInDesiredState -f ($Role -join ','));
             return $true;
         }
         else {
-            Write-Verbose ($localizedData.ResourceNotInDesiredState -f $Role);
+            Write-Verbose ($localizedData.ResourceNotInDesiredState -f ($Role -join ','));
             return $false;
         }
 
@@ -76,6 +83,9 @@ function Set-TargetResource {
     [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseShouldProcessForStateChangingFunctions', '')]
     [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidGlobalVars', 'global:DSCMachineStatus')]
     param (
+        [Parameter(Mandatory)] [ValidateSet('Yes')]
+        [System.String] $IsSingleInstance,
+
         [Parameter(Mandatory)] [ValidateNotNullOrEmpty()]
         [System.String] $SourcePath,
 
@@ -120,9 +130,9 @@ function Set-TargetResource {
         if ($PSBoundParameters.ContainsKey('Credential')) {
             $startWaitProcessParams['Credential'] = $Credential;
         }
-        $exitCode = StartWaitProcess @startWaitProcessParams;
+        $exitCode = StartWaitProcess @startWaitProcessParams -Verbose:$Verbose;
         # Check for reboot
-        if (($exitCode -eq 3010) -or ($Role -eq 'Controller')) {
+        if (($exitCode -eq 3010) -or ($Role -contains 'Controller')) {
             $global:DSCMachineStatus = 1;
         }
 

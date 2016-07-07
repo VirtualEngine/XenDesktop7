@@ -56,6 +56,7 @@ function Get-TargetResource {
 
 function Test-TargetResource {
     [CmdletBinding()]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingEmptyCatchBlock', '')]
     [OutputType([System.Boolean])]
     param (
         [Parameter(Mandatory)] [ValidateSet('DesktopVDA','SessionVDA')]
@@ -194,7 +195,7 @@ function Set-TargetResource {
         if ($PSBoundParameters.ContainsKey('Credential')) {
             $startWaitProcessParams['Credential'] = $Credential;
         }
-        [ref] $null = StartWaitProcess @startWaitProcessParams;
+        [ref] $null = StartWaitProcess @startWaitProcessParams -Verbose:$Verbose;
         # The Citrix XenDesktop VDA requires a reboot
         $global:DSCMachineStatus = 1;
 
