@@ -1,4 +1,4 @@
-<# VE_XD7SiteLicense\VE_XD7SiteLicense.psd1 #>
+<# VE_XD7SiteLicense\VE_XD7SiteLicense.Resources.psd1 #>
 ConvertFrom-StringData @'
     XenDesktopSDKNotFoundError             = Citrix XenDesktop 7.x Powershell SDK/Snap-in was not found.
     SettingLicenseServerProperties         = Setting Citrix XenDesktop 7.x Site License Server: '{0}', Port: '{1}', Edition: '{2}' properties.

@@ -1,4 +1,4 @@
-<# VE_XD7EntitlementPolicy\VE_XD7EntitlementPolicy.psd1 #>
+<# VE_XD7EntitlementPolicy\VE_XD7EntitlementPolicy.Resources.psd1 #>
 ConvertFrom-StringData @'
     XenDesktopSDKNotFoundError       = Citrix XenDesktop 7.x Powershell SDK/Snap-in was not found.
     AddingDesktopEntitlementPolicy   = Adding Citrix XenDesktop 7.x desktop entitlement policy '{0}'.

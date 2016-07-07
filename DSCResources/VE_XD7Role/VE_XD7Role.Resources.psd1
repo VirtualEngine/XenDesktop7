@@ -1,4 +1,4 @@
-<# VE_XD7Role\VE_XD7Role.psd1 #>
+<# VE_XD7Role\VE_XD7Role.Resources.psd1 #>
 ConvertFrom-StringData @'
     XenDesktopSDKNotFoundError       = Citrix XenDesktop 7.x Powershell SDK/Snap-in was not found.
     UserNameNotFullyQualifiedWarning = The Citrix XenDesktop 7.x administrator reference '{0}' is not fully qualified. Specify the administrator's Domain\\UserName or Domain\\GroupName to avoid any ambiguity.
