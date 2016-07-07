@@ -1,3 +1,6 @@
+[System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseShouldProcessForStateChangingFunctions', '')]
+param ()
+
 $here = Split-Path -Parent $MyInvocation.MyCommand.Path;
 $sut = (Split-Path -Leaf $MyInvocation.MyCommand.Path).Replace('.Tests.ps1', '')
 $moduleRoot = Split-Path -Path (Split-Path -Path $here -Parent) -Parent;
@@ -15,7 +18,7 @@ InModuleScope $sut {
         $testAdmin = @{ Name = 'Test Administrator'; Ensure = 'Present'; Enabled = $true; }
         $testAdminDisabled = @{ Name = 'Test Administrator'; Ensure = 'Present'; Enabled = $false; }
         $testAdminAbsent = @{ Name = 'Test Administrator'; Ensure = 'Absent'; Enabled = $true; }
-        $testCredentials = New-Object System.Management.Automation.PSCredential 'DummyUser', (ConvertTo-SecureString 'DummyPassword' -AsPlainText -Force);
+        $testCredential = [System.Management.Automation.PSCredential]::Empty;
 
         Context 'Get-TargetResource' {
             Mock -CommandName AssertXDModule -MockWith { };
@@ -40,13 +43,13 @@ InModuleScope $sut {
             }
 
             It 'Invokes script block with credentials and CredSSP when specified' {
-                $testAdminWithCredentials = $testAdmin.Clone();
-                $testAdminWithCredentials['Credential'] = $testCredentials;
-                Mock -CommandName Invoke-Command -ParameterFilter { $Credential -eq $testCredentials -and $Authentication -eq 'CredSSP' } { }
+                $testAdminWithCredential = $testAdmin.Clone();
+                $testAdminWithCredential['Credential'] = $testCredential;
+                Mock -CommandName Invoke-Command -ParameterFilter { $Credential -eq $testCredential -and $Authentication -eq 'CredSSP' } { }
 
-                Get-TargetResource @testAdminWithCredentials;
+                Get-TargetResource @testAdminWithCredential;
 
-                Assert-MockCalled Invoke-Command -ParameterFilter { $Credential -eq $testCredentials -and $Authentication -eq 'CredSSP' } -Exactly 1 -Scope It;
+                Assert-MockCalled Invoke-Command -ParameterFilter { $Credential -eq $testCredential -and $Authentication -eq 'CredSSP' } -Exactly 1 -Scope It;
             }
 
             It 'Asserts "Citrix.DelegatedAdmin.Admin.V1" snapin is registered' {
@@ -133,13 +136,13 @@ InModuleScope $sut {
             }
 
             It 'Invokes script block with credentials and CredSSP when specified' {
-                $testAdminWithCredentials = $testAdmin.Clone();
-                $testAdminWithCredentials['Credential'] = $testCredentials;
-                Mock -CommandName Invoke-Command -ParameterFilter { $Credential -eq $testCredentials -and $Authentication -eq 'CredSSP' } { }
+                $testAdminWithCredential = $testAdmin.Clone();
+                $testAdminWithCredential['Credential'] = $testCredential;
+                Mock -CommandName Invoke-Command -ParameterFilter { $Credential -eq $testCredential -and $Authentication -eq 'CredSSP' } { }
 
-                Set-TargetResource @testAdminWithCredentials;
+                Set-TargetResource @testAdminWithCredential;
 
-                Assert-MockCalled Invoke-Command -ParameterFilter { $Credential -eq $testCredentials -and $Authentication -eq 'CredSSP' } -Exactly 1 -Scope It;
+                Assert-MockCalled Invoke-Command -ParameterFilter { $Credential -eq $testCredential -and $Authentication -eq 'CredSSP' } -Exactly 1 -Scope It;
             }
 
             It 'Asserts "Citrix.DelegatedAdmin.Admin.V1" snapin is registered' {

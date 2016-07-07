@@ -1,3 +1,6 @@
+[System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseShouldProcessForStateChangingFunctions', '')]
+param ()
+
 $here = Split-Path -Parent $MyInvocation.MyCommand.Path;
 $sut = (Split-Path -Leaf $MyInvocation.MyCommand.Path).Replace('.Tests.ps1', '')
 $moduleRoot = Split-Path -Path (Split-Path -Path $here -Parent) -Parent;
@@ -10,9 +13,7 @@ InModuleScope $sut {
     Describe 'XenDesktop7\VE_XD7Database' {
 
         $testSiteDatabase = @{ SiteName = 'TestSite'; DataStore = 'Site'; DatabaseServer = 'TestServer'; DatabaseName = 'Site'; }
-        $testLoggingDatabase = @{ SiteName = 'TestSite'; DataStore = 'Logging'; DatabaseServer = 'TestServer'; DatabaseName = 'Logging'; }
-        $testMonitorDatabase = @{ SiteName = 'TestSite'; DataStore = 'Monitor'; DatabaseServer = 'TestServer'; DatabaseName = 'Monitor'; }
-        $testCredentials = New-Object System.Management.Automation.PSCredential 'DummyUser', (ConvertTo-SecureString 'DummyPassword' -AsPlainText -Force);
+        $testCredential = [System.Management.Automation.PSCredential]::Empty;
 
         Context 'TestMSSQLDatabase' {
             $testDatabase = @{ DatabaseServer = 'TestServer'; DatabaseName = 'Site'; }
@@ -25,13 +26,13 @@ InModuleScope $sut {
                 Assert-MockCalled Invoke-Command -ParameterFilter { $Credential -eq $null -and $Authentication -eq $null } -Exactly 1 -Scope It;
             }
             It 'Invokes script block with credentials and CredSSP when specified' {
-                $testDatabaseWithCredentials = $testDatabase.Clone();
-                $testDatabaseWithCredentials['Credential'] = $testCredentials;
-                Mock -CommandName Invoke-Command -ParameterFilter { $Credential -eq $testCredentials -and $Authentication -eq 'CredSSP' } { }
+                $testDatabaseWithCredential = $testDatabase.Clone();
+                $testDatabaseWithCredential['Credential'] = $testCredential;
+                Mock -CommandName Invoke-Command -ParameterFilter { $Credential -eq $testCredential -and $Authentication -eq 'CredSSP' } { }
 
-                TestMSSQLDatabase @testDatabaseWithCredentials;
+                TestMSSQLDatabase @testDatabaseWithCredential;
 
-                Assert-MockCalled Invoke-Command -ParameterFilter { $Credential -eq $testCredentials -and $Authentication -eq 'CredSSP' } -Exactly 1 -Scope It;
+                Assert-MockCalled Invoke-Command -ParameterFilter { $Credential -eq $testCredential -and $Authentication -eq 'CredSSP' } -Exactly 1 -Scope It;
             }
 
         } #end context TestMSSQLDatabase
@@ -87,13 +88,13 @@ InModuleScope $sut {
             }
 
             It 'Invokes script block with credentials and CredSSP when specified' {
-                $testSiteDatabaseWithCredentials = $testSiteDatabase.Clone();
-                $testSiteDatabaseWithCredentials['Credential'] = $testCredentials;
-                Mock -CommandName Invoke-Command -ParameterFilter { $Credential -eq $testCredentials -and $Authentication -eq 'CredSSP' } { }
+                $testSiteDatabaseWithCredential = $testSiteDatabase.Clone();
+                $testSiteDatabaseWithCredential['Credential'] = $testCredential;
+                Mock -CommandName Invoke-Command -ParameterFilter { $Credential -eq $testCredential -and $Authentication -eq 'CredSSP' } { }
 
-                Set-TargetResource @testSiteDatabaseWithCredentials;
+                Set-TargetResource @testSiteDatabaseWithCredential;
 
-                Assert-MockCalled Invoke-Command -ParameterFilter { $Credential -eq $testCredentials -and $Authentication -eq 'CredSSP' } -Exactly 1 -Scope It;
+                Assert-MockCalled Invoke-Command -ParameterFilter { $Credential -eq $testCredential -and $Authentication -eq 'CredSSP' } -Exactly 1 -Scope It;
             }
 
             It 'Asserts "Citrix.XenDesktop.Admin" module is registered' {

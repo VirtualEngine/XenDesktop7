@@ -1,3 +1,6 @@
+[System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseShouldProcessForStateChangingFunctions', '')]
+param ()
+
 $here = Split-Path -Parent $MyInvocation.MyCommand.Path;
 $sut = (Split-Path -Leaf $MyInvocation.MyCommand.Path).Replace('.Tests.ps1', '')
 $moduleRoot = Split-Path -Path (Split-Path -Path $here -Parent) -Parent;
@@ -41,17 +44,7 @@ InModuleScope $sut {
             Ensure = 'Present';
         }
 
-        $fakeEntitlementPolicyRule = [PSCustomObject] @{
-            DesktopGroupUid = 1;
-            Name = $fakeResource.Name;
-            Enabled = $fakeResource.Enabled;
-            PublishedName = $fakeResource.PublishedName;
-            IncludedUsers = $fakeResource.IncludedUsers;
-            ExcludedUsers = $fakeResource.ExcludedUsers;
-            Description = $fakeResource.Description;
-
-        }
-        $testCredentials = New-Object System.Management.Automation.PSCredential 'DummyUser', (ConvertTo-SecureString 'DummyPassword' -AsPlainText -Force);
+        $testCredential = [System.Management.Automation.PSCredential]::Empty;
 
         Context 'Get-TargetResource' {
             Mock -CommandName AssertXDModule -MockWith { }
@@ -98,13 +91,13 @@ InModuleScope $sut {
             }
 
             It 'Invokes script block with credentials and CredSSP when specified' {
-                Mock -CommandName Invoke-Command -ParameterFilter { $Credential -eq $testCredentials -and $Authentication -eq 'CredSSP' } { }
-                $testEntitlementPolicyWithCredentials = $testEntitlementPolicy.Clone();
-                $testEntitlementPolicyWithCredentials['Credential'] = $testCredentials;
+                Mock -CommandName Invoke-Command -ParameterFilter { $Credential -eq $testCredential -and $Authentication -eq 'CredSSP' } { }
+                $testEntitlementPolicyWithCredential = $testEntitlementPolicy.Clone();
+                $testEntitlementPolicyWithCredential['Credential'] = $testCredential;
 
-                $targetResource = Get-TargetResource @testEntitlementPolicyWithCredentials;
+                $targetResource = Get-TargetResource @testEntitlementPolicyWithCredential;
 
-                Assert-MockCalled Invoke-Command -ParameterFilter { $Credential -eq $testCredentials -and $Authentication -eq 'CredSSP' } -Exactly 1 -Scope It;
+                Assert-MockCalled Invoke-Command -ParameterFilter { $Credential -eq $testCredential -and $Authentication -eq 'CredSSP' } -Exactly 1 -Scope It;
             }
 
             It 'Asserts "Citrix.Broker.Admin.V2" module is registered' {
