@@ -1,4 +1,6 @@
 #requires -Version 5;
+[System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingWriteHost', '')]
+param ()
 
 $psake.use_exit_on_error = $true;
 
