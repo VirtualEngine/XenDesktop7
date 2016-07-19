@@ -4,5 +4,5 @@ class VE_XD7StoreFrontReceiverAuthenticationMethod : OMI_BaseResource
 {
     [Key, Description("Citrix Storefront Authentication Service IIS Virtual Path")] String VirtualPath;
     [Required, Description("Citrix Storefront Authentication methods"), ValueMap{"IntegratedWindows","HttpBasic","ExplicitForms","CitrixFederation","CitrixAGBasic","Certificate"}, Values{"IntegratedWindows","HttpBasic","ExplicitForms","CitrixFederation","CitrixAGBasic","Certificate"}] String AuthenticationMethod[];
-    [Write, Description("Citrix Storefront Authentication Service IIS Site Id"), ValueMap{"Present", "Absent"}, Values{"Present", "Absent"}] UInt16 Ensure;
+    [Write, Description("Citrix Storefront Authentication Service IIS Site Id")] UInt16 SiteId;
 };
