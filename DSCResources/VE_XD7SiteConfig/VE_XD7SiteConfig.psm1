@@ -1,4 +1,5 @@
-Import-LocalizedData -BindingVariable localizedData -FileName VE_XD7Site.Resources.psd1;
+Import-LocalizedData -BindingVariable localizedData -FileName VE_XD7SiteConfig.Resources.psd1;
+
 
 function Get-TargetResource {
     [CmdletBinding()]
@@ -120,21 +121,27 @@ function Test-TargetResource {
 
         $targetResource = Get-TargetResource @PSBoundParameters;
 
-        [ref] $null = $PSBoundParameters.Remove('IsSingleInstance');
-        [ref] $null = $PSBoundParameters.Remove('Credential');
-
+        $parameters = @(
+            'TrustRequestsSentToTheXmlServicePort',
+            'SecureIcaRequired',
+            'DnsResolutionEnabled',
+            'BaseOU',
+            'ConnectionLeasingEnabled'
+        )
         $inCompliance = $true;
-        foreach ($parameter in $PSBoundParameters.Keys) {
+        foreach ($parameter in $parameters) {
 
-            $expectedValue = $PSBoundParameters[$parameter];
-            $actualValue = $targetResource[$parameter];
+            if ($PSBoundParameters.ContainsKey($parameter)) {
 
-            if ($expectedValue -ne $actualValue) {
-                Write-Verbose ($localizedData.ResourcePropertyMismatch -f $parameter, $expectedValue, $actualValue);
-                $inCompliance = $false;
+                $expectedValue = $PSBoundParameters[$parameter];
+                $actualValue = $targetResource[$parameter];
 
+                if ($expectedValue -ne $actualValue) {
+                    Write-Verbose ($localizedData.ResourcePropertyMismatch -f $parameter, $expectedValue, $actualValue);
+                    $inCompliance = $false;
+
+                }
             }
-
         }
 
         if ($inCompliance) {
@@ -147,6 +154,7 @@ function Test-TargetResource {
 
     } #end process
 } #end function Test-TargetResource
+
 
 function Set-TargetResource {
     [CmdletBinding()]
@@ -195,23 +203,23 @@ function Set-TargetResource {
 
             $setBrokerSiteParams = @{ };
 
-            if ($using:PSBoundParameters.ContainsKey('TrustRequestsSentToTheXmlServicePort')) {
+            if (($using:PSBoundParameters).ContainsKey('TrustRequestsSentToTheXmlServicePort')) {
                 $setBrokerSiteParams['TrustRequestsSentToTheXmlServicePort'] = $using:TrustRequestsSentToTheXmlServicePort;
             }
 
-            if ($using:PSBoundParameters.ContainsKey('SecureIcaRequired')) {
+            if (($using:PSBoundParameters).ContainsKey('SecureIcaRequired')) {
                 $setBrokerSiteParams['SecureIcaRequired'] = $using:SecureIcaRequired;
             }
 
-            if ($using:PSBoundParameters.ContainsKey('DnsResolutionEnabled')) {
+            if (($using:PSBoundParameters).ContainsKey('DnsResolutionEnabled')) {
                 $setBrokerSiteParams['DnsResolutionEnabled'] = $using:DnsResolutionEnabled;
             }
 
-            if ($using:PSBoundParameters.ContainsKey('BaseOU')) {
+            if (($using:PSBoundParameters).ContainsKey('BaseOU')) {
                 $setBrokerSiteParams['BaseOU'] = $using:BaseOU;
             }
 
-            if ($using:PSBoundParameters.ContainsKey('ConnectionLeasingEnabled')) {
+            if (($using:PSBoundParameters).ContainsKey('ConnectionLeasingEnabled')) {
                 $setBrokerSiteParams['ConnectionLeasingEnabled'] = $using:ConnectionLeasingEnabled;
             }
 
@@ -233,10 +241,19 @@ function Set-TargetResource {
             $invokeCommandParams['ScriptBlock'] = [System.Management.Automation.ScriptBlock]::Create($scriptBlock.ToString().Replace('$using:','$'));
         }
 
-        [ref] $null = $PSBoundParameters.Remove('IsSingleInstance');
-        [ref] $null = $PSBoundParameters.Remove('Credential');
-        $scriptBlockParams = [System.String]::("','", $PSBoundParameters.Values);
-        Write-Verbose ($localizedData.InvokingScriptBlockWithParams -f scriptBlockParams);
+        $parameters = @(
+            'TrustRequestsSentToTheXmlServicePort',
+            'SecureIcaRequired',
+            'DnsResolutionEnabled',
+            'BaseOU',
+            'ConnectionLeasingEnabled'
+        )
+        foreach ($parameter in $parameters) {
+            if ($PSBoundParameters.ContainsKey($parameter)) {
+                $scriptBlockParam = "{0}' = '{1}" -f $parameter, $PSBoundParameters[$parameter];
+                Write-Verbose ($localizedData.InvokingScriptBlockWithParam -f $scriptBlockParam);
+            }
+        }
 
         [ref] $null = Invoke-Command  @invokeCommandParams;
 
