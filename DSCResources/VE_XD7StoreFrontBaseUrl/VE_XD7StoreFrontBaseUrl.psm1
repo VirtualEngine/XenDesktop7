@@ -72,7 +72,8 @@ function Set-TargetResource {
                 [System.ConsoleColor] $BackgroundColor
             )
             foreach ($message in $Object) {
-                Write-Verbose $message;
+                try { Write-Verbose -Message $message }
+                catch { }
             }
         }
 

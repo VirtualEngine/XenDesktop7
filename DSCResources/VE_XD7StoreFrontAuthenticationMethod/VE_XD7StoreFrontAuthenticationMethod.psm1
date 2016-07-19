@@ -39,7 +39,8 @@ function Get-TargetResource {
                 [System.ConsoleColor] $BackgroundColor
             )
             foreach ($message in $Object) {
-                Write-Verbose $message;
+                try { Write-Verbose -Message $message }
+                catch { }
             }
         }
 
@@ -47,7 +48,7 @@ function Get-TargetResource {
         Import-Module (FindXDModule -Name 'UtilsModule' -Path $storefrontCmdletSearchPath) -Scope Global -Verbose:$false;
         Import-Module (FindXDModule -Name 'AuthenticationModule' -Path $storefrontCmdletSearchPath) -Scope Global -Verbose:$false;
 
-        $authenticationMethods = Get-DSWebReceiverAuthenticationMethods -SiteId $SiteId -VirtualPath $VirtualPath;
+        $authenticationMethods = Get-DSAuthenticationProtocolsDeployed -SiteId $SiteId -VirtualPath $VirtualPath;
 
         $targetResource = @{
             VirtualPath = $VirtualPath;
@@ -138,7 +139,7 @@ function Set-TargetResource {
     )
     begin {
 
-        AssertXDModule -Name 'WebReceiverModule','StoresModuleUtilsModule' -Path "$env:ProgramFiles\Citrix\Receiver StoreFront\Management";
+        AssertXDModule -Name 'AuthenticationModule','UtilsModule' -Path "$env:ProgramFiles\Citrix\Receiver StoreFront\Management";
 
     }
     process {
@@ -153,7 +154,8 @@ function Set-TargetResource {
                 [System.ConsoleColor] $BackgroundColor
             )
             foreach ($message in $Object) {
-                Write-Verbose $message;
+                try { Write-Verbose -Message $message }
+                catch { }
             }
         }
 

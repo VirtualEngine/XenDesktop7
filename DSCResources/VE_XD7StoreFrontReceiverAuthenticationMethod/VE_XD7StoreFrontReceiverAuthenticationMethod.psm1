@@ -35,7 +35,8 @@ function Get-TargetResource {
                 [System.ConsoleColor] $BackgroundColor
             )
             foreach ($message in $Object) {
-                Write-Verbose $message;
+                try { Write-Verbose -Message $message }
+                catch { }
             }
         }
 
@@ -72,11 +73,7 @@ function Test-TargetResource {
 
         ## Citrix Storefront Authentication Service IIS Site Id
         [Parameter()]
-        [System.UInt16] $SiteId = 1,
-
-        [Parameter()]
-        [ValidateSet('Present','Absent')]
-        [System.String] $Ensure = 'Present'
+        [System.UInt16] $SiteId = 1
     )
     process {
 
@@ -117,8 +114,18 @@ function Set-TargetResource {
     [CmdletBinding()]
     [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseShouldProcessForStateChangingFunctions', '')]
     param (
+        ## Citrix Storefront Authentication Service IIS Virtual Path
         [Parameter(Mandatory)]
-        [System.String] $BaseUrl
+        [System.String] $VirtualPath,
+
+        ## Explicit authentication methods available
+        [Parameter(Mandatory)]
+        [ValidateSet('IntegratedWindows','HttpBasic','ExplicitForms','CitrixFederation','CitrixAGBasic','Certificate')]
+        [System.String[]] $AuthenticationMethod,
+
+        ## Citrix Storefront Authentication Service IIS Site Id
+        [Parameter()]
+        [System.UInt16] $SiteId = 1
     )
     begin {
 
@@ -137,7 +144,8 @@ function Set-TargetResource {
                 [System.ConsoleColor] $BackgroundColor
             )
             foreach ($message in $Object) {
-                Write-Verbose $message;
+                try { Write-Verbose -Message $message }
+                catch { }
             }
         }
 
@@ -147,7 +155,7 @@ function Set-TargetResource {
         Import-Module (FindXDModule -Name 'StoresModule' -Path $storefrontCmdletSearchPath) -Scope Global -Verbose:$false;
 
         Write-Verbose ($localizedData.UpdatingReceiverAuthenticationService -f $VirtualPath);
-        [ref] $null = Set-DSWebReceiverAuthenticationMethods -SiteId $SiteId -VirtualPath $VirtualPath -Protocols $AuthenticationMethod;
+        [ref] $null = Set-DSWebReceiverAuthenticationMethods -SiteId $SiteId -VirtualPath $VirtualPath -AuthenticationMethods $AuthenticationMethod;
 
     } #end process
 } #end function Set-TargetResource
