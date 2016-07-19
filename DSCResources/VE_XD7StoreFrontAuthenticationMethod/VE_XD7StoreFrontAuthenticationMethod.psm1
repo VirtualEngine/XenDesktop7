@@ -89,13 +89,13 @@ function Test-TargetResource {
         $inDesiredState = $true;
         foreach ($method in $AuthenticationMethod) {
             if ($Ensure -eq 'Present') {
-                if ($targetResource.AuthenticationMethods -notcontains $method) {
+                if ($targetResource.AuthenticationMethod -notcontains $method) {
                     Write-Verbose -Message ($localizedData.ResourcePropertyMismatch -f 'AuthenticationMethods', $method, '<Null>');
                     $inDesiredState = $false;
                 }
             }
             elseif ($Ensure -eq 'Absent') {
-                if ($targetResource.AuthenticationMethods -contains $method) {
+                if ($targetResource.AuthenticationMethod -contains $method) {
                     Write-Verbose -Message ($localizedData.ResourcePropertyMismatch -f 'AuthenticationMethods', '<Null>', $method);
                     $inDesiredState = $false;
                 }
@@ -164,12 +164,14 @@ function Set-TargetResource {
         Write-Verbose ($localizedData.UpdatingAuthenticationService -f $VirtualPath);
 
         if ($Ensure -eq 'Present') {
+
             Write-Verbose ($localizedData.AddingAuthenticationMethod -f ($AuthenticationMethod -join ', '));
-            Add-DSAuthenticationProtocolsDeployed -SiteId $SiteId -VirtualPath $VirtualPath -Protocols $AuthenticationMethod;
+            [ref] $null = Add-DSAuthenticationProtocolsDeployed -SiteId $SiteId -VirtualPath $VirtualPath -Protocols $AuthenticationMethod;
         }
         elseif ($Ensure -eq 'Absent') {
+
             Write-Verbose ($localizedData.RemovingAuthenticationMethod -f ($AuthenticationMethod -join ', '));
-            Remove-DSAuthenticationProtocolsDeployed -SiteId $SiteId -VirtualPath $VirtualPath -Protocols $AuthenticationMethod;
+            [ref] $null = Remove-DSAuthenticationProtocolsDeployed -SiteId $SiteId -VirtualPath $VirtualPath -Protocols $AuthenticationMethod;
         }
 
     } #end process

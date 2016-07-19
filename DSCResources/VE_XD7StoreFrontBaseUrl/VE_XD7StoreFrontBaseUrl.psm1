@@ -75,9 +75,11 @@ function Set-TargetResource {
                 Write-Verbose $message;
             }
         }
+
         $storefrontCmdletSearchPath = "$env:ProgramFiles\Citrix\Receiver StoreFront\Management";
         Import-Module (FindXDModule -Name 'UtilsModule' -Path $storefrontCmdletSearchPath) -Scope Global -Verbose:$false;
         Import-Module (FindXDModule -Name 'ClusterConfigurationModule' -Path $storefrontCmdletSearchPath) -Scope Global -Verbose:$false;
+
         Write-Verbose ($localizedData.UpdatingBaseUrl -f $BaseUrl);
         [ref] $null = Set-DSClusterAddress -NewHostBaseUrl $BaseUrl;
 

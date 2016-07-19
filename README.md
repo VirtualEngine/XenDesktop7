@@ -15,7 +15,9 @@ Included Resources
 * XD7Role
 * XD7Site
 * XD7SiteLicense
+* XD7StoreFrontAuthenticationMethod
 * XD7StoreFrontBaseUrl
+* XD7StoreFrontReceiverAuthenticationMethod
 * XD7VDAController
 * XD7VDAFeature
 * XD7WaitForSite
@@ -582,8 +584,40 @@ Configuration XD7SiteLicenseExample {
     }
 }
 ```
+XD7StoreFrontAuthenticationMethod
+=================================
+Configures the available authentication providers of a Citrix StoreFront 2.x or 3.x server.
+###Syntax
+```
+XD7StoreFrontAuthenticationMethod [string]
+{
+    VirtualPath = [string]
+    AuthenticationMethod = [string[]] { Certificate | CitrixAGBasic | CitrixFederation | ExplicitForms | HttpBasic | IntegratedWindows }
+    [ SiteId = [uint16] ]
+    [ Ensure = [string] { Absent | Present } ]
+}
+```
+###Properties
+* **VirtualPath**: The Citrix Storefront IIS authentication service virtual path.
+* **AuthenticationMethod**: Authentication methods to be installed. Existing authentication methods will not be removed.
+* **SiteId**: The Citrix Storefront IIS authentication service site id.
+ * If not specified, the value defaults to 1.
+* **Ensure**: Whether the Storefront authentication service method should be added or removed.
+
+###Configuration
+```
+Configuration XD7StoreFrontAuthenticationMethodExample {
+    Import-DscResource -ModuleName XenDesktop7
+    XD7StoreFrontAuthenticationMethod XD7StoreFrontAuthenticationMethods {
+        VirtualPath = '/Citrix/Authentication'
+        SiteId = 1
+        AuthenticationMethod = 'WindowsIntegrated'
+        Ensure = 'Present'
+    }
+}
+```
 XD7StoreFrontBaseUrl
-================
+====================
 Configures the base URL of a Citrix StoreFront 2.x or 3.x server.
 ###Syntax
 ```
@@ -601,6 +635,36 @@ Configuration XD7StoreFrontBaseUrlExample {
     Import-DscResource -ModuleName XenDesktop7
     XD7StoreFrontBaseUrl 'storefront_lab_local' {
         BaseUrl = 'https://storefront.lab.local/'
+    }
+}
+```
+XD7StoreFrontReceiverAuthenticationMethod
+=========================================
+Configures the available authentication providers of a Citrix StoreFront 2.x or 3.x server.
+###Syntax
+```
+XD7StoreFrontReceiverAuthenticationMethod [string]
+{
+    VirtualPath = [string]
+    AuthenticationMethod = [string[]] { Certificate | CitrixAGBasic | CitrixFederation | ExplicitForms | HttpBasic | IntegratedWindows }
+    [ SiteId = [uint16] ]
+}
+```
+###Properties
+* **VirtualPath**: The Citrix Storefront IIS authentication service virtual path.
+* **AuthenticationMethod**: Authentication methods to be installed.
+ * __Note: Existing authentication methods will be removed.__
+* **SiteId**: The Citrix Storefront IIS authentication service site id.
+ * If not specified, the value defaults to 1.
+
+###Configuration
+```
+Configuration XD7StoreFrontReceiverAuthenticationMethodExample {
+    Import-DscResource -ModuleName XenDesktop7
+    XD7StoreFrontReceiverAuthenticationMethod XD7StoreFrontReceiverAuthenticationMethods {
+        VirtualPath = '/Citrix/StoreWeb'
+        SiteId = 1
+        AuthenticationMethod = 'ExplicitForms','WindowsIntegrated'
     }
 }
 ```
