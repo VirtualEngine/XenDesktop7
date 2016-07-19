@@ -14,6 +14,7 @@ Included Resources
 * XD7Features
 * XD7Role
 * XD7Site
+* XD7SiteConfig
 * XD7SiteLicense
 * XD7StoreFrontAuthenticationMethod
 * XD7StoreFrontBaseUrl
@@ -32,15 +33,15 @@ XD7AccessPolicy [string]
 {
     DeliveryGroup = [string]
     AccessType = [string] { AccessGateway | Direct }
-    [Enabled = [bool]]
-    [AllowRestart = [bool]]
-    [Name = [string]]
-    [Description = [string]]
-    [Protocol = [string[]] { HDX | RDP }
-    [IncludeUsers = [string[]]
-    [ExcludeUsers = [string[]]
-    [Ensure = [string] { Present | Absent }]
-    [Credential = [PSCredential]]
+    [ Enabled = [bool] ]
+    [ AllowRestart = [bool] ]
+    [ Name = [string] ]
+    [ Description = [string] ]
+    [ Protocol = [string[] ] { HDX | RDP }
+    [ IncludeUsers = [string[]] ]
+    [ ExcludeUsers = [string[]] ]
+    [ Ensure = [string] { Present | Absent }]
+    [ Credential = [PSCredential] ]
 }
 ```
 ###Properties
@@ -83,8 +84,8 @@ XD7Administrator [string]
 {
     Name = [string]
     Enabled = [bool]
-    [Ensure = [string] { Present | Absent }]
-    [Credential = [PSCredential]]
+    [ Ensure = [string] { Present | Absent } ]
+    [ Credential = [PSCredential] ]
 }
 ```
 ###Properties
@@ -113,15 +114,15 @@ Creates a Citrix XenDesktop machine catalog.
 XD7Catalog [string]
 {
     Name = [string]
-    [Description = [string]]
     Allocation = [string] { Permanent | Random | Static }
     Provisioning = [string] { Manual | PVS | MCS }
     Persistence = [string] { Discard | Local | PVD }
-    [IsMultiSession = [bool]]
-    [PvsAddress = [stirng]]
-    [PvsDomain = [string]]
-    [Ensure = [string] { Present | Absent }]
-    [Credential = [PSCredential]]
+    [ Description = [string] ]
+    [ IsMultiSession = [bool] ]
+    [ PvsAddress = [string] ]
+    [ PvsDomain = [string] ]
+    [ Ensure = [string] { Present | Absent } ]
+    [ Credential = [PSCredential] ]
 }
 ```
 ###Properties
@@ -158,9 +159,9 @@ Adds/assigns an Active Directory machine to a Citrix XenDesktop 7 machine catalo
 XD7CatalogMachine [string]
 {
     Name = [string]
-    Members = [string[]]
-    [Ensure = [string] { Present | Absent }]
-    [Credential = [PSCredential]]
+    Members = [string[]] ]
+    [ Ensure = [string] { Present | Absent } ]
+    [ Credential = [PSCredential] ]
 }
 ```
 ###Properties
@@ -189,8 +190,8 @@ XD7Controller [string]
 {
     SiteName = [string]
     ExistingControllerName = [string]
-    [Ensure = [string] { Present | Absent }]
-    [Credential = [PSCredential]]
+    [ Ensure = [string] { Present | Absent } ]
+    [ Credential = [PSCredential] ]
 }
 ```
 ###Properties
@@ -222,7 +223,7 @@ XD7Database [string]
     DatabaseName = [string]
     DatabaseServer = [string]
     DataStore = [string] { Site | Logging | Monitor }
-    [Credential = [PSCredential]]
+    [ Credential = [PSCredential] ]
 }
 ```
 ###Properties
@@ -255,17 +256,17 @@ XD7DesktopGroup [string]
     IsMultiSession = [bool]
     DeliveryType = [string] { AppsOnly | DesktopsOnly | DesktopsAndApps }
     DesktopType = [string] { Shared | Private }
-    [Description = [string]
-    [DisplayName = [string]]
-    [Enabled = [bool]]
-    [ColorDepth = [string] { FourBit | EightBit | SixteenBit | TwentyFourBit }]
-    [IsMaintenanceMode = [bool]]
-    [IsRemotePC = [bool]]
-    [IsSecureIca = [bool]]
-    [ShutdownDesktopsAfterUse = [bool]]
-    [TurnOnAddedMachine = [bool]]
-    [Ensure = [string] { Present | Absent }]
-    [Credential = [PSCredential]]
+    [ Description = [string]
+    [ DisplayName = [string] ]
+    [ Enabled = [bool] ]
+    [ ColorDepth = [string] { FourBit | EightBit | SixteenBit | TwentyFourBit } ]
+    [ IsMaintenanceMode = [bool] ]
+    [ IsRemotePC = [bool] ]
+    [ IsSecureIca = [bool] ]
+    [ ShutdownDesktopsAfterUse = [bool] ]
+    [ TurnOnAddedMachine = [bool] ]
+    [ Ensure = [string] { Present | Absent } ]
+    [ Credential = [PSCredential] ]
 }
 ```
 ###Properties
@@ -305,9 +306,9 @@ Adds or removes Active Directory computer accounts to or from a Citrix XenDeskto
 XD7DesktopGroupMember [string]
 {
     Name = [string]
-    Members = [string[]]
-    [Ensure = [string] { Present | Absent }]
-    [Credential = [PSCredential]]
+    Members = [string[]] ]
+    [ Ensure = [string] { Present | Absent } ]
+    [ Credential = [PSCredential] ]
 }
 ```
 ###Properties
@@ -337,15 +338,15 @@ XD7DesktopGroupApplication [string]
     Name = [string]
     DesktopGroupName = [string]
     Path = [string]
-    [ApplicationType = [string] { HostedOnDesktop, InstalledOnClient }]
-    [WorkingDirectory = [string]]
-    [Arguments = [string]]
-    [Description = [string]]
-    [DisplayName = [string]]
-    [Enabled = [bool]]
-    [Visible = [bool]]
-    [Ensure = [string]] { Present | Absent }
-    [Credential = [PSCredential]]
+    [ ApplicationType = [string] { HostedOnDesktop, InstalledOnClient } ]
+    [ WorkingDirectory = [string] ]
+    [ Arguments = [string] ]
+    [ Description = [string] ]
+    [ DisplayName = [string] ]
+    [ Enabled = [bool] ]
+    [ Visible = [bool] ]
+    [ Ensure = [string] ] { Present | Absent } ]
+    [ Credential = [PSCredential] ]
 }
 ```
 ###Properties
@@ -389,13 +390,13 @@ XD7EntitlementPolicy [string]
 {
     DeliveryGroup = [string]
     EntitlementType = [string] EntitlementType { Desktop | Application }
-    [Enabled = [bool]]
-    [Name = [string]]
-    [Description = [string]]
-    [IncludeUsers = [string[]]]
-    [ExcludeUsers = [string[]]]
-    [Ensure = [string] { Present | Absent }]
-    [Credential = [PSCredential]]
+    [ Enabled = [bool] ]
+    [ Name = [string] ]
+    [ Description = [string] ]
+    [ IncludeUsers = [string[]] ]
+    [ ExcludeUsers = [string[]] ]
+    [ Ensure = [string] { Present | Absent } ]
+    [ Credential = [PSCredential] ]
 }
 ```
 ###Properties
@@ -429,8 +430,8 @@ XD7Feature [string]
 {
     Role = [string] { Controller | Licensing | Storefront | Studio | Director }
     SourcePath = [string]
-    [[Ensure = [string] { Present | Absent }]
-    [Credential = [PSCredential]]
+    [Ensure = [string] { Present | Absent } ]
+    [ Credential = [PSCredential] ]
 }
 ```
 ###Properties
@@ -458,10 +459,10 @@ Installs multiple Citrix XenDesktop 7 server roles/features in a single pass, re
 XD7Features [string]
 {
     IsSingleInstance = [string] { Yes }
-    Role = [string[]] { Controller | Licensing | Storefront | Studio | Director }
+    Role = [string[] { Controller | Licensing | Storefront | Studio | Director }
     SourcePath = [string]
-    [[Ensure = [string] { Present | Absent }]
-    [Credential = [PSCredential]]
+    [ Ensure = [string] { Present | Absent } ]
+    [ Credential = [PSCredential] ]
 }
 ```
 ###Properties
@@ -492,9 +493,9 @@ XD7Role [string]
 {
     Name = [string]
     Members = string[]
-    RoleScope = [string[
-    [Ensure = [string] { Present | Absent }]
-    [Credential = [PSCredential]]
+    RoleScope = [string]
+    [ Ensure = [string] { Present | Absent } ]
+    [ Credential = [PSCredential] ]
 }
 ```
 ###Properties
@@ -528,7 +529,7 @@ XD7Site [string]
     SiteDatabaseName = [string]
     LoggingDatabaseName = [string]
     MonitorDatabaseName = [string]
-    [Credential = [PSCredential]]
+    [ Credential = [PSCredential] ]
 }
 ```
 ###Properties
@@ -552,6 +553,41 @@ Configuration XD7SiteExample {
     }
 }
 ```
+XD7SiteConfig
+=============
+Configures a Citrix XenDesktop 7 global site settings.
+###Syntax
+```
+XD7SiteConfig [string]
+{
+    IsSingleInstance = [string] { Yes }
+    [ TrustRequestsSentToTheXmlServicePort = [bool] ]
+    [ SecureIcaRequired = [bool] ]
+    [ DnsResolutionEnabled = [bool] ]
+    [ ConnectionLeasingEnabled = [bool] ]
+    [ BaseOU = [string] ]
+    [ Credential = [PSCredential] ]
+}
+```
+###Properties
+* **TrustRequestsSentToTheXmlServicePort**: The XML Service trust settings.
+* **SecureIcaRequired**: The default SecureICA usage requirements for new desktop groups.
+* **DnsResolutionEnabled**: The setting to configure whether numeric IP address or the DNS name to be present in the ICA file.
+* **ConnectionLeasingEnabled**: The objectGUID property identifying the base OU in Active Directory used for desktop registrations.
+* **BaseOU**: The indicator for connection leasing active.
+* **Credential**: Specifies optional credential of a user which has permissions to create the site and access the MS SQL databases. __This property is required for Powershell 4.0.__
+
+###Configuration
+```
+Configuration XD7SiteConfigExample {
+    Import-DscResource -ModuleName XenDesktop7
+    XD7SiteConfig XD7GlobalSiteSetting {
+        IsSingleInstance = 'Yes'
+        TrustRequestsSentToTheXmlServicePort = $true
+        ConnectionLeasingEnabled = $true
+    }
+}
+```
 XD7SiteLicense
 ==============
 Configures a Citrix XenDesktop 7 licensing scheme.
@@ -559,12 +595,12 @@ Configures a Citrix XenDesktop 7 licensing scheme.
 ```
 XD7SiteLicense [string]
 {
-    LicenseServer = [string]]
-    [LicenseServerPort = [uint16]]
-    [LicenseEdition [string] { PLT | ENT | VDI }]
-    [LicenseModel = [string] { UserDevice | Concurrent }]
-    [TrustLicenseServerCertificate = [bool]]
-    [Credential = [PSCredential]]
+    LicenseServer = [string] ]
+    [ LicenseServerPort = [uint16] ]
+    [ LicenseEdition [string] { PLT | ENT | VDI } ]
+    [ LicenseModel = [string] { UserDevice | Concurrent } ]
+    [ TrustLicenseServerCertificate = [bool] ]
+    [ Credential = [PSCredential] ]
 }
 ```
 ###Properties
@@ -592,7 +628,7 @@ Configures the available authentication providers of a Citrix StoreFront 2.x or 
 XD7StoreFrontAuthenticationMethod [string]
 {
     VirtualPath = [string]
-    AuthenticationMethod = [string[]] { Certificate | CitrixAGBasic | CitrixFederation | ExplicitForms | HttpBasic | IntegratedWindows }
+    AuthenticationMethod = [string[] ] { Certificate | CitrixAGBasic | CitrixFederation | ExplicitForms | HttpBasic | IntegratedWindows }
     [ SiteId = [uint16] ]
     [ Ensure = [string] { Absent | Present } ]
 }
@@ -676,7 +712,7 @@ Assigns a Citrix XenDesktop Controller to a Citrix Virtual Delivery Agent (VDA).
 XD7VDAController [string]
 {
     Name = [string]
-    [Ensure = [string] { Present | Absent }]
+    [ Ensure = [string] { Present | Absent } ]
 }
 ```
 ###Properties
@@ -704,12 +740,12 @@ XD7VDAFeature [string]
 {
     Role = [string] { DesktopVDA | SessionVDA }
     SourcePath = [string]
-    [InstallReceiver = [bool]]
-    [EnableRemoteAssistance = [bool]]
-    [Optimize = [bool]]
-    [InstallDesktopExperience = [bool]]
-    [EnableRealTimeTransport = [bool]]
-    [Ensure = [string] { Present | Absent }]
+    [ InstallReceiver = [bool] ]
+    [ EnableRemoteAssistance = [bool] ]
+    [ Optimize = [bool] ]
+    [ InstallDesktopExperience = [bool] ]
+    [ EnableRealTimeTransport = [bool] ]
+    [ Ensure = [string] { Present | Absent } ]
 }
 ```
 ###Properties
@@ -743,9 +779,9 @@ XD7WaitForSite [string]
 {
     SiteName = [string]
     ExistingControllerName = [string]
-    [RetryIntervalSec = [uint64]]
-    [RetryCount = [uint32]]
-    [Credential = [PSCredential]]
+    [ RetryIntervalSec = [uint64] ]
+    [ RetryCount = [uint32] ]
+    [ Credential = [PSCredential] ]
 }
 ```
 ###Properties
