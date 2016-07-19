@@ -55,7 +55,7 @@ function Get-TargetResource {
                 TrustRequestsSentToTheXmlServicePort = $brokerSite.TrustRequestsSentToTheXmlServicePort;
                 SecureIcaRequired = $brokerSite.SecureIcaRequired;
                 DnsResolutionEnabled = $brokerSite.DnsResolutionEnabled;
-                BaseOU = $brokerSite.BaseOU.ToString();
+                BaseOU = if ($brokerSite.BaseOU) { $brokerSite.BaseOU.ToString(); }
                 ConnectionLeasingEnabled = $brokerSite.ConnectionLeasingEnabled;
                 SiteName = $brokerSite.Name;
             };
