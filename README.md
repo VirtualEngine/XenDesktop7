@@ -19,6 +19,7 @@ Included Resources
 * XD7StoreFrontAuthenticationMethod
 * XD7StoreFrontBaseUrl
 * XD7StoreFrontReceiverAuthenticationMethod
+* XD7StoreFrontUnifiedExperience
 * XD7VDAController
 * XD7VDAFeature
 * XD7WaitForSite
@@ -701,6 +702,39 @@ Configuration XD7StoreFrontReceiverAuthenticationMethodExample {
         VirtualPath = '/Citrix/StoreWeb'
         SiteId = 1
         AuthenticationMethod = 'ExplicitForms','WindowsIntegrated'
+    }
+}
+```
+XD7StoreFrontUnifiedExperience
+==============================
+Configures the Citrix Storefront Unified Experience of a Citrix Storefront 3.x server.
+###Syntax
+```
+XD7StoreFrontUnifiedExperience [string]
+{
+    VirtualPath = [string]
+    WebReceiverVirtualPath = [string]
+    [ SiteId = [uint16] ]
+    [ Ensure = [string] { Absent | Present } ]
+}
+```
+###Properties
+* **VirtualPath**: The Citrix Storefront IIS Store service virtual path.
+* **WebReceiverVirtualPath**: The Citrix Storefront IIS Receiver for Web service virtual path.
+ * __Note: Existing authentication methods will be removed.__
+* **SiteId**: The Citrix Storefront IIS authentication service site id.
+ * If not specified, the value defaults to 1.
+* **Ensure**: Whether the Storefront unified experience should be enabled or disabled.
+
+###Configuration
+```
+Configuration XD7StoreFrontUnifiedExperienceExample {
+    Import-DscResource -ModuleName XenDesktop7
+    XD7StoreFrontUnifiedExperience EnableStoreFrontUnifiedExperience {
+        VirtualPath = '/Citrix/Store'
+        WebReceiverVirtualPath = '/Citrix/StoreWeb'
+        SiteId = 1
+        Ensure = 'Present'
     }
 }
 ```
