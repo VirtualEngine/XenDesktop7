@@ -11,26 +11,32 @@ function Get-TargetResource {
         [System.String] $IsSingleInstance,
 
         ## The XML Service trust settings
-        [Parameter()] [ValidateNotNullOrEmpty()]
+        [Parameter()]
+        [ValidateNotNullOrEmpty()]
         [System.Boolean] $TrustRequestsSentToTheXmlServicePort,
 
         ## The default SecureICA usage requirements for new desktop groups
-        [Parameter()] [ValidateNotNullOrEmpty()]
+        [Parameter()]
+        [ValidateNotNullOrEmpty()]
         [System.Boolean] $SecureIcaRequired,
 
         ## The setting to configure whether numeric IP address or the DNS name to be present in the ICA file
-        [Parameter()] [ValidateNotNullOrEmpty()]
+        [Parameter()]
+        [ValidateNotNullOrEmpty()]
         [System.Boolean] $DnsResolutionEnabled,
 
         ## The objectGUID property identifying the base OU in Active Directory used for desktop registrations
-        [Parameter()] [ValidateNotNullOrEmpty()]
+        [Parameter()]
+        [ValidateNotNullOrEmpty()]
         [System.String] $BaseOU,
 
         ## The indicator for connection leasing active
-        [Parameter()] [ValidateNotNullOrEmpty()]
+        [Parameter()]
+        [ValidateNotNullOrEmpty()]
         [System.Boolean] $ConnectionLeasingEnabled,
 
-        [Parameter()] [ValidateNotNull()]
+        [Parameter()]
+        [ValidateNotNull()]
         [System.Management.Automation.PSCredential]
         [System.Management.Automation.CredentialAttribute()]
         $Credential
@@ -77,7 +83,7 @@ function Get-TargetResource {
         }
 
         Write-Verbose $localizedData.InvokingScriptBlock;
-        return Invoke-Command @invokeCommandParams;
+        return Invoke-Command @invokeCommandParams -Verbose:$Verbose;
 
     } #end process
 } #end function Get-TargetResource
@@ -93,26 +99,32 @@ function Test-TargetResource {
         [System.String] $IsSingleInstance,
 
         ## The XML Service trust settings
-        [Parameter()] [ValidateNotNullOrEmpty()]
+        [Parameter()]
+        [ValidateNotNullOrEmpty()]
         [System.Boolean] $TrustRequestsSentToTheXmlServicePort,
 
         ## The default SecureICA usage requirements for new desktop groups
-        [Parameter()] [ValidateNotNullOrEmpty()]
+        [Parameter()]
+        [ValidateNotNullOrEmpty()]
         [System.Boolean] $SecureIcaRequired,
 
         ## The setting to configure whether numeric IP address or the DNS name to be present in the ICA file
-        [Parameter()] [ValidateNotNullOrEmpty()]
+        [Parameter()]
+        [ValidateNotNullOrEmpty()]
         [System.Boolean] $DnsResolutionEnabled,
 
         ## The objectGUID property identifying the base OU in Active Directory used for desktop registrations
-        [Parameter()] [ValidateNotNullOrEmpty()]
+        [Parameter()]
+        [ValidateNotNullOrEmpty()]
         [System.String] $BaseOU,
 
         ## The indicator for connection leasing active
-        [Parameter()] [ValidateNotNullOrEmpty()]
+        [Parameter()]
+        [ValidateNotNullOrEmpty()]
         [System.Boolean] $ConnectionLeasingEnabled,
 
-        [Parameter()] [ValidateNotNull()]
+        [Parameter()]
+        [ValidateNotNull()]
         [System.Management.Automation.PSCredential]
         [System.Management.Automation.CredentialAttribute()]
         $Credential
@@ -128,7 +140,9 @@ function Test-TargetResource {
             'BaseOU',
             'ConnectionLeasingEnabled'
         )
+
         $inCompliance = $true;
+
         foreach ($parameter in $parameters) {
 
             if ($PSBoundParameters.ContainsKey($parameter)) {
@@ -150,6 +164,7 @@ function Test-TargetResource {
         else {
             Write-Verbose ($localizedData.ResourceNotInDesiredState -f 'SiteConfig');
         }
+
         return $inCompliance;
 
     } #end process
@@ -166,26 +181,32 @@ function Set-TargetResource {
         [System.String] $IsSingleInstance,
 
         ## The XML Service trust settings
-        [Parameter()] [ValidateNotNullOrEmpty()]
+        [Parameter()]
+        [ValidateNotNullOrEmpty()]
         [System.Boolean] $TrustRequestsSentToTheXmlServicePort,
 
         ## The default SecureICA usage requirements for new desktop groups
-        [Parameter()] [ValidateNotNullOrEmpty()]
+        [Parameter()]
+        [ValidateNotNullOrEmpty()]
         [System.Boolean] $SecureIcaRequired,
 
         ## The setting to configure whether numeric IP address or the DNS name to be present in the ICA file
-        [Parameter()] [ValidateNotNullOrEmpty()]
+        [Parameter()]
+        [ValidateNotNullOrEmpty()]
         [System.Boolean] $DnsResolutionEnabled,
 
         ## The objectGUID property identifying the base OU in Active Directory used for desktop registrations
-        [Parameter()] [ValidateNotNullOrEmpty()]
+        [Parameter()]
+        [ValidateNotNullOrEmpty()]
         [System.String] $BaseOU,
 
         ## The indicator for connection leasing active
-        [Parameter()] [ValidateNotNullOrEmpty()]
+        [Parameter()]
+        [ValidateNotNullOrEmpty()]
         [System.Boolean] $ConnectionLeasingEnabled,
 
-        [Parameter()] [ValidateNotNull()]
+        [Parameter()]
+        [ValidateNotNull()]
         [System.Management.Automation.PSCredential]
         [System.Management.Automation.CredentialAttribute()]
         $Credential

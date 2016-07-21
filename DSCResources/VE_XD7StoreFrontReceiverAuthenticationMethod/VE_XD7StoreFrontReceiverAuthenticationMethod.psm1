@@ -34,7 +34,9 @@ function Get-TargetResource {
                 [System.ConsoleColor] $ForegroundColor,
                 [System.ConsoleColor] $BackgroundColor
             )
+
             foreach ($message in $Object) {
+
                 try { Write-Verbose -Message $message }
                 catch { }
             }
@@ -83,6 +85,7 @@ function Test-TargetResource {
 
         ## Check we have the specified methods
         foreach ($method in $AuthenticationMethod) {
+
             if ($targetResource.AuthenticationMethod -notcontains $method) {
                 Write-Verbose -Message ($localizedData.ResourcePropertyMismatch -f 'AuthenticationMethod', $method, '<Null>');
                 $inDesiredState = $false;
@@ -91,6 +94,7 @@ function Test-TargetResource {
 
         ## Check whether other methods are present
         foreach ($method in $targetResource.AuthenticationMethod) {
+
             if ($AuthenticationMethod -notcontains $method) {
                 Write-Verbose -Message ($localizedData.ResourcePropertyMismatch -f 'AuthenticationMethod', '<Null>', $method);
                 $inDesiredState = $false;
@@ -98,10 +102,12 @@ function Test-TargetResource {
         }
 
         if ($inDesiredState) {
+
             Write-Verbose ($localizedData.ResourceInDesiredState -f $BaseUrl);
             return $true;
         }
         else {
+
             Write-Verbose ($localizedData.ResourceNotInDesiredState -f $BaseUrl);
             return $false;
         }
@@ -144,6 +150,7 @@ function Set-TargetResource {
                 [System.ConsoleColor] $BackgroundColor
             )
             foreach ($message in $Object) {
+
                 try { Write-Verbose -Message $message }
                 catch { }
             }

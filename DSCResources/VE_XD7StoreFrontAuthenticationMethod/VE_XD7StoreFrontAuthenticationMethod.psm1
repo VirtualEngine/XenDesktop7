@@ -56,6 +56,7 @@ function Get-TargetResource {
             AuthenticationMethod = $AuthenticationMethods;
             Ensure = if ($AuthenticationMethods) { 'Present' } else { 'Absent' }
         }
+
         return $targetResource;
 
     } #end process
@@ -88,15 +89,21 @@ function Test-TargetResource {
         $targetResource = Get-TargetResource @PSBoundParameters;
 
         $inDesiredState = $true;
+
         foreach ($method in $AuthenticationMethod) {
+
             if ($Ensure -eq 'Present') {
+
                 if ($targetResource.AuthenticationMethod -notcontains $method) {
+
                     Write-Verbose -Message ($localizedData.ResourcePropertyMismatch -f 'AuthenticationMethods', $method, '<Null>');
                     $inDesiredState = $false;
                 }
             }
             elseif ($Ensure -eq 'Absent') {
+
                 if ($targetResource.AuthenticationMethod -contains $method) {
+
                     Write-Verbose -Message ($localizedData.ResourcePropertyMismatch -f 'AuthenticationMethods', '<Null>', $method);
                     $inDesiredState = $false;
                 }
