@@ -1,3 +1,6 @@
+[System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseShouldProcessForStateChangingFunctions', '')]
+param ()
+
 $here = Split-Path -Parent $MyInvocation.MyCommand.Path;
 $sut = (Split-Path -Leaf $MyInvocation.MyCommand.Path).Replace('.Tests.ps1', '')
 $moduleRoot = Split-Path -Path (Split-Path -Path $here -Parent) -Parent;
@@ -16,7 +19,7 @@ InModuleScope $sut {
         $testMachineCatalogMembers = @('TestMachine.local');
         $testMachineCatalog = @{ Name = $testMachineCatalogName; Members = $testMachineCatalogMembers; Ensure = 'Present'; }
         $testMachineCatalogAbsent = @{ Name = $testMachineCatalogName; Members = $testMachineCatalogMembers; Ensure = 'Absent'; }
-        $testCredentials = New-Object System.Management.Automation.PSCredential 'DummyUser', (ConvertTo-SecureString 'DummyPassword' -AsPlainText -Force);
+        $testCredential = [System.Management.Automation.PSCredential]::Empty;
 
         Context 'Get-TargetResource' {
             Mock -CommandName AssertXDModule -MockWith { };
@@ -38,13 +41,13 @@ InModuleScope $sut {
             }
 
             It 'Invokes script block with credentials and CredSSP when specified' {
-                $testMachineCatalogWithCredentials = $testMachineCatalog.Clone();
-                $testMachineCatalogWithCredentials['Credential'] = $testCredentials;
-                Mock -CommandName Invoke-Command -ParameterFilter { $Credential -eq $testCredentials -and $Authentication -eq 'CredSSP' } { }
+                $testMachineCatalogWithCredential = $testMachineCatalog.Clone();
+                $testMachineCatalogWithCredential['Credential'] = $testCredential;
+                Mock -CommandName Invoke-Command -ParameterFilter { $Credential -eq $testCredential -and $Authentication -eq 'CredSSP' } { }
 
-                Get-TargetResource @testMachineCatalogWithCredentials;
+                Get-TargetResource @testMachineCatalogWithCredential;
 
-                Assert-MockCalled Invoke-Command -ParameterFilter { $Credential -eq $testCredentials -and $Authentication -eq 'CredSSP' } -Exactly 1 -Scope It;
+                Assert-MockCalled Invoke-Command -ParameterFilter { $Credential -eq $testCredential -and $Authentication -eq 'CredSSP' } -Exactly 1 -Scope It;
             }
 
             It 'Asserts "Citrix.Broker.Admin.V2" snapin is registered' {
@@ -157,13 +160,13 @@ InModuleScope $sut {
             }
 
             It 'Invokes script block with credentials and CredSSP when specified' {
-                $testMachineCatalogWithCredentials = $testMachineCatalog.Clone();
-                $testMachineCatalogWithCredentials['Credential'] = $testCredentials;
-                Mock -CommandName Invoke-Command -ParameterFilter { $Credential -eq $testCredentials -and $Authentication -eq 'CredSSP' } { }
+                $testMachineCatalogWithCredential = $testMachineCatalog.Clone();
+                $testMachineCatalogWithCredential['Credential'] = $testCredential;
+                Mock -CommandName Invoke-Command -ParameterFilter { $Credential -eq $testCredential -and $Authentication -eq 'CredSSP' } { }
 
-                Set-TargetResource @testMachineCatalogWithCredentials;
+                Set-TargetResource @testMachineCatalogWithCredential;
 
-                Assert-MockCalled Invoke-Command -ParameterFilter { $Credential -eq $testCredentials -and $Authentication -eq 'CredSSP' } -Exactly 1 -Scope It;
+                Assert-MockCalled Invoke-Command -ParameterFilter { $Credential -eq $testCredential -and $Authentication -eq 'CredSSP' } -Exactly 1 -Scope It;
             }
 
             It 'Asserts "Citrix.Broker.Admin.V2" snapin is registered' {

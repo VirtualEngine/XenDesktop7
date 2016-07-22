@@ -1,0 +1,9 @@
+
+[ClassVersion("1.0.0"), FriendlyName("XD7StoreFrontUnifiedExperience")]
+class VE_XD7StoreFrontUnifiedExperience : OMI_BaseResource
+{
+    [Key, Description("Citrix Storefront Store IIS Virtual Path")] String VirtualPath;
+    [Required, Description("Citrix Storefront Receiver for Web IIS Virtual Path")] String WebReceiverVirtualPath;
+    [Write, Description("Citrix Storefront Authentication Service IIS Site Id")] UInt16 SiteId;
+    [Write, ValueMap{"Present", "Absent"}, Values{"Present", "Absent"}] String Ensure;
+};

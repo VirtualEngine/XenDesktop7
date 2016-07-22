@@ -1,4 +1,4 @@
-<# VE_XD7DesktopGroupApplication\VE_XD7DesktopGroupApplication.psd1 #>
+<# VE_XD7DesktopGroupApplication\VE_XD7DesktopGroupApplication.Resources.psd1 #>
 ConvertFrom-StringData @'
     XenDesktopSDKNotFoundError    = Citrix XenDesktop 7.x Powershell SDK/Snap-in was not found.
     ImmutablePropertyError        = Citrix XenDesktop 7.x property '{0}' cannot be modified post-creation. Remove the object and then recreate.

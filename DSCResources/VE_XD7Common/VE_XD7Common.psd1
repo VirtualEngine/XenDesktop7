@@ -7,8 +7,9 @@
     Copyright = '(c) 2016 Virtual Engine Limited. All rights reserved.'
     Description = 'Citrix XenDesktop 7.x Common DSC Resource library'
     PowerShellVersion = '4.0'
-    FunctionsToExport = '*'
-    CmdletsToExport = '*'
-    VariablesToExport = '*'
-    AliasesToExport = '*'
+    FunctionsToExport = 'AddInvokeScriptBlockCredentials','GetHostname','GetRegistryValue','StartWaitProcess',
+                        'FindXDModule','TestXDModule','AssertXDModule','GetXDBrokerMachine','TestXDMachineIsExistingMember',
+                        'TestXDMachineMembership','ResolveXDBrokerMachine','ThrowInvalidOperationException',
+                        'ThrowInvalidProgramException','ThrowOperationCanceledException','TestXDInstalledRole',
+                        'GetXDInstalledRole','ResolveXDSetupMedia','ResolveXDServerSetupArguments'
 }

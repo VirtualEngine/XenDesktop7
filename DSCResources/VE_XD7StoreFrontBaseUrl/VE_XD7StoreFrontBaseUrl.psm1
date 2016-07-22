@@ -9,14 +9,18 @@ function Get-TargetResource {
         [System.String] $BaseUrl
     )
     begin {
+
         AssertXDModule -Name 'Citrix.DeliveryServices.Framework.Commands' -IsSnapin;
+
     }
     process {
 
         Add-PSSnapIn -Name 'Citrix.DeliveryServices.Framework.Commands' -ErrorAction Stop;
+
         $targetResource = @{
             BaseUrl = Get-DSFrameworkProperty -Key 'HostBaseUrl';
         }
+
         return $targetResource;
 
     } #end process
@@ -33,14 +37,18 @@ function Test-TargetResource {
     process {
 
         $targetResource = Get-TargetResource @PSBoundParameters;
+
         if (-not $BaseUrl.EndsWith('/')) {
             $BaseUrl = '{0}/' -f $BaseUrl;
         }
+
         if ($BaseUrl -eq $targetResource.BaseUrl) {
+
             Write-Verbose ($localizedData.ResourceInDesiredState -f $BaseUrl);
             return $true;
         }
         else {
+
             Write-Verbose ($localizedData.ResourcePropertyMismatch -f 'BaseUrl', $BaseUrl, $targetResource.BaseUrl);
             Write-Verbose ($localizedData.ResourceNotInDesiredState -f $BaseUrl);
             return $false;
@@ -58,7 +66,9 @@ function Set-TargetResource {
         [System.String] $BaseUrl
     )
     begin {
+
         AssertXDModule -Name 'ClusterConfigurationModule','UtilsModule' -Path "$env:ProgramFiles\Citrix\Receiver StoreFront\Management";
+
     }
     process {
 
@@ -71,14 +81,21 @@ function Set-TargetResource {
                 [System.ConsoleColor] $ForegroundColor,
                 [System.ConsoleColor] $BackgroundColor
             )
+
             foreach ($message in $Object) {
-                Write-Verbose $message;
+
+                try { Write-Verbose -Message $message }
+                catch { }
+
             }
         }
+
         $storefrontCmdletSearchPath = "$env:ProgramFiles\Citrix\Receiver StoreFront\Management";
         Import-Module (FindXDModule -Name 'UtilsModule' -Path $storefrontCmdletSearchPath) -Scope Global -Verbose:$false;
         Import-Module (FindXDModule -Name 'ClusterConfigurationModule' -Path $storefrontCmdletSearchPath) -Scope Global -Verbose:$false;
+
         Write-Verbose ($localizedData.UpdatingBaseUrl -f $BaseUrl);
+
         [ref] $null = Set-DSClusterAddress -NewHostBaseUrl $BaseUrl;
 
     } #end process

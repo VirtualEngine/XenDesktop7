@@ -1,0 +1,13 @@
+
+[ClassVersion("1.0.0"), FriendlyName("XD7SiteConfig")]
+class VE_XD7SiteConfig : OMI_BaseResource
+{
+    [Key, Description("Specifies the resource is a single instance, the value must be 'Yes'"), ValueMap{"Yes"}, Values{"Yes"}] String IsSingleInstance;
+    [Write, Description("The XML Service trust settings")] Boolean TrustRequestsSentToTheXmlServicePort;
+    [Write, Description("The default SecureICA usage requirements for new desktop groups")] Boolean SecureIcaRequired;
+    [Write, Description("The setting to configure whether numeric IP address or the DNS name to be present in the ICA file")] Boolean DnsResolutionEnabled;
+    [Write, Description("The objectGUID property identifying the base OU in Active Directory used for desktop registrations")] String BaseOU;
+    [Write, Description("The indicator for connection leasing active")] Boolean ConnectionLeasingEnabled;
+    [Write, EmbeddedInstance("MSFT_Credential"), Description("Specifies a user account that has permission to update the site")] String Credential;
+    [Read, Description("The Citrix XenDesktop site name")] String SiteName;
+};

@@ -1,3 +1,6 @@
+[System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseShouldProcessForStateChangingFunctions', '')]
+param ()
+
 $here = Split-Path -Parent $MyInvocation.MyCommand.Path;
 $sut = (Split-Path -Leaf $MyInvocation.MyCommand.Path).Replace('.Tests.ps1', '')
 $moduleRoot = Split-Path -Path (Split-Path -Path $here -Parent) -Parent;
@@ -18,9 +21,7 @@ InModuleScope $sut {
         $testRoleMembers = @('TEST\USER1','TEST\USER 2');
 
         $testRole = @{ Name = $testRoleName; Members = $testRoleMembers; };
-        $testRoleCustomRole = @{ Name = $testRoleNameCustom; Members = $testRoleMembers; };
-        $testScopeCustom = @{ Name = $testRoleName; Members = $testRoleMembers; RoleScope = $roleScopeNameCustom };
-        $testCredentials = New-Object System.Management.Automation.PSCredential 'DummyUser', (ConvertTo-SecureString 'DummyPassword' -AsPlainText -Force);
+        $testCredential = [System.Management.Automation.PSCredential]::Empty;
 
         $stubAdmins = @(
             [PSCustomObject] @{ Name = 'TEST\USER 2'; Enabled = $true; Rights = @( [PSCustomObject] @{ RoleName = $testRoleName; ScopeName = $testScopeName; }; ); }
@@ -70,13 +71,13 @@ InModuleScope $sut {
             }
 
             It 'Invokes script block with credentials and CredSSP when specified' {
-                Mock -CommandName Invoke-Command -ParameterFilter { $Credential -eq $testCredentials -and $Authentication -eq 'CredSSP' } { }
-                $testRoleWithCredentials = $testRole.Clone();
-                $testRoleWithCredentials['Credential'] = $testCredentials;
+                Mock -CommandName Invoke-Command -ParameterFilter { $Credential -eq $testCredential -and $Authentication -eq 'CredSSP' } { }
+                $testRoleWithCredential = $testRole.Clone();
+                $testRoleWithCredential['Credential'] = $testCredential;
 
-                $targetResource = Get-TargetResource @testRoleWithCredentials;
+                $targetResource = Get-TargetResource @testRoleWithCredential;
 
-                Assert-MockCalled Invoke-Command -ParameterFilter { $Credential -eq $testCredentials -and $Authentication -eq 'CredSSP' } -Exactly 1 -Scope It;
+                Assert-MockCalled Invoke-Command -ParameterFilter { $Credential -eq $testCredential -and $Authentication -eq 'CredSSP' } -Exactly 1 -Scope It;
             }
 
             It 'Asserts "Citrix.DelegatedAdmin.Admin.V1" module is registered' {
@@ -227,13 +228,13 @@ InModuleScope $sut {
             }
 
             It 'Invokes script block with credentials and CredSSP when specified' {
-                Mock -CommandName Invoke-Command -ParameterFilter { $Credential -eq $testCredentials -and $Authentication -eq 'CredSSP' } { }
-                $testRoleWithCredentials = $testRole.Clone();
-                $testRoleWithCredentials['Credential'] = $testCredentials;
+                Mock -CommandName Invoke-Command -ParameterFilter { $Credential -eq $testCredential -and $Authentication -eq 'CredSSP' } { }
+                $testRoleWithCredential = $testRole.Clone();
+                $testRoleWithCredential['Credential'] = $testCredential;
 
-                Set-TargetResource @testRoleWithCredentials;
+                Set-TargetResource @testRoleWithCredential;
 
-                Assert-MockCalled Invoke-Command -ParameterFilter { $Credential -eq $testCredentials -and $Authentication -eq 'CredSSP' } -Exactly 1 -Scope It;
+                Assert-MockCalled Invoke-Command -ParameterFilter { $Credential -eq $testCredential -and $Authentication -eq 'CredSSP' } -Exactly 1 -Scope It;
             }
 
             It 'Asserts "Citrix.DelegatedAdmin.Admin.V1" module is registered' {

@@ -1,4 +1,4 @@
-<# VE_XD7Database\VE_XD7Database.psd1 #>
+<# VE_XD7Database\VE_XD7Database.Resources.psd1 #>
 ConvertFrom-StringData @'
     XenDesktopSDKNotFoundError    = Citrix XenDesktop 7.x Powershell SDK/Snap-in was not found.
     CreatingXDDatabase            = Creating Citrix XenDesktop 7.x {0} Site Database '{1}' on host '{2}'.

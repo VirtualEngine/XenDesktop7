@@ -38,7 +38,7 @@ InModuleScope $sut {
             PvsAddress = $stubCatalog.PvsAddress;
             PvsDomain = $stubCatalog.PvsDomain;
         };
-        $testCredentials = New-Object System.Management.Automation.PSCredential 'DummyUser', (ConvertTo-SecureString 'DummyPassword' -AsPlainText -Force);
+        $testCredential = [System.Management.Automation.PSCredential]::Empty;
 
         Context 'Get-TargetResource' {
             Mock -CommandName AssertXDModule -MockWith { };
@@ -69,13 +69,13 @@ InModuleScope $sut {
             }
 
             It 'Invokes script block with credentials and CredSSP when specified' {
-                $testCatalogWithCredentials = $testCatalog.Clone();
-                $testCatalogWithCredentials['Credential'] = $testCredentials;
-                Mock -CommandName Invoke-Command -ParameterFilter { $Credential -eq $testCredentials -and $Authentication -eq 'CredSSP' } { }
+                $testCatalogWithCredential = $testCatalog.Clone();
+                $testCatalogWithCredential['Credential'] = $testCredential;
+                Mock -CommandName Invoke-Command -ParameterFilter { $Credential -eq $testCredential -and $Authentication -eq 'CredSSP' } { }
 
-                Get-TargetResource @testCatalogWithCredentials;
+                Get-TargetResource @testCatalogWithCredential;
 
-                Assert-MockCalled Invoke-Command -ParameterFilter { $Credential -eq $testCredentials -and $Authentication -eq 'CredSSP' } -Exactly 1 -Scope It;
+                Assert-MockCalled Invoke-Command -ParameterFilter { $Credential -eq $testCredential -and $Authentication -eq 'CredSSP' } -Exactly 1 -Scope It;
             }
 
             It 'Asserts "Citrix.Broker.Admin.V2" snapin is registered' {

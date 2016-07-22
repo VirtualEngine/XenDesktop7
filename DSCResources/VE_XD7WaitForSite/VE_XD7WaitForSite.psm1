@@ -4,13 +4,16 @@ function Get-TargetResource {
     [CmdletBinding()]
     [OutputType([System.Collections.Hashtable])]
     param (
-        [Parameter(Mandatory)] [ValidateNotNullOrEmpty()]
+        [Parameter(Mandatory)]
+        [ValidateNotNullOrEmpty()]
         [System.String] $SiteName,
 
-        [Parameter(Mandatory)] [ValidateNotNullOrEmpty()]
+        [Parameter(Mandatory)]
+        [ValidateNotNullOrEmpty()]
         [System.String] $ExistingControllerName,
 
-        [Parameter()] [ValidateNotNull()]
+        [Parameter()]
+        [ValidateNotNull()]
         [System.Management.Automation.PSCredential]
         [System.Management.Automation.CredentialAttribute()]
         $Credential,
@@ -37,6 +40,7 @@ function Get-TargetResource {
             RetryIntervalSec = $RetryIntervalSec;
             RetryCount = $RetryCount;
         }
+
         return $targetResource;
 
     } #end process
@@ -47,13 +51,16 @@ function Test-TargetResource {
     [CmdletBinding()]
     [OutputType([System.Boolean])]
     param (
-        [Parameter(Mandatory)] [ValidateNotNullOrEmpty()]
+        [Parameter(Mandatory)]
+        [ValidateNotNullOrEmpty()]
         [System.String] $SiteName,
 
-        [Parameter(Mandatory)] [ValidateNotNullOrEmpty()]
+        [Parameter(Mandatory)]
+        [ValidateNotNullOrEmpty()]
         [System.String] $ExistingControllerName,
 
-        [Parameter()] [ValidateNotNull()]
+        [Parameter()]
+        [ValidateNotNull()]
         [System.Management.Automation.PSCredential]
         [System.Management.Automation.CredentialAttribute()]
         $Credential,
@@ -68,16 +75,21 @@ function Test-TargetResource {
 
         Write-Verbose ($localizedData.TestingXDSite -f $SiteName, $ExistingControllerName);
         $xdSiteName = TestXDSite -ExistingControllerName $ExistingControllerName -Credential $Credential;
+
         if ($xdSiteName -eq $SiteName) {
+
             Write-Verbose ($localizedData.ResourceInDesiredState -f $SiteName);
             return $true;
         }
         else {
+
             if (-not ([System.String]::IsNullOrEmpty($xdSiteName))) {
                 Write-Warning ($localizedData.IncorrectXDSiteNameWarning -f $xdSiteName);
             }
+
             Write-Verbose ($localizedData.ResourceNotInDesiredState -f $SiteName);
             return $false;
+
         }
     } #end process
 
@@ -88,13 +100,16 @@ function Set-TargetResource {
     [CmdletBinding()]
     [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseShouldProcessForStateChangingFunctions', '')]
     param (
-        [Parameter(Mandatory)] [ValidateNotNullOrEmpty()]
+        [Parameter(Mandatory)]
+        [ValidateNotNullOrEmpty()]
         [System.String] $SiteName,
 
-        [Parameter(Mandatory)] [ValidateNotNullOrEmpty()]
+        [Parameter(Mandatory)]
+        [ValidateNotNullOrEmpty()]
         [System.String] $ExistingControllerName,
 
-        [Parameter()] [ValidateNotNull()]
+        [Parameter()]
+        [ValidateNotNull()]
         [System.Management.Automation.PSCredential]
         [System.Management.Automation.CredentialAttribute()]
         $Credential,
@@ -108,19 +123,24 @@ function Set-TargetResource {
     process {
 
         for ($count = 0; $count -lt $RetryCount; $count++) {
+
             Write-Verbose ($localizedData.TestingXDSite -f $SiteName, $ExistingControllerName);
             $xdSiteName = TestXDSite -ExistingControllerName $ExistingControllerName -Credential $Credential;
+
             if ($xdSiteName -eq $SiteName) {
                 break;
             }
             else {
+
                 if (-not ([System.String]::IsNullOrEmpty($xdSiteName))) {
                     Write-Warning ($localizedData.IncorrectXDSiteNameWarning -f $xdSiteName);
                 }
                 Write-Verbose ($localizedData.XDSiteNotFoundRetrying -f $SiteName, $RetryIntervalSec);
                 Start-Sleep -Seconds $RetryIntervalSec;
             }
+
         } #end foreach
+
         if (-not $xdSiteName) {
             ThrowOperationCanceledException -ErrorId 'OperationTimeout' -ErrorMessage ($localizedData.XDSiteNotFoundTimeout -f $SiteName, $RetryCount);
         }
@@ -139,10 +159,12 @@ function TestXDSite {
     [CmdletBinding()]
     [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingEmptyCatchBlock', '')]
     param (
-        [Parameter(Mandatory)] [ValidateNotNullOrEmpty()]
+        [Parameter(Mandatory)]
+        [ValidateNotNullOrEmpty()]
         [System.String] $ExistingControllerName,
 
-        [Parameter()] [ValidateNotNull()]
+        [Parameter()]
+        [ValidateNotNull()]
         [System.Management.Automation.PSCredential]
         [System.Management.Automation.CredentialAttribute()]
         $Credential
@@ -150,26 +172,33 @@ function TestXDSite {
     process {
 
         $scriptBlock = {
+
             $VerbosePreference = 'SilentlyContinue';
             Import-Module 'C:\Program Files\Citrix\XenDesktopPoshSdk\Module\Citrix.XenDesktop.Admin.V1\Citrix.XenDesktop.Admin\Citrix.XenDesktop.Admin.psd1';
             try {
+
                 $xdSite = Get-XDSite -AdminAddress $using:ExistingControllerName -ErrorAction SilentlyContinue;
             }
             catch { } # Get-XDSite doesn't support $ErrorActionPreference :@
+
             return $xdSite.Name
+
         } #end scriptBlock
 
         $invokeCommandParams = @{
             ScriptBlock = $scriptBlock;
             ErrorAction = 'Stop';
         }
+
         if ($Credential) {
             AddInvokeScriptBlockCredentials -Hashtable $invokeCommandParams -Credential $Credential;
         }
         else {
             $scriptBlock = [System.Management.Automation.ScriptBlock]::Create($scriptBlock.ToString().Replace('$using:','$'));
         }
+
         Write-Verbose $localizedData.InvokingScriptBlock;
+
         return Invoke-Command @invokeCommandParams;
 
     } #end process
