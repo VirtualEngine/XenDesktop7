@@ -2,36 +2,36 @@
 
 ## Included Resources
 
-* [XD7AccessPolicy](#XD7AccessPolicy)
-* [XD7Administrator](#XD7Administrator)
-* [XD7Catalog](#XD7Catalog)
-* [XD7CatalogMachine](#XD7CatalogMachine)
-* [XD7Controller](#XD7Controller)
-* [XD7Database](#XD7Database)
-* [XD7DesktopGroup](#XD7DesktopGroup)
-* [XD7DesktopGroupMember](#XD7DesktopGroupMember)
-* [XD7DesktopGroupApplication](#XD7DesktopGroupApplication)
-* [XD7EntitlementPolicy](#XD7EntitlementPolicy)
-* [XD7Feature](#XD7Feature)
-* [XD7Features](#XD7Features)
-* [XD7Role](#XD7Role)
-* [XD7Site](#XD7Site)
-* [XD7SiteConfig](#XD7SiteConfig)
-* [XD7SiteLicense](#XD7SiteLicense)
-* [XD7StoreFrontAuthenticationMethod](#XD7StoreFrontAuthenticationMethod)
-* [XD7StoreFrontBaseUrl](#XD7StoreFrontBaseUrl)
-* [XD7StoreFrontReceiverAuthenticationMethod](#XD7StoreFrontReceiverAuthenticationMethod)
-* [XD7StoreFrontUnifiedExperience](#XD7StoreFrontUnifiedExperience)
-* [XD7VDAController](#XD7VDAController)
-* [XD7VDAFeature](#XD7VDAFeature)
-* [XD7WaitForSite](#XD7WaitForSite)
+* [XD7AccessPolicy](#xd7accesspolicy)
+* [XD7Administrator](#xd7administrator)
+* [XD7Catalog](#xd7catalog)
+* [XD7CatalogMachine](#xd7catalogmachine)
+* [XD7Controller](#xd7controller)
+* [XD7Database](#xd7database)
+* [XD7DesktopGroup](#xd7desktopgroup)
+* [XD7DesktopGroupMember](#xd7desktopgroupmember)
+* [XD7DesktopGroupApplication](#xd7desktopgroupapplication)
+* [XD7EntitlementPolicy](#xd7entitlementpolicy)
+* [XD7Feature](#xd7feature)
+* [XD7Features](#xd7features)
+* [XD7Role](#xd7role)
+* [XD7Site](#xd7site)
+* [XD7SiteConfig](#xd7siteconfig)
+* [XD7SiteLicense](#xd7sitelicense)
+* [XD7StoreFrontAuthenticationMethod](#xd7storefrontauthenticationmethod)
+* [XD7StoreFrontBaseUrl](#xd7storefrontbaseurl)
+* [XD7StoreFrontReceiverAuthenticationMethod](#xd7storefrontreceiverauthenticationmethod)
+* [XD7StoreFrontUnifiedExperience](#xd7storefrontunifiedexperience)
+* [XD7VDAController](#xd7vdacontroller)
+* [XD7VDAFeature](#xd7vdafeature)
+* [XD7WaitForSite](#xd7waitforsite)
 
-# XD7AccessPolicy
+## XD7AccessPolicy
 
 An access policy rule defines a set of connection filters and access control rights relating to a
 desktop group.
 
-## Syntax
+### Syntax
 
 ```
 XD7AccessPolicy [string]
@@ -50,7 +50,7 @@ XD7AccessPolicy [string]
 }
 ```
 
-## Properties
+### Properties
 
 * **DeliveryGroup**: The Citrix XenDesktop 7.x delivery group name to assign the access policy.
 * **AccessType**: The access policy filter type.
@@ -64,7 +64,7 @@ XD7AccessPolicy [string]
 * **Ensure**: Whether the role is to be installed or not. Supported values are Present or Absent. If not specified, it defaults to Present.
 * **Credential**: Specifies optional credential of a user which has permissions to access the source media and/or install/uninstall the specified role. __This property is required for Powershell 4.0.__
 
-## Configuration
+### Configuration
 
 ```
 Configuration XD7AccessPolicyExample {
