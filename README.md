@@ -1,34 +1,38 @@
-Included Resources
-==================
-* XD7AccessPolicy
-* XD7Administrator
-* XD7Catalog
-* XD7CatalogMachine
-* XD7Controller
-* XD7Database
-* XD7DesktopGroup
-* XD7DesktopGroupMember
-* XD7DesktopGroupApplication
-* XD7EntitlementPolicy
-* XD7Feature
-* XD7Features
-* XD7Role
-* XD7Site
-* XD7SiteConfig
-* XD7SiteLicense
-* XD7StoreFrontAuthenticationMethod
-* XD7StoreFrontBaseUrl
-* XD7StoreFrontReceiverAuthenticationMethod
-* XD7StoreFrontUnifiedExperience
-* XD7VDAController
-* XD7VDAFeature
-* XD7WaitForSite
+# XenDesktop7
 
-XD7AccessPolicy
-===========
+## Included Resources
+
+* [XD7AccessPolicy](#XD7AccessPolicy)
+* [XD7Administrator](#XD7Administrator)
+* [XD7Catalog](#XD7Catalog)
+* [XD7CatalogMachine](#XD7CatalogMachine)
+* [XD7Controller](#XD7Controller)
+* [XD7Database](#XD7Database)
+* [XD7DesktopGroup](#XD7DesktopGroup)
+* [XD7DesktopGroupMember](#XD7DesktopGroupMember)
+* [XD7DesktopGroupApplication](#XD7DesktopGroupApplication)
+* [XD7EntitlementPolicy](#XD7EntitlementPolicy)
+* [XD7Feature](#XD7Feature)
+* [XD7Features](#XD7Features)
+* [XD7Role](#XD7Role)
+* [XD7Site](#XD7Site)
+* [XD7SiteConfig](#XD7SiteConfig)
+* [XD7SiteLicense](#XD7SiteLicense)
+* [XD7StoreFrontAuthenticationMethod](#XD7StoreFrontAuthenticationMethod)
+* [XD7StoreFrontBaseUrl](#XD7StoreFrontBaseUrl)
+* [XD7StoreFrontReceiverAuthenticationMethod](#XD7StoreFrontReceiverAuthenticationMethod)
+* [XD7StoreFrontUnifiedExperience](#XD7StoreFrontUnifiedExperience)
+* [XD7VDAController](#XD7VDAController)
+* [XD7VDAFeature](#XD7VDAFeature)
+* [XD7WaitForSite](#XD7WaitForSite)
+
+# XD7AccessPolicy
+
 An access policy rule defines a set of connection filters and access control rights relating to a
 desktop group.
-###Syntax
+
+## Syntax
+
 ```
 XD7AccessPolicy [string]
 {
@@ -45,7 +49,9 @@ XD7AccessPolicy [string]
     [ Credential = [PSCredential] ]
 }
 ```
-###Properties
+
+## Properties
+
 * **DeliveryGroup**: The Citrix XenDesktop 7.x delivery group name to assign the access policy.
 * **AccessType**: The access policy filter type.
 * **Enabled**: Whether the access policy is enabled. If not specified, it defaults to True.
@@ -58,7 +64,8 @@ XD7AccessPolicy [string]
 * **Ensure**: Whether the role is to be installed or not. Supported values are Present or Absent. If not specified, it defaults to Present.
 * **Credential**: Specifies optional credential of a user which has permissions to access the source media and/or install/uninstall the specified role. __This property is required for Powershell 4.0.__
 
-###Configuration
+## Configuration
+
 ```
 Configuration XD7AccessPolicyExample {
     Import-DscResource -ModuleName XenDesktop7
@@ -74,12 +81,13 @@ Configuration XD7AccessPolicyExample {
 }
 ```
 
-XD7Administrator
-================
+## XD7Administrator
+
 Registers an administrator in Citrix XenDesktop site. Administrators needs to be registered
 before they can be assigned to a role.
 
-###Syntax
+### Syntax
+
 ```
 XD7Administrator [string]
 {
@@ -89,13 +97,16 @@ XD7Administrator [string]
     [ Credential = [PSCredential] ]
 }
 ```
-###Properties
+
+### Properties
+
 * **Name**: Active Direcrtory user/group name to register in the site database.
 * **Enabled**: Defines whether the user/group is enabled. If not specified, it defaults to True.
 * **Ensure**: Whether the administrator is present or not. Supported values are Present or Absent. If not specified, it defaults to Present.
 * **Credential**: Specifies optional credential of a user which has permissions to access the Citrix XenDesktop 7 site. __This property is required for Powershell 4.0.__
 
-###Configuration
+### Configuration
+
 ```
 Configuration XD7AdministratorExample {
     Import-DscResource -ModuleName XenDesktop7
@@ -106,11 +117,13 @@ Configuration XD7AdministratorExample {
     }
 }
 ```
-XD7Catalog
-==========
+
+## XD7Catalog
+
 Creates a Citrix XenDesktop machine catalog.
 
-###Syntax
+### Syntax
+
 ```
 XD7Catalog [string]
 {
@@ -126,7 +139,9 @@ XD7Catalog [string]
     [ Credential = [PSCredential] ]
 }
 ```
-###Properties
+
+### Properties
+
 * **Name**: Name of the Citrix XenDesktop 7 machine catalog to create.
 * **Description**: Description of the Citrix XenDesktop 7 machine catalog.
 * **Allocation**: Machine catalog allocation type. Supported values are Permanent, Randam or Static.
@@ -138,7 +153,8 @@ XD7Catalog [string]
 * **Ensure**: Whether the catalog is to be available or not. Supported values are Present or Absent. If not specified, it defaults to Present.
 * **Credential**: Specifies optional credential of a user which has permissions to create the catalog. __This property is required for Powershell 4.0.__
 
-###Configuration
+### Configuration
+
 ```
 Configuration XD7CatalogExample {
     Import-DscResource -ModuleName XenDesktop7
@@ -152,10 +168,13 @@ Configuration XD7CatalogExample {
     }
 }
 ```
-XD7CatalogMachine
-==========
+
+## XD7CatalogMachine
+
 Adds/assigns an Active Directory machine to a Citrix XenDesktop 7 machine catalog.
-###Syntax
+
+### Syntax
+
 ```
 XD7CatalogMachine [string]
 {
@@ -165,13 +184,16 @@ XD7CatalogMachine [string]
     [ Credential = [PSCredential] ]
 }
 ```
-###Properties
+
+### Properties
+
 * **Name**: Name of the Citrix XenDesktop 7 machine catalog to add the members to.
 * **Members**: One or more Active Directory computers accounts to add to the machine catalog.
 * **Ensure**: Whether the computer accounts should be present or not. Supported values are Present or Absent. If not specified, it defaults to Present.
 * **Credential**: Specifies optional credential of a user which has permissions to machines to the catalog. __This property is required for Powershell 4.0.__
 
-###Configuration
+### Configuration
+
 ```
 Configuration XD7CatalogMachineExample {
     Import-DscResource -ModuleName XenDesktop7
@@ -182,10 +204,13 @@ Configuration XD7CatalogMachineExample {
     }
 }
 ```
-XD7Controller
-=============
+
+## XD7Controller
+
 Adds or removes a Citrix XenDesktop 7 controller to or from a Citrix XenDesktop site.
-###Syntax
+
+### Syntax
+
 ```
 XD7Controller [string]
 {
@@ -195,13 +220,16 @@ XD7Controller [string]
     [ Credential = [PSCredential] ]
 }
 ```
-###Properties
+
+### Properties
+
 * **SiteName**: Citrix XenDesktop 7 site name to join.
 * **ExistingControllerName**: Existing Citrix XenDesktop 7 site controller used to join the site.
 * **Ensure**: Whether the site controller should be present or not. Supported values are Present or Absent. If not specified, it defaults to Present.
 * **Credential**: Specifies optional credential of a user which has permissions to add or remove the controller from the site. __This property is required for Powershell 4.0.__
 
-###Configuration
+### Configuration
+
 ```
 Configuration XD7Controller {
     Import-DscResource -ModuleName XenDesktop7
@@ -212,11 +240,14 @@ Configuration XD7Controller {
     }
 }
 ```
-XD7Database
-===========
+
+## XD7Database
+
 Creates a Citrix XenDesktop 7 site, logging or monitor database. This resource does not support
 removing or relocation of site databases.
-###Syntax
+
+### Syntax
+
 ```
 XD7Database [string]
 {
@@ -227,14 +258,17 @@ XD7Database [string]
     [ Credential = [PSCredential] ]
 }
 ```
-###Properties
+
+### Properties
+
 * **SiteName**: Citrix XenDesktop 7 site name assigned to the database.
 * **DatabaseName**: Name of the Microsoft SQL database to create.
 * **DatabaseServer**: FQDN of the Microsoft SQL server to host the database.
 * **DataStore**: Citrix XenDesktop site database type to create.
 * **Credential**: Specifies optional credential of a user which has permissions to create the database. __This property is required for Powershell 4.0.__
 
-###Configuration
+### Configuration
+
 ```
 Configuration XD7Database {
     Import-DscResource -ModuleName XenDesktop7
@@ -246,10 +280,13 @@ Configuration XD7Database {
     }
 }
 ```
-XD7DesktopGroup
-===============
+
+## XD7DesktopGroup
+
 Creates a Citrix XenDesktop 7 desktop group.
-###Syntax
+
+### Syntax
+
 ```
 XD7DesktopGroup [string]
 {
@@ -270,7 +307,9 @@ XD7DesktopGroup [string]
     [ Credential = [PSCredential] ]
 }
 ```
-###Properties
+
+### Properties
+
 * **Name**: Name of the Citrix XenDesktop 7 desktop group.
 * **IsMultiSession**: Flags whether the desktop group supports multisession hosts.
 * **DeliveryType**: Delivery type of the desktop group. Supported values are AppsOnlys, DesktopsOnly or DesktopsAndApps.
@@ -287,7 +326,8 @@ XD7DesktopGroup [string]
 * **Ensure**: Specifies whether the desktop group is present or not. If not specified, this value defaults to Present.
 * **Credential**: Specifies optional credential of a user which has permissions to create the desktop group. __This property is required for Powershell 4.0.__
 
-###Configuration
+### Configuration
+
 ```
 Configuration XD7DesktopGroupExample {
     Import-DscResource -ModuleName XenDesktop7
@@ -299,10 +339,13 @@ Configuration XD7DesktopGroupExample {
     }
 }
 ```
-XD7DesktopGroupMember
-=====================
+
+## XD7DesktopGroupMember
+
 Adds or removes Active Directory computer accounts to or from a Citrix XenDesktop 7 desktop group.
-###Syntax
+
+### Syntax
+
 ```
 XD7DesktopGroupMember [string]
 {
@@ -312,13 +355,16 @@ XD7DesktopGroupMember [string]
     [ Credential = [PSCredential] ]
 }
 ```
-###Properties
+
+### Properties
+
 * **Name**: Name of the desktop group to allocate members to.
 * **Members**: Active Directory computer account names to assign to the desktop group.
 * **Ensure**: Specifies whether the specified Active Directory computer accounts are present in the desktop group or not. If not specified, this value defaults to Present.
 * **Credential**: Specifies optional credential of a user which has permissions to modify the desktop group. __This property is required for Powershell 4.0.__
 
-###Configuration
+### Configuration
+
 ```
 Configuration XD7DesktopGroupMemberExample {
     Import-DscResource -ModuleName XenDesktop7
@@ -329,10 +375,13 @@ Configuration XD7DesktopGroupMemberExample {
     }
 }
 ```
-XD7DesktopGroupApplication
-==========================
+
+## XD7DesktopGroupApplication
+
 Adds or removes published applications to or from a Citrix XenDesktop 7 desktop/delivery group.
-###Syntax
+
+### Syntax
+
 ```
 XD7DesktopGroupApplication [string]
 {
@@ -350,26 +399,29 @@ XD7DesktopGroupApplication [string]
     [ Credential = [PSCredential] ]
 }
 ```
-###Properties
+
+### Properties
+
 * **Name**: Name of the desktop application to publish.
 * **DesktopGroupName**: Name of the desktop/delivery group to publish the application.
 * **Path**: Path to the application executable.
 * **ApplicationType**: Specifies the type of application.
- * If not specified, this value defaults to HostedOnDesktop (published).
- * __NOTE: It is not possible to change the application type after it's created.__
+  * If not specified, this value defaults to HostedOnDesktop (published).
+  * __NOTE: It is not possible to change the application type after it's created.__
 * **WorkingDirectory**: Working directory of the application.
 * **Arguments**: Command line arguments of the application.
 * **Description**: Application description.
 * **DisplayName**: Name of the application displayed to the user.
 * **Enabled**: Specifies whether the application is enabled.
- * If not specifed, this value defaults to $true.
+  * If not specifed, this value defaults to $true.
 * **Visible**: Specifies whether the application is visible to the user.
- * If not specifed, this value defaults to $true.
+  * If not specifed, this value defaults to $true.
 * **Ensure**: Specifies whether the specified application is published in the desktop delivery group or not.
- * If not specified, this value defaults to Present.
+  * If not specified, this value defaults to Present.
 * **Credential**: Specifies optional credential of a user which has permissions to modify the desktop group. __This property is required for Powershell 4.0.__
 
-###Configuration
+### Configuration
+
 ```
 Configuration XD7DesktopGroupApplicationExample {
     Import-DscResource -ModuleName XenDesktop7
@@ -382,10 +434,13 @@ Configuration XD7DesktopGroupApplicationExample {
     }
 }
 ```
-XD7EntitlementPolicy
-====================
+
+## XD7EntitlementPolicy
+
 Grants Active Directory users/groups access to a Citrix XenDesktop 7 desktop group.
-###Syntax
+
+### Syntax
+
 ```
 XD7EntitlementPolicy [string]
 {
@@ -400,7 +455,9 @@ XD7EntitlementPolicy [string]
     [ Credential = [PSCredential] ]
 }
 ```
-###Properties
+
+### Properties
+
 * **DeliveryGroup**: The name of the delivery group to include and/or exclude users to.
 * **EntitlementType**: Whether the entitlement is applies to a desktop or an application.
 * **Enabled**: Flags whether the entitlement is enabled. If not specified, this value defaults to True.
@@ -411,7 +468,8 @@ XD7EntitlementPolicy [string]
 * **Ensure**: Whether the entitlement policy is present or not. If not specified, this value defaults to True.
 * **Credential**: Specifies optional credential of a user which has permissions to create the entitlement. __This property is required for Powershell 4.0.__
 
-###Configuration
+### Configuration
+
 ```
 Configuration XD7EntitlementPolicyExample {
     Import-DscResource -ModuleName XenDesktop7
@@ -422,10 +480,13 @@ Configuration XD7EntitlementPolicyExample {
     }
 }
 ```
-XD7Feature
-==========
+
+## XD7Feature
+
 Installs Citrix XenDesktop 7 server role/feature.
-###Syntax
+
+### Syntax
+
 ```
 XD7Feature [string]
 {
@@ -435,13 +496,16 @@ XD7Feature [string]
     [ Credential = [PSCredential] ]
 }
 ```
-###Properties
+
+### Properties
+
 * **Role**: The Citrix XenDesktop 7.x role/feature to install.
 * **SourcePath**: Location of the extracted Citrix XenDesktop 7.x setup media.
 * **Ensure**: Whether the role is to be installed or not. Supported values are Present or Absent. If not specified, it defaults to Present.
 * **Credential**: Specifies optional credential of a user which has permissions to access the source media and/or install/uninstall the specified role.
 
-###Configuration
+### Configuration
+
 ```
 Configuration XD7FeatureExample {
     Import-DscResource -ModuleName XenDesktop7
@@ -452,10 +516,13 @@ Configuration XD7FeatureExample {
     }
 }
 ```
-XD7Features
-===========
+
+## XD7Features
+
 Installs multiple Citrix XenDesktop 7 server roles/features in a single pass, reducing the number of reboots.
-###Syntax
+
+### Syntax
+
 ```
 XD7Features [string]
 {
@@ -466,13 +533,16 @@ XD7Features [string]
     [ Credential = [PSCredential] ]
 }
 ```
-###Properties
+
+### Properties
+
 * **Role**: The Citrix XenDesktop 7.x roles/features to install.
 * **SourcePath**: Location of the extracted Citrix XenDesktop 7.x setup media.
 * **Ensure**: Whether the role is to be installed or not. Supported values are Present or Absent. If not specified, it defaults to Present.
 * **Credential**: Specifies optional credential of a user which has permissions to access the source media and/or install/uninstall the specified role.
 
-###Configuration
+### Configuration
+
 ```
 Configuration XD7FeaturesExample {
     Import-DscResource -ModuleName XenDesktop7
@@ -484,11 +554,14 @@ Configuration XD7FeaturesExample {
     }
 }
 ```
-XD7Role
-=======
+
+## XD7Role
+
 Assigns a Citrix XenDesktop 7 delegated security role to an administrator. This resource
 does not currently support creating new Citrix XenDesktop 7 roles.
-###Syntax
+
+### Syntax
+
 ```
 XD7Role [string]
 {
@@ -499,14 +572,17 @@ XD7Role [string]
     [ Credential = [PSCredential] ]
 }
 ```
-###Properties
+
+### Properties
+
 * **Name**: Name of an existing Citrix XenDesktop 7 role to assign or unassign an administrator to/from.
 * **Members**: Name(s) of the Citrix XenDesktop 7 administrator(s) to assign or unassign.
 * **RoleScope**: Name of an existing Citrix XenDesktop 7 scope to apply to the assignment. If not specified, the value defaults to All.
 * **Ensure**: Whether the role member(s) should be assigned to the role or note. If not specified, this value defaults to Present.
 * **Credential**: Specifies optional credential of a user which has permissions to update the role membership. __This property is required for Powershell 4.0.__
 
-###Configuration
+### Configuration
+
 ```
 Configuration XD7RoleExample {
     Import-DscResource -ModuleName XenDesktop7
@@ -518,10 +594,13 @@ Configuration XD7RoleExample {
     }
 }
 ```
-XD7Site
-=======
+
+## XD7Site
+
 Creates a new Citrix XenDesktop 7 site.
-###Syntax
+
+### Syntax
+
 ```
 XD7Site [string]
 {
@@ -533,7 +612,9 @@ XD7Site [string]
     [ Credential = [PSCredential] ]
 }
 ```
-###Properties
+
+### Properties
+
 * **SiteName**: Name of the new Citrix XenDesktop 7 site.
 * **DatabaseServer**: Name of the MS SQL server hosting the Citrix XenDesktop 7 site databases.
 * **SiteDatabaseName**: Name of the existing Citrix XenDesktop 7 site database.
@@ -541,7 +622,8 @@ XD7Site [string]
 * **MonitorDatabaseName**: Name of the existing Citrix XenDesktop 7 monitor database.
 * **Credential**: Specifies optional credential of a user which has permissions to create the site and access the MS SQL databases. __This property is required for Powershell 4.0.__
 
-###Configuration
+### Configuration
+
 ```
 Configuration XD7SiteExample {
     Import-DscResource -ModuleName XenDesktop7
@@ -554,10 +636,13 @@ Configuration XD7SiteExample {
     }
 }
 ```
-XD7SiteConfig
-=============
+
+## XD7SiteConfig
+
 Configures a Citrix XenDesktop 7 global site settings.
-###Syntax
+
+### Syntax
+
 ```
 XD7SiteConfig [string]
 {
@@ -570,7 +655,9 @@ XD7SiteConfig [string]
     [ Credential = [PSCredential] ]
 }
 ```
-###Properties
+
+### Properties
+
 * **TrustRequestsSentToTheXmlServicePort**: The XML Service trust settings.
 * **SecureIcaRequired**: The default SecureICA usage requirements for new desktop groups.
 * **DnsResolutionEnabled**: The setting to configure whether numeric IP address or the DNS name to be present in the ICA file.
@@ -578,7 +665,8 @@ XD7SiteConfig [string]
 * **BaseOU**: The indicator for connection leasing active.
 * **Credential**: Specifies optional credential of a user which has permissions to create the site and access the MS SQL databases. __This property is required for Powershell 4.0.__
 
-###Configuration
+### Configuration
+
 ```
 Configuration XD7SiteConfigExample {
     Import-DscResource -ModuleName XenDesktop7
@@ -589,10 +677,13 @@ Configuration XD7SiteConfigExample {
     }
 }
 ```
-XD7SiteLicense
-==============
+
+## XD7SiteLicense
+
 Configures a Citrix XenDesktop 7 licensing scheme.
-###Syntax
+
+### Syntax
+
 ```
 XD7SiteLicense [string]
 {
@@ -604,7 +695,9 @@ XD7SiteLicense [string]
     [ Credential = [PSCredential] ]
 }
 ```
-###Properties
+
+### Properties
+
 * **LicenseServer**: Name of the exisiting Citrix license server.
 * **LicenseServerPort**: Port number of the existing Citrix license server. If not specified, the value defaults to 27000.
 * **LicenseEdition**: Citrix XenDesktop 7 site licensed edition to apply. Valid values are PLT, ENT or VDI. If not specified, a default value of PLT is used.
@@ -612,7 +705,8 @@ XD7SiteLicense [string]
 * **TrustLicenseServerCertificate**: Flags whether the Citrix license server certificate should be trusted. If not specified, this value defaults to True.
 * **Credential**: Specifies optional credential of a user which has permissions to update the site licensing. __This property is required for Powershell 4.0.__
 
-###Configuration
+### Configuration
+
 ```
 Configuration XD7SiteLicenseExample {
     Import-DscResource -ModuleName XenDesktop7
@@ -621,10 +715,13 @@ Configuration XD7SiteLicenseExample {
     }
 }
 ```
-XD7StoreFrontAuthenticationMethod
-=================================
+
+## XD7StoreFrontAuthenticationMethod
+
 Configures the available authentication providers of a Citrix StoreFront 2.x or 3.x server.
-###Syntax
+
+### Syntax
+
 ```
 XD7StoreFrontAuthenticationMethod [string]
 {
@@ -634,14 +731,17 @@ XD7StoreFrontAuthenticationMethod [string]
     [ Ensure = [string] { Absent | Present } ]
 }
 ```
-###Properties
+
+### Properties
+
 * **VirtualPath**: The Citrix Storefront IIS authentication service virtual path.
 * **AuthenticationMethod**: Authentication methods to be installed. Existing authentication methods will not be removed.
 * **SiteId**: The Citrix Storefront IIS authentication service site id.
- * If not specified, the value defaults to 1.
+  * If not specified, the value defaults to 1.
 * **Ensure**: Whether the Storefront authentication service method should be added or removed.
 
-###Configuration
+### Configuration
+
 ```
 Configuration XD7StoreFrontAuthenticationMethodExample {
     Import-DscResource -ModuleName XenDesktop7
@@ -653,20 +753,26 @@ Configuration XD7StoreFrontAuthenticationMethodExample {
     }
 }
 ```
-XD7StoreFrontBaseUrl
-====================
+
+## XD7StoreFrontBaseUrl
+
 Configures the base URL of a Citrix StoreFront 2.x or 3.x server.
-###Syntax
+
+### Syntax
+
 ```
 XD7StoreFrontBaseUrl [string]
 {
     BaseUrl = [string]
 }
 ```
-###Properties
+
+### Properties
+
 * **BaseUrl**: Base URL to assign to the StoreFront server/group, e.g. https://storefront.lab.local/
 
-###Configuration
+### Configuration
+
 ```
 Configuration XD7StoreFrontBaseUrlExample {
     Import-DscResource -ModuleName XenDesktop7
@@ -675,10 +781,13 @@ Configuration XD7StoreFrontBaseUrlExample {
     }
 }
 ```
-XD7StoreFrontReceiverAuthenticationMethod
-=========================================
+
+## XD7StoreFrontReceiverAuthenticationMethod
+
 Configures the available authentication providers of a Citrix StoreFront 2.x or 3.x server.
-###Syntax
+
+### Syntax
+
 ```
 XD7StoreFrontReceiverAuthenticationMethod [string]
 {
@@ -687,14 +796,17 @@ XD7StoreFrontReceiverAuthenticationMethod [string]
     [ SiteId = [uint16] ]
 }
 ```
-###Properties
+
+### Properties
+
 * **VirtualPath**: The Citrix Storefront IIS authentication service virtual path.
 * **AuthenticationMethod**: Authentication methods to be installed.
- * __Note: Existing authentication methods will be removed.__
+  * __Note: Existing authentication methods will be removed.__
 * **SiteId**: The Citrix Storefront IIS authentication service site id.
- * If not specified, the value defaults to 1.
+  * If not specified, the value defaults to 1.
 
-###Configuration
+### Configuration
+
 ```
 Configuration XD7StoreFrontReceiverAuthenticationMethodExample {
     Import-DscResource -ModuleName XenDesktop7
@@ -705,10 +817,13 @@ Configuration XD7StoreFrontReceiverAuthenticationMethodExample {
     }
 }
 ```
-XD7StoreFrontUnifiedExperience
-==============================
+
+## XD7StoreFrontUnifiedExperience
+
 Configures the Citrix Storefront Unified Experience of a Citrix Storefront 3.x server.
-###Syntax
+
+### Syntax
+
 ```
 XD7StoreFrontUnifiedExperience [string]
 {
@@ -718,15 +833,18 @@ XD7StoreFrontUnifiedExperience [string]
     [ Ensure = [string] { Absent | Present } ]
 }
 ```
-###Properties
+
+### Properties
+
 * **VirtualPath**: The Citrix Storefront IIS Store service virtual path.
 * **WebReceiverVirtualPath**: The Citrix Storefront IIS Receiver for Web service virtual path.
- * __Note: Existing authentication methods will be removed.__
+  * __Note: Existing authentication methods will be removed.__
 * **SiteId**: The Citrix Storefront IIS authentication service site id.
- * If not specified, the value defaults to 1.
+  * If not specified, the value defaults to 1.
 * **Ensure**: Whether the Storefront unified experience should be enabled or disabled.
 
-###Configuration
+### Configuration
+
 ```
 Configuration XD7StoreFrontUnifiedExperienceExample {
     Import-DscResource -ModuleName XenDesktop7
@@ -738,10 +856,13 @@ Configuration XD7StoreFrontUnifiedExperienceExample {
     }
 }
 ```
-XD7VDAController
-================
+
+## XD7VDAController
+
 Assigns a Citrix XenDesktop Controller to a Citrix Virtual Delivery Agent (VDA).
-###Syntax
+
+### Syntax
+
 ```
 XD7VDAController [string]
 {
@@ -749,11 +870,14 @@ XD7VDAController [string]
     [ Ensure = [string] { Present | Absent } ]
 }
 ```
-###Properties
+
+### Properties
+
 * **Name**: Name of the Citrix XenDesktop 7 Delivery Controller to assign to the VDA.
 * **Ensure**: Specifies whether the Citrix XenDesktop 7 controller entry should be present or not. If not specified, the value defaults to Present.
 
-###Configuration
+### Configuration
+
 ```
 Configuration XD7VDAControllerExample {
     Import-DscResource -ModuleName XenDesktop7
@@ -765,10 +889,13 @@ Configuration XD7VDAControllerExample {
     }
 }
 ```
-XD7VDAFeature
-=============
+
+## XD7VDAFeature
+
 Installs Citrix XenDesktop 7 Virtual Delivery Agent (VDA) feature.
-###Syntax
+
+### Syntax
+
 ```
 XD7VDAFeature [string]
 {
@@ -782,7 +909,9 @@ XD7VDAFeature [string]
     [ Ensure = [string] { Present | Absent } ]
 }
 ```
-###Properties
+
+### Properties
+
 * **Role**: The Citrix XenDesktop 7 VDA feature to install.
 * **SourcePath**: Location of the extracted Citrix XenDesktop 7 setup media.
 * **InstallReceiver**: Flags whether to install the Citrix Receiver. If not specified, the value defaults to False.
@@ -792,7 +921,8 @@ XD7VDAFeature [string]
 * **EnableRealTimeTransport**: Flags whether to enable UDP Real-time transport feature during install. If not specified, this value defaults to False.
 * **Ensure**: Whether the role is to be installed or not. Supported values are Present or Absent. If not specified, it defaults to Present.
 
-###Configuration
+### Configuration
+
 ```
 Configuration XD7VDAFeatureExample {
     Import-DscResource -ModuleName XenDesktop7
@@ -804,10 +934,13 @@ Configuration XD7VDAFeatureExample {
     }
 }
 ```
-XD7WaitForSite
-==============
+
+## XD7WaitForSite
+
 Waits for a Citrix XenDesktop 7 site to become available.
-###Syntax
+
+### Syntax
+
 ```
 XD7WaitForSite [string]
 {
@@ -818,14 +951,17 @@ XD7WaitForSite [string]
     [ Credential = [PSCredential] ]
 }
 ```
-###Properties
+
+### Properties
+
 * **SiteName**: Citrix XenDesktop 7 site to wait for.
 * **ExistingControllerName**: Name of an existing Citrix XenDesktop 7 site controller to check for site availavility.
 * **RetryIntervalSec**: Number of seconds between retries. If not specified, the value defaults to 30 seconds.
 * **RetryCount**: Number of attempts to try before giving up. If not specified, the value default to 10.
 * **Credential**: Specifies optional credential of a user which has permissions to communicate with the existing site controller. __This property is required for Powershell 4.0.__
 
-###Configuration
+### Configuration
+
 ```
 Configuration XD7WaitForSiteExample {
     Import-DscResource -ModuleName XenDesktop7
