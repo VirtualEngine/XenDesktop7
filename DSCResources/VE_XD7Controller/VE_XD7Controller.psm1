@@ -181,13 +181,13 @@ function Set-TargetResource {
 
         if ($Credential) {
             AddInvokeScriptBlockCredentials -Hashtable $invokeCommandParams -Credential $Credential;
+            ## Override the local computer name returned by AddInvokeScriptBlockCredentials with the existing XenDesktop controller address
+            $invokeCommandParams['ComputerName'] = $ExistingControllerName;
         }
         else {
             $invokeCommandParams['ScriptBlock'] = [System.Management.Automation.ScriptBlock]::Create($scriptBlock.ToString().Replace('$using:','$'));
         }
 
-        ## Override the local computer name returned by AddInvokeScriptBlockCredentials with the existing XenDesktop controller address
-        $invokeCommandParams['ComputerName'] = $ExistingControllerName;
         $scriptBlockParams = @($ExistingControllerName, $localHostName, $Ensure, $Credential)
         Write-Verbose ($localizedData.InvokingScriptBlockWithParams -f [System.String]::Join("','", $scriptBlockParams));
 
