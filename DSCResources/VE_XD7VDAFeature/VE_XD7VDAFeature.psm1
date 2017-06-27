@@ -9,7 +9,6 @@ function Get-TargetResource {
         [System.String] $Role,
 
         [Parameter(Mandatory)]
-        [ValidateNotNullOrEmpty()]
         [System.String] $SourcePath,
 
         [Parameter()]
@@ -23,24 +22,22 @@ function Get-TargetResource {
         [System.String] $Ensure = 'Present',
 
         [Parameter()]
-        [ValidateNotNull()]
         [System.Boolean] $InstallReceiver = $false,
 
         [Parameter()]
-        [ValidateNotNull()]
         [System.Boolean] $EnableRemoteAssistance = $true,
 
         [Parameter()]
-        [ValidateNotNull()]
         [System.Boolean] $Optimize = $false,
 
         [Parameter()]
-        [ValidateNotNull()]
         [System.Boolean] $InstallDesktopExperience = $true,
 
         [Parameter()]
-        [ValidateNotNull()]
-        [System.Boolean] $EnableRealTimeTransport = $false
+        [System.Boolean] $EnableRealTimeTransport = $false,
+
+        [Parameter()]
+        [System.Boolean] $ExcludeTelemetryService
     )
     process {
 
@@ -52,6 +49,7 @@ function Get-TargetResource {
             Optimize = $Optimize;
             InstallDesktopExperience = $InstallDesktopExperience;
             EnableRealTimeTransport = $EnableRealTimeTransport;
+            ExcludeTelemetryService = $ExcludeTelemetryService;
             Ensure = 'Absent';
         }
 
@@ -75,7 +73,6 @@ function Test-TargetResource {
         [System.String] $Role,
 
         [Parameter(Mandatory)]
-        [ValidateNotNullOrEmpty()]
         [System.String] $SourcePath,
 
         [Parameter()]
@@ -89,26 +86,25 @@ function Test-TargetResource {
         [System.String] $Ensure = 'Present',
 
         [Parameter()]
-        [ValidateNotNull()]
         [System.Boolean] $InstallReceiver = $false,
 
         [Parameter()]
-        [ValidateNotNull()]
         [System.Boolean] $EnableRemoteAssistance = $true,
 
         [Parameter()]
-        [ValidateNotNull()]
         [System.Boolean] $Optimize = $false,
 
         [Parameter()]
-        [ValidateNotNull()]
         [System.Boolean] $InstallDesktopExperience = $true,
 
         [Parameter()]
-        [ValidateNotNull()]
         [System.Boolean] $EnableRealTimeTransport = $false,
 
-        [Parameter()] [ValidateNotNullOrEmpty()]
+        [Parameter()]
+        [System.Boolean] $ExcludeTelemetryService,
+
+        [Parameter()]
+        [ValidateNotNullOrEmpty()]
         [System.String] $LogPath = (Join-Path -Path $env:TMP -ChildPath '\Citrix\XenDesktop Installer')
     )
     process {
@@ -155,7 +151,6 @@ function Set-TargetResource {
         [System.String] $Role,
 
         [Parameter(Mandatory)]
-        [ValidateNotNullOrEmpty()]
         [System.String] $SourcePath,
 
         [Parameter()]
@@ -169,26 +164,25 @@ function Set-TargetResource {
         [System.String] $Ensure = 'Present',
 
         [Parameter()]
-        [ValidateNotNull()]
         [System.Boolean] $InstallReceiver = $false,
 
         [Parameter()]
-        [ValidateNotNull()]
         [System.Boolean] $EnableRemoteAssistance = $true,
 
         [Parameter()]
-        [ValidateNotNull()]
         [System.Boolean] $Optimize = $false,
 
         [Parameter()]
-        [ValidateNotNull()]
         [System.Boolean] $InstallDesktopExperience = $true,
 
         [Parameter()]
-        [ValidateNotNull()]
         [System.Boolean] $EnableRealTimeTransport = $false,
 
-        [Parameter()] [ValidateNotNullOrEmpty()]
+        [Parameter()]
+        [System.Boolean] $ExcludeTelemetryService,
+
+        [Parameter()]
+        [ValidateNotNullOrEmpty()]
         [System.String] $LogPath = (Join-Path -Path $env:TMP -ChildPath '\Citrix\XenDesktop Installer')
     )
     begin {
@@ -216,6 +210,7 @@ function Set-TargetResource {
             $resolveXDVdaSetupArgumentParams['Optimize'] = $Optimize;
             $resolveXDVdaSetupArgumentParams['InstallDesktopExperience'] = $InstallDesktopExperience;
             $resolveXDVdaSetupArgumentParams['EnableRealTimeTransport'] = $EnableRealTimeTransport;
+            $resolveXDVdaSetupArgumentParams['ExcludeTelemetryService'] = $ExcludeTelemetryService;
             $installArguments = ResolveXDVdaSetupArguments @resolveXDVdaSetupArgumentParams;
         }
         else {
@@ -264,24 +259,22 @@ function ResolveXDVdaSetupArguments {
         [System.String] $LogPath = (Join-Path -Path $env:TMP -ChildPath '\Citrix\XenDesktop Installer'),
 
         [Parameter()]
-        [ValidateNotNull()]
         [System.Boolean] $InstallReceiver = $false,
 
         [Parameter()]
-        [ValidateNotNull()]
         [System.Boolean] $EnableRemoteAssistance = $true,
 
         [Parameter()]
-        [ValidateNotNull()]
         [System.Boolean] $Optimize = $false,
 
         [Parameter()]
-        [ValidateNotNull()]
         [System.Boolean] $InstallDesktopExperience = $true,
 
         [Parameter()]
-        [ValidateNotNull()]
         [System.Boolean] $EnableRealTimeTransport = $false,
+
+        [Parameter()]
+        [System.Boolean] $ExcludeTelemetryService,
 
         ## Uninstall Citrix XenDesktop 7.x product.
         [Parameter()]
@@ -320,6 +313,10 @@ function ResolveXDVdaSetupArguments {
 
             if ($EnableRealTimeTransport) {
                 [ref] $null = $arguments.Add('/ENABLE_REAL_TIME_TRANSPORT');
+            }
+
+            if ($ExcludeTelemetryService) {
+                [ref] $null = $arguments.Add('/EXCLUDE "Citrix Telemetry Service"');
             }
 
             if ($Role -eq 'DesktopVDA') {

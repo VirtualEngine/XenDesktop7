@@ -906,6 +906,7 @@ XD7VDAFeature [string]
     [ Optimize = [bool] ]
     [ InstallDesktopExperience = [bool] ]
     [ EnableRealTimeTransport = [bool] ]
+    [ ExcludeTelemetryService = [bool] ]
     [ Ensure = [string] { Present | Absent } ]
 }
 ```
@@ -919,6 +920,8 @@ XD7VDAFeature [string]
 * **Optimize**: Flags whether to optimize a VDA. This is only applicable to virtual machines. If not specified, the value defaults to False.
 * **InstallDesktopExperience**: Flags whether to install the Windows Desktop Experience feature. This is only applicable to server operating systems. If not specified, the value defaults to True.
 * **EnableRealTimeTransport**: Flags whether to enable UDP Real-time transport feature during install. If not specified, this value defaults to False.
+* **ExcludeTelemetryService**: Excludes the Citrix Telemetry Service from the install.
+  * __NOTE:__ _Only applicable/included from Citrix XenDesktop 7.8 and later._
 * **Ensure**: Whether the role is to be installed or not. Supported values are Present or Absent. If not specified, it defaults to Present.
 
 ### Configuration

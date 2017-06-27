@@ -577,7 +577,7 @@ function GetXDInstalledRole {
         return $installedRoles;
 
     } #end process
-} #end functoin GetXDInstalledProduct
+} #end function GetXDInstalledProduct
 
 
 function ResolveXDSetupMedia {
