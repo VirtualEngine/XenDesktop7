@@ -1,4 +1,4 @@
-Import-LocalizedData -BindingVariable localized -FileName VE_XD7Common.Resources.psd1;
+﻿Import-LocalizedData -BindingVariable localized -FileName VE_XD7Common.Resources.psd1;
 
 #region Private Functions
 
@@ -548,7 +548,7 @@ function GetXDInstalledRole {
                     $filter = 'Citrix Studio';
                 }
                 'Storefront' {
-                    $filter = 'Citrix Storefront';
+                    $filter = 'Citrix Storefront$';
                 }
                 'Licensing' {
                     $filter = 'Citrix Licensing';
