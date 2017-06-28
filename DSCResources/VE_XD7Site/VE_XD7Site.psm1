@@ -193,7 +193,7 @@ function Set-TargetResource {
                 MonitorDatabaseName = $using:MonitorDatabaseName;
             }
 
-            $xdSite = New-XDSite @newXDSiteParams;
+            $null = New-XDSite @newXDSiteParams;
         } #end scriptBlock
 
         $invokeCommandParams = @{

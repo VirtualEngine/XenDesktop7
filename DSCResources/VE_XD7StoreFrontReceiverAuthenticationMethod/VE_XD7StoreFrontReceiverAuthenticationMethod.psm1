@@ -3,6 +3,8 @@ Import-LocalizedData -BindingVariable localizedData -FileName VE_XD7StoreFrontRe
 function Get-TargetResource {
     [CmdletBinding()]
     [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSDSCUseVerboseMessageInDSCResource', '')]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidGlobalFunctions', 'global:Write-Host')]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingEmptyCatchBlock', '')]
     [OutputType([System.Collections.Hashtable])]
     param (
         ## Citrix Storefront Authentication Service IIS Virtual Path
@@ -119,6 +121,8 @@ function Test-TargetResource {
 function Set-TargetResource {
     [CmdletBinding()]
     [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseShouldProcessForStateChangingFunctions', '')]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidGlobalFunctions', 'global:Write-Host')]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingEmptyCatchBlock', '')]
     param (
         ## Citrix Storefront Authentication Service IIS Virtual Path
         [Parameter(Mandatory)]

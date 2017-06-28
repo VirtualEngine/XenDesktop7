@@ -397,7 +397,6 @@ function ResolveXDBrokerMachine {
     )
     process {
 
-        $brokerMachine = $null;
         foreach ($machine in $brokerMachines) {
             ## Try matching on DNS name
             if (($machine.DNSName -eq $MachineName) -or ($machine.MachineName -eq $MachineName)) {

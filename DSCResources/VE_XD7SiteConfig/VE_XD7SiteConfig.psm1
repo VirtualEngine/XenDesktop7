@@ -3,6 +3,7 @@ Import-LocalizedData -BindingVariable localizedData -FileName VE_XD7SiteConfig.R
 
 function Get-TargetResource {
     [CmdletBinding()]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingEmptyCatchBlock', '')]
     [OutputType([System.Collections.Hashtable])]
     param (
         ## Single instance key
@@ -245,7 +246,7 @@ function Set-TargetResource {
             }
 
             if ($setBrokerSiteParams.Keys.Count -gt 0) {
-                $brokerSite = Set-BrokerSite @setBrokerSiteParams;
+                $null = Set-BrokerSite @setBrokerSiteParams;
             }
 
         } #end scriptBlock
