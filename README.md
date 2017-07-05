@@ -6,7 +6,7 @@ XenDesktop 7.x deployment.
 __NOTE: Use of the XD7StoreFront* resources with PowerShell v5.0's `PsDscRunAsCredential` parameter
 is not supported. This typically only affects the
 [XenDesktop7Lab](https://github.com/virtualengine/XenDesktop7Lab) composite resources as the
-XD7StoreFront* reousrces don't a credential parameter.__
+XD7StoreFront* resources don't have a `Credential` parameter.__
 
 ## Included Resources
 
