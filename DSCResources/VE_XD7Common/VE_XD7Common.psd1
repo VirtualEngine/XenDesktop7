@@ -1,15 +1,31 @@
 ﻿@{
-    RootModule = 'VE_XD7Common.psm1'
-    ModuleVersion = '1.0'
-    GUID = '68e21726-3708-4ec2-828f-e1a00799fb0e'
-    Author = 'Iain Brighton'
-    CompanyName = 'Virtual Engine'
-    Copyright = '(c) 2016 Virtual Engine Limited. All rights reserved.'
-    Description = 'Citrix XenDesktop 7.x Common DSC Resource library'
+    RootModule        = 'VE_XD7Common.psm1'
+    ModuleVersion     = '1.0'
+    GUID              = '68e21726-3708-4ec2-828f-e1a00799fb0e'
+    Author            = 'Iain Brighton'
+    CompanyName       = 'Virtual Engine'
+    Copyright         = '(c) 2016 Virtual Engine Limited. All rights reserved.'
+    Description       = 'Citrix XenDesktop 7.x Common DSC Resource library'
     PowerShellVersion = '4.0'
-    FunctionsToExport = 'AddInvokeScriptBlockCredentials','GetHostname','GetRegistryValue','StartWaitProcess',
-                        'FindXDModule','TestXDModule','AssertXDModule','GetXDBrokerMachine','TestXDMachineIsExistingMember',
-                        'TestXDMachineMembership','ResolveXDBrokerMachine','ThrowInvalidOperationException',
-                        'ThrowInvalidProgramException','ThrowOperationCanceledException','TestXDInstalledRole',
-                        'GetXDInstalledRole','ResolveXDSetupMedia','ResolveXDServerSetupArguments'
+    FunctionsToExport = @(
+                            'Add-PSSnapin',
+                            'AddInvokeScriptBlockCredentials',
+                            'AssertXDModule',
+                            'FindXDModule',
+                            'GetHostname',
+                            'GetRegistryValue',
+                            'GetXDBrokerMachine',
+                            'GetXDInstalledRole',
+                            'ResolveXDBrokerMachine',
+                            'ResolveXDSetupMedia',
+                            'ResolveXDServerSetupArguments',
+                            'StartWaitProcess',
+                            'TestXDInstalledRole',
+                            'TestXDMachineIsExistingMember',
+                            'TestXDMachineMembership',
+                            'TestXDModule',
+                            'ThrowInvalidOperationException',
+                            'ThrowInvalidProgramException',
+                            'ThrowOperationCanceledException'
+                        );
 }

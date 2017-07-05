@@ -55,8 +55,8 @@ function Get-TargetResource {
         $targetResource = @{
             VirtualPath = $VirtualPath;
             SiteId = $SiteId;
-            AuthenticationMethod = $AuthenticationMethods;
-            Ensure = if ($AuthenticationMethods) { 'Present' } else { 'Absent' }
+            AuthenticationMethod = $authenticationMethods;
+            Ensure = if ($authenticationMethods) { 'Present' } else { 'Absent' }
         }
 
         return $targetResource;
@@ -98,7 +98,7 @@ function Test-TargetResource {
 
                 if ($targetResource.AuthenticationMethod -notcontains $method) {
 
-                    Write-Verbose -Message ($localizedData.ResourcePropertyMismatch -f 'AuthenticationMethods', $method, '<Null>');
+                    Write-Verbose -Message ($localizedData.ResourcePropertyMismatch -f 'AuthenticationMethod', $method, '<Null>');
                     $inDesiredState = $false;
                 }
             }
@@ -106,7 +106,7 @@ function Test-TargetResource {
 
                 if ($targetResource.AuthenticationMethod -contains $method) {
 
-                    Write-Verbose -Message ($localizedData.ResourcePropertyMismatch -f 'AuthenticationMethods', '<Null>', $method);
+                    Write-Verbose -Message ($localizedData.ResourcePropertyMismatch -f 'AuthenticationMethod', '<Null>', $method);
                     $inDesiredState = $false;
                 }
             }

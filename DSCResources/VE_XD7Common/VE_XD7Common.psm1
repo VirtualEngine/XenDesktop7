@@ -247,6 +247,30 @@ function AssertXDModule {
 } #end function AssertXDModule
 
 
+function Add-PSSnapin {
+<#
+    .SYNOPSIS
+        Proxy function to load Citrix PowerShell snapins within a module
+        at the global scope.
+#>
+    [CmdletBinding()]
+    param (
+        [Parameter(Mandatory, ValueFromPipeline, ValueFromPipelineByPropertyName)]
+        [System.String[]] $Name
+    )
+    process {
+
+        foreach ($snapinName in $Name) {
+
+            $modulePath = Join-Path -Path $PSScriptRoot -ChildPath "$snapinName.psm1";
+            Import-Module -Name $modulePath -Global -Verbose:$false;
+
+        } #end foreach snapin
+
+    } #end process
+} #end function Add-PSSnapin
+
+
 function GetXDBrokerMachine {
 <#
     .SYNOPSIS

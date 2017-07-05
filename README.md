@@ -1,5 +1,13 @@
 # XenDesktop7
 
+The XenDesktop7 PowerShell DSC resources can be used to deploy, configure and maintain a  Citrix
+XenDesktop 7.x deployment.
+
+__NOTE: Use of the XD7StoreFront* resources with PowerShell v5.0's `PsDscRunAsCredential` parameter
+is not supported. This typically only affects the
+[XenDesktop7Lab](https://github.com/virtualengine/XenDesktop7Lab) composite resources as the
+XD7StoreFront* reousrces don't a credential parameter.__
+
 ## Included Resources
 
 * [XD7AccessPolicy](#xd7accesspolicy)
