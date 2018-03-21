@@ -1,4 +1,4 @@
-Import-LocalizedData -BindingVariable localizedData -FileName VE_XD7Controller.Resources.psd1;
+﻿Import-LocalizedData -BindingVariable localizedData -FileName VE_XD7Controller.Resources.psd1;
 
 function Get-TargetResource {
     [CmdletBinding()]
@@ -56,13 +56,13 @@ function Get-TargetResource {
 
         if ($Credential) {
             AddInvokeScriptBlockCredentials -Hashtable $invokeCommandParams -Credential $Credential;
+            ## Overwrite the local ComputerName returned by AddInvokeScriptBlockCredentials
+            $invokeCommandParams['ComputerName'] = $ExistingControllerName;
         }
         else {
             $invokeCommandParams['ScriptBlock'] = [System.Management.Automation.ScriptBlock]::Create($scriptBlock.ToString().Replace('$using:','$'));
         }
 
-        ## Overwrite the local ComputerName returned by AddInvokeScriptBlockCredentials
-        $invokeCommandParams['ComputerName'] = $ExistingControllerName;
         Write-Verbose ($localizedData.InvokingScriptBlockWithParams -f [System.String]::Join("','", @($ExistingControllerName)));
 
         return Invoke-Command @invokeCommandParams;
@@ -181,13 +181,13 @@ function Set-TargetResource {
 
         if ($Credential) {
             AddInvokeScriptBlockCredentials -Hashtable $invokeCommandParams -Credential $Credential;
+            ## Override the local computer name returned by AddInvokeScriptBlockCredentials with the existing XenDesktop controller address
+            $invokeCommandParams['ComputerName'] = $ExistingControllerName;
         }
         else {
             $invokeCommandParams['ScriptBlock'] = [System.Management.Automation.ScriptBlock]::Create($scriptBlock.ToString().Replace('$using:','$'));
         }
 
-        ## Override the local computer name returned by AddInvokeScriptBlockCredentials with the existing XenDesktop controller address
-        $invokeCommandParams['ComputerName'] = $ExistingControllerName;
         $scriptBlockParams = @($ExistingControllerName, $localHostName, $Ensure, $Credential)
         Write-Verbose ($localizedData.InvokingScriptBlockWithParams -f [System.String]::Join("','", $scriptBlockParams));
 
