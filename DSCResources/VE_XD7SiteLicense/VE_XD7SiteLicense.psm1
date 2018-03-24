@@ -19,6 +19,10 @@ function Get-TargetResource {
         [System.UInt16] $LicenseServerPort = 27000,
 
         [Parameter()]
+        [ValidateSet('XDT','MPS')]
+        [System.String] $LicenseProduct = 'XDT',
+
+        [Parameter()]
         [ValidateSet('PLT','ENT','ADV')]
         [System.String] $LicenseEdition = 'PLT',
 
@@ -54,6 +58,7 @@ function Get-TargetResource {
             $targetResource = @{
                 LicenseServer = $xdSiteConfig.LicenseServerName;
                 LicenseServerPort = $xdSiteConfig.LicenseServerPort;
+                LicenseProduct = $xdSiteConfig.ProductCode;
                 LicenseEdition = $xdSiteConfig.ProductEdition;
                 LicenseModel = $xdSiteConfig.LicensingModel;
                 TrustLicenseServerCertificate = !([System.String]::IsNullOrEmpty($xdSiteConfig.MetaDataMap.CertificateHash));
@@ -99,6 +104,10 @@ function Test-TargetResource {
         [Parameter()]
         [ValidateNotNull()]
         [System.UInt16] $LicenseServerPort = 27000,
+
+        [Parameter()]
+        [ValidateSet('XDT','MPS')]
+        [System.String] $LicenseProduct = 'XDT',
 
         [Parameter()]
         [ValidateSet('PLT','ENT','ADV')]
@@ -180,6 +189,10 @@ function Set-TargetResource {
         [System.UInt16] $LicenseServerPort = 27000,
 
         [Parameter()]
+        [ValidateSet('XDT','MPS')]
+        [System.String] $LicenseProduct = 'XDT',
+
+        [Parameter()]
         [ValidateSet('PLT','ENT','ADV')]
         [System.String] $LicenseEdition = 'PLT',
 
@@ -213,6 +226,7 @@ function Set-TargetResource {
             $setConfigSiteParams = @{
                 LicenseServerName = $using:LicenseServer;
                 LicenseServerPort = $using:LicenseServerPort;
+                ProductCode = $using:LicenseProduct;
                 ProductEdition = $using:LicenseEdition;
                 LicensingModel = $using:LicenseModel;
             }

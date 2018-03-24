@@ -5,6 +5,7 @@ class VE_XD7SiteLicense : OMI_BaseResource
     [Key, Description("Citrix XenDesktop 7 site licensing server name.")] String LicenseServer;
     [Write, ValueMap{"Present", "Absent"}, Values{"Present", "Absent"}] String Ensure;
     [Write, Description("Citrix XenDesktop 7 site licensing server port.")] Uint16 LicenseServerPort;
+    [Write, Description("Citrix XenDesktop 7 site licensing product code."), ValueMap{"XDT", "MPS"}, Values{"XDT", "MPS"}] String LicenseProduct;
     [Write, Description("Citrix XenDesktop 7 site licensing edition."), ValueMap{"PLT", "ENT", "ADV"}, Values{"PLT", "ENT", "ADV"}] String LicenseEdition;
     [Write, Description("Citrix XenDesktop 7 site licensing model."), ValueMap{"UserDevice", "Concurrent"}, Values{"UserDevice", "Concurrent"}] String LicenseModel;
     [Write, Description("Add the Citrix XenDesktop 7 site licensing server certificate hash.")] Boolean TrustLicenseServerCertificate;

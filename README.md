@@ -697,6 +697,7 @@ XD7SiteLicense [string]
 {
     LicenseServer = [string] ]
     [ LicenseServerPort = [uint16] ]
+    [ LicenseProduct [string] { XDT | MPS } ]
     [ LicenseEdition [string] { PLT | ENT | VDI } ]
     [ LicenseModel = [string] { UserDevice | Concurrent } ]
     [ TrustLicenseServerCertificate = [bool] ]
@@ -708,6 +709,7 @@ XD7SiteLicense [string]
 
 * **LicenseServer**: Name of the exisiting Citrix license server.
 * **LicenseServerPort**: Port number of the existing Citrix license server. If not specified, the value defaults to 27000.
+* **LicenseProduct**: Citrix XenDesktop 7 site licensed product to apply, e.g XenDesktop or XenApp. Valid values are XDT or MPS. If not specified, a default value of XDT is used.
 * **LicenseEdition**: Citrix XenDesktop 7 site licensed edition to apply. Valid values are PLT, ENT or VDI. If not specified, a default value of PLT is used.
 * **LicenseModel**: Citrix XenDesktop 7 site license model to apply. Valid values are UserDevice or Concurrent. If not specified, a default value of UserDevice is used.
 * **TrustLicenseServerCertificate**: Flags whether the Citrix license server certificate should be trusted. If not specified, this value defaults to True.

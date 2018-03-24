@@ -164,7 +164,7 @@ function TestXDSite {
         [System.String] $ExistingControllerName,
 
         [Parameter()]
-        [ValidateNotNull()]
+        [AllowNull()]
         [System.Management.Automation.PSCredential]
         [System.Management.Automation.CredentialAttribute()]
         $Credential
@@ -190,10 +190,12 @@ function TestXDSite {
             ErrorAction = 'Stop';
         }
 
-        if ($Credential) {
+        if ($null -ne $Credential) {
+
             AddInvokeScriptBlockCredentials -Hashtable $invokeCommandParams -Credential $Credential;
         }
         else {
+
             $scriptBlock = [System.Management.Automation.ScriptBlock]::Create($scriptBlock.ToString().Replace('$using:','$'));
         }
 

@@ -21,6 +21,7 @@ InModuleScope $sut {
         $stubSiteLicense = [PSCustomObject] @{
             LicenseServerName = 'TestLicenseServer';
             LicenseServerPort = 27000;
+            ProductCode = 'XDT'; # XDT, MPS
             ProductEdition = 'PLT'; # PLT, ENT, APP
             LicensingModel = 'UserDevice'; # UserDevice, Concurrent
             MetaDataMap = @{ CertificateHash ='MyTestCertificateHash'; }
@@ -28,6 +29,7 @@ InModuleScope $sut {
         $targetResource = @{
             LicenseServer = $stubSiteLicense.LicenseServerName;
             LicenseServerPort = $stubSiteLicense.LicenseServerPort;
+            LicenseProduct = 'XDT'; # XDT, MPS
             LicenseEdition = $stubSiteLicense.ProductEdition;
             LicenseModel = $stubSiteLicense.LicensingModel;
             TrustLicenseServerCertificate = $true;
@@ -85,6 +87,10 @@ InModuleScope $sut {
 
             It 'Returns False when "LicenseServerPort" is incorrect' {
                 Test-TargetResource @testSiteLicense -LicenseServerPort 27001 | Should Be $false;
+            }
+
+            It 'Returns False when "LicenseProduct" is incorrect' {
+                Test-TargetResource @testSiteLicense -LicenseProduct MPS | Should Be $false;
             }
 
             It 'Returns False when "LicenseEdition" is incorrect' {

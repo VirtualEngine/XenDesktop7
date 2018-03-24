@@ -118,6 +118,9 @@ InModuleScope $sut {
         Context 'Test-TargetResource' {
             $testDrivePath = (Get-PSDrive -Name TestDrive).Root;
 
+            ## Ensure secure boot is not triggered
+            Mock Confirm-SecureBootUEFI -MockWith { return $false; }
+
             It 'Returns a System.Boolean type.' {
                 Mock -CommandName GetXDInstalledRole -ParameterFilter { $Role -eq 'DesktopVDA' } -MockWith { }
 
