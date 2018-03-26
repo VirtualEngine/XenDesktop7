@@ -196,7 +196,7 @@ function TestXDSite {
         }
         else {
 
-            $scriptBlock = [System.Management.Automation.ScriptBlock]::Create($scriptBlock.ToString().Replace('$using:','$'));
+            $invokeCommandParams['ScriptBlock'] = [System.Management.Automation.ScriptBlock]::Create($scriptBlock.ToString().Replace('$using:','$'));
         }
 
         Write-Verbose $localizedData.InvokingScriptBlock;
