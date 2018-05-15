@@ -62,12 +62,12 @@ function Get-TargetResource {
                 LicenseEdition = $xdSiteConfig.ProductEdition;
                 LicenseModel = $xdSiteConfig.LicensingModel;
                 TrustLicenseServerCertificate = !([System.String]::IsNullOrEmpty($xdSiteConfig.MetaDataMap.CertificateHash));
-                Ensure = $using:Ensure;
+                Ensure = $Ensure;
             };
 
             return $targetResource;
         } #end scriptblock
-
+        <# 
         $invokeCommandParams = @{
             ScriptBlock = $scriptBlock;
             ErrorAction = 'Stop';
@@ -82,8 +82,8 @@ function Get-TargetResource {
 
         $scriptBlockParams = @($LicenseServer, $LicenseServerPort, $LicenseEdition, $LicenseModel);
         Write-Verbose ($localizedData.InvokingScriptBlockWithParams -f [System.String]::Join("','", $scriptBlockParams));
-
-        return Invoke-Command @invokeCommandParams;
+        #>
+        & $scriptblock;
 
     } #end process
 } #end function Get-TargetResource

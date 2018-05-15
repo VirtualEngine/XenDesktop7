@@ -30,18 +30,19 @@ function Get-TargetResource {
 
     } #end begin
     process {
-
+        #Running scriptblock without invoke-command, so no need for $using:
         $scriptBlock = {
 
             Import-Module "$env:ProgramFiles\Citrix\XenDesktopPoshSdk\Module\Citrix.XenDesktop.Admin.V1\Citrix.XenDesktop.Admin\Citrix.XenDesktop.Admin.psd1" -Verbose:$false;
-
-            $xdSite = Get-XDSite -AdminAddress $using:ExistingControllerName -ErrorAction Stop;
+            $xdSite = Get-XDSite -AdminAddress $ExistingControllerName -ErrorAction Stop;
+            #$xdSite = Get-XDSite -AdminAddress $using:ExistingControllerName -ErrorAction Stop;
             $targetResource = @{
                 SiteName = $xdSite.Name;
-                ExistingControllerName = $using:ExistingControllerName;
+                ExistingControllerName = $ExistingControllerName;                
+                #ExistingControllerName = $using:ExistingControllerName;
                 Ensure = 'Absent';
             }
-            if (($xdSite.Name -eq $using:SiteName) -and ($xdSite.Controllers.DnsName -contains $using:localHostName)) {
+            if (($xdSite.Name -eq $SiteName) -and ($xdSite.Controllers.DnsName -contains $localHostName)) {
                 $targetResource['Ensure'] = 'Present';
             }
             return $targetResource;
@@ -49,11 +50,13 @@ function Get-TargetResource {
         } #end scriptBlock
 
         $localHostName = GetHostName;
-        $invokeCommandParams = @{
+        <# $invokeCommandParams = @{
             ScriptBlock = $scriptBlock;
             ErrorAction = 'Stop';
         }
-
+        ##Removed because we do not need CredSSP authentication in v5.
+        ##Use PSDSCCredential instead of Credential 
+       
         if ($Credential) {
             AddInvokeScriptBlockCredentials -Hashtable $invokeCommandParams -Credential $Credential;
             ## Overwrite the local ComputerName returned by AddInvokeScriptBlockCredentials
@@ -62,10 +65,10 @@ function Get-TargetResource {
         else {
             $invokeCommandParams['ScriptBlock'] = [System.Management.Automation.ScriptBlock]::Create($scriptBlock.ToString().Replace('$using:','$'));
         }
-
+        #>
         Write-Verbose ($localizedData.InvokingScriptBlockWithParams -f [System.String]::Join("','", @($ExistingControllerName)));
 
-        return Invoke-Command @invokeCommandParams;
+        & $scriptBlock
 
     } #end process
 } #end function Get-TargetResource
@@ -147,7 +150,7 @@ function Set-TargetResource {
 
     } #end begin
     process {
-
+        ##Not sure if what I did above caused this, but when set to 'Absent' this block will remove the $existing controller instead of the one you're running the script from
         $scriptBlock = {
 
             Import-Module "$env:ProgramFiles\Citrix\XenDesktopPoshSdk\Module\Citrix.XenDesktop.Admin.V1\Citrix.XenDesktop.Admin\Citrix.XenDesktop.Admin.psd1" -Verbose:$false;
