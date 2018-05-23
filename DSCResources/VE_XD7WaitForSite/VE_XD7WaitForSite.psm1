@@ -188,8 +188,7 @@ function TestXDSite {
             ScriptBlock = $scriptBlock;
             ErrorAction = 'Stop';
         }
-        ##Removed because we do not need CredSSP authentication in v5.
-        <#
+                
         if ($null -ne $Credential) {
 
             AddInvokeScriptBlockCredentials -Hashtable $invokeCommandParams -Credential $Credential;
@@ -198,7 +197,7 @@ function TestXDSite {
 
             $invokeCommandParams['ScriptBlock'] = [System.Management.Automation.ScriptBlock]::Create($scriptBlock.ToString().Replace('$using:','$'));
         }
-        #>
+        
         Write-Verbose $localizedData.InvokingScriptBlock;
 
         & $scriptBlock
