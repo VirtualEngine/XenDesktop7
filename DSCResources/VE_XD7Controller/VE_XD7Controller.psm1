@@ -50,26 +50,24 @@ function Get-TargetResource {
         } #end scriptBlock
 
         $localHostName = GetHostName;
-        <# $invokeCommandParams = @{
+        $invokeCommandParams = @{
             ScriptBlock = $scriptBlock;
             ErrorAction = 'Stop';
         }
-        ##Removed because we do not need CredSSP authentication in v5.
-        ##Use PSDSCCredential instead of Credential 
        
         if ($Credential) {
             AddInvokeScriptBlockCredentials -Hashtable $invokeCommandParams -Credential $Credential;
             ## Overwrite the local ComputerName returned by AddInvokeScriptBlockCredentials
             $invokeCommandParams['ComputerName'] = $ExistingControllerName;
+            Write-Verbose ($localizedData.InvokingScriptBlockWithParams -f [System.String]::Join("','", @($ExistingControllerName)));
+            return Invoke-Command @invokeCommandParams;
         }
         else {
             $invokeCommandParams['ScriptBlock'] = [System.Management.Automation.ScriptBlock]::Create($scriptBlock.ToString().Replace('$using:','$'));
+            Write-Verbose ($localizedData.InvokingScriptBlockWithParams -f [System.String]::Join("','", @($ExistingControllerName)));
+            return & $invokeCommandParams.ScriptBlock
         }
-        #>
-        Write-Verbose ($localizedData.InvokingScriptBlockWithParams -f [System.String]::Join("','", @($ExistingControllerName)));
-
-        & $scriptBlock
-
+           
     } #end process
 } #end function Get-TargetResource
 
@@ -186,15 +184,16 @@ function Set-TargetResource {
             AddInvokeScriptBlockCredentials -Hashtable $invokeCommandParams -Credential $Credential;
             ## Override the local computer name returned by AddInvokeScriptBlockCredentials with the existing XenDesktop controller address
             $invokeCommandParams['ComputerName'] = $ExistingControllerName;
+            $scriptBlockParams = @($ExistingControllerName, $localHostName, $Ensure, $Credential)
+            Write-Verbose ($localizedData.InvokingScriptBlockWithParams -f [System.String]::Join("','", $scriptBlockParams));
+            [ref] $null = Invoke-Command @invokeCommandParams;
         }
         else {
             $invokeCommandParams['ScriptBlock'] = [System.Management.Automation.ScriptBlock]::Create($scriptBlock.ToString().Replace('$using:','$'));
+            $scriptBlockParams = @($ExistingControllerName, $localHostName, $Ensure, $Credential)
+            Write-Verbose ($localizedData.InvokingScriptBlockWithParams -f [System.String]::Join("','", $scriptBlockParams));
+            [ref] $null = & $invokeCommandParams.ScriptBlock
         }
-
-        $scriptBlockParams = @($ExistingControllerName, $localHostName, $Ensure, $Credential)
-        Write-Verbose ($localizedData.InvokingScriptBlockWithParams -f [System.String]::Join("','", $scriptBlockParams));
-
-        [ref] $null = Invoke-Command @invokeCommandParams;
 
     } #end process
 } #end function Set-TargetResource

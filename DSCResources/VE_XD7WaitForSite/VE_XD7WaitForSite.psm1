@@ -1,4 +1,5 @@
 Import-LocalizedData -BindingVariable localizedData -FileName VE_XD7WaitForSite.Resources.psd1;
+
 function Get-TargetResource {
     [CmdletBinding()]
     [OutputType([System.Collections.Hashtable])]
@@ -176,7 +177,7 @@ function TestXDSite {
             Import-Module 'C:\Program Files\Citrix\XenDesktopPoshSdk\Module\Citrix.XenDesktop.Admin.V1\Citrix.XenDesktop.Admin\Citrix.XenDesktop.Admin.psd1';
             try {
 
-                $xdSite = Get-XDSite -AdminAddress $ExistingControllerName -ErrorAction SilentlyContinue;
+                $xdSite = Get-XDSite -AdminAddress $using:ExistingControllerName -ErrorAction SilentlyContinue;
             }
             catch { } # Get-XDSite doesn't support $ErrorActionPreference :@
 
@@ -188,20 +189,18 @@ function TestXDSite {
             ScriptBlock = $scriptBlock;
             ErrorAction = 'Stop';
         }
-                
-        if ($null -ne $Credential) {
 
+        if ($null -ne $Credential) {
             AddInvokeScriptBlockCredentials -Hashtable $invokeCommandParams -Credential $Credential;
+            Write-Verbose $localizedData.InvokingScriptBlock;
+            return Invoke-Command @invokeCommandParams;
         }
         else {
-
             $invokeCommandParams['ScriptBlock'] = [System.Management.Automation.ScriptBlock]::Create($scriptBlock.ToString().Replace('$using:','$'));
+            Write-Verbose $localizedData.InvokingScriptBlock;
+            return & $invokeCommandParams.ScriptBlock
         }
         
-        Write-Verbose $localizedData.InvokingScriptBlock;
-
-        & $scriptBlock
-
     } #end process
 } #end function TestXDSite
 
