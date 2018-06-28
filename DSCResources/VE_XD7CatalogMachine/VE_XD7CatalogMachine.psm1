@@ -57,7 +57,7 @@ function Get-TargetResource {
         else {
             $invokeCommandParams['ScriptBlock'] = [System.Management.Automation.ScriptBlock]::Create($scriptBlock.ToString().Replace('$using:','$'));
             Write-Verbose ($localizedData.InvokingScriptBlockWithParams -f [System.String]::Join("','", @($Name)));
-            & $scriptblock['ScriptBlock']
+            return & $invokeCommandParams.ScriptBlock
         }
 
         
@@ -174,7 +174,7 @@ function Set-TargetResource {
         }
         else {
             $invokeCommandParams['ScriptBlock'] = [System.Management.Automation.ScriptBlock]::Create($scriptBlock.ToString().Replace('$using:','$'));
-            & $invokeCommandParams['ScriptBlock']
+            return & $invokeCommandParams.ScriptBlock
         }
     } #end process
 } #end function Set-TargetResource
