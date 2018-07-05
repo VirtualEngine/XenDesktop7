@@ -57,11 +57,11 @@ function Get-TargetResource {
             ErrorAction = 'Stop';
         }
 
+        Write-Verbose ($localizedData.InvokingScriptBlockWithParams -f [System.String]::Join("','", @($Name, $Enabled, $Ensure)));
+
         if ($Credential) {
-            AddInvokeScriptBlockCredentials -Hashtable $invokeCommandParams -Credential $Credential;
-            Write-Verbose ($localizedData.InvokingScriptBlockWithParams -f [System.String]::Join("','", @($Name, $Enabled, $Ensure)));
-            $targetResource = Invoke-Command  @invokeCommandParams;
-            
+            AddInvokeScriptBlockCredentials -Hashtable $invokeCommandParams -Credential $Credential;            
+            $targetResource = Invoke-Command  @invokeCommandParams;            
         }
         else {
             $invokeCommandParams['ScriptBlock'] = [System.Management.Automation.ScriptBlock]::Create($scriptBlock.ToString().Replace('$using:','$'));
@@ -187,15 +187,15 @@ function Set-TargetResource {
                 }
             }
         } #end scriptblock
-
         $invokeCommandParams = @{
             ScriptBlock = $scriptBlock;
             ErrorAction = 'Stop';
         }
 
+        Write-Verbose ($localizedData.InvokingScriptBlockWithParams -f [System.String]::Join("','", @($Name, $Enabled, $Ensure)));
+
         if ($Credential) {
-            AddInvokeScriptBlockCredentials -Hashtable $invokeCommandParams -Credential $Credential;
-            Write-Verbose ($localizedData.InvokingScriptBlockWithParams -f [System.String]::Join("','", @($Name, $Enabled, $Ensure)));
+            AddInvokeScriptBlockCredentials -Hashtable $invokeCommandParams -Credential $Credential;            
             [ref] $null = Invoke-Command @invokeCommandParams;
         }
         else {
