@@ -178,8 +178,8 @@ function Set-TargetResource {
             ErrorAction = 'Stop';
         }
 
-        Write-Verbose ($localizedData.InvokingScriptBlockWithParams -f [System.String]::Join("','", $scriptBlockParams));
-        $scriptBlockParams = @($ExistingControllerName, $localHostName, $Ensure, $Credential)    
+        $scriptBlockParams = @($ExistingControllerName, $localHostName, $Ensure, $Credential)
+        Write-Verbose ($localizedData.InvokingScriptBlockWithParams -f [System.String]::Join("','", $scriptBlockParams));         
 
         if ($Credential) {
             AddInvokeScriptBlockCredentials -Hashtable $invokeCommandParams -Credential $Credential;
