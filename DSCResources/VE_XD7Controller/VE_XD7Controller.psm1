@@ -30,16 +30,14 @@ function Get-TargetResource {
 
     } #end begin
     process {
-        #Running scriptblock without invoke-command, so no need for $using:
+        
         $scriptBlock = {
 
-            Import-Module "$env:ProgramFiles\Citrix\XenDesktopPoshSdk\Module\Citrix.XenDesktop.Admin.V1\Citrix.XenDesktop.Admin\Citrix.XenDesktop.Admin.psd1" -Verbose:$false;
-            $xdSite = Get-XDSite -AdminAddress $ExistingControllerName -ErrorAction Stop;
-            #$xdSite = Get-XDSite -AdminAddress $using:ExistingControllerName -ErrorAction Stop;
+            Import-Module "$env:ProgramFiles\Citrix\XenDesktopPoshSdk\Module\Citrix.XenDesktop.Admin.V1\Citrix.XenDesktop.Admin\Citrix.XenDesktop.Admin.psd1" -Verbose:$false;            
+            $xdSite = Get-XDSite -AdminAddress $using:ExistingControllerName -ErrorAction Stop;
             $targetResource = @{
-                SiteName = $xdSite.Name;
-                ExistingControllerName = $ExistingControllerName;                
-                #ExistingControllerName = $using:ExistingControllerName;
+                SiteName = $xdSite.Name;               
+                ExistingControllerName = $using:ExistingControllerName;
                 Ensure = 'Absent';
             }
             if (($xdSite.Name -eq $SiteName) -and ($xdSite.Controllers.DnsName -contains $localHostName)) {
@@ -54,17 +52,17 @@ function Get-TargetResource {
             ScriptBlock = $scriptBlock;
             ErrorAction = 'Stop';
         }
-       
+
+        Write-Verbose ($localizedData.InvokingScriptBlockWithParams -f [System.String]::Join("','", @($ExistingControllerName)));
+
         if ($Credential) {
             AddInvokeScriptBlockCredentials -Hashtable $invokeCommandParams -Credential $Credential;
             ## Overwrite the local ComputerName returned by AddInvokeScriptBlockCredentials
-            $invokeCommandParams['ComputerName'] = $ExistingControllerName;
-            Write-Verbose ($localizedData.InvokingScriptBlockWithParams -f [System.String]::Join("','", @($ExistingControllerName)));
+            $invokeCommandParams['ComputerName'] = $ExistingControllerName;            
             return Invoke-Command @invokeCommandParams;
         }
         else {
-            $invokeCommandParams['ScriptBlock'] = [System.Management.Automation.ScriptBlock]::Create($scriptBlock.ToString().Replace('$using:','$'));
-            Write-Verbose ($localizedData.InvokingScriptBlockWithParams -f [System.String]::Join("','", @($ExistingControllerName)));
+            $invokeCommandParams['ScriptBlock'] = [System.Management.Automation.ScriptBlock]::Create($scriptBlock.ToString().Replace('$using:','$'));            
             return & $invokeCommandParams.ScriptBlock
         }
            
@@ -148,7 +146,7 @@ function Set-TargetResource {
 
     } #end begin
     process {
-        ##Not sure if what I did above caused this, but when set to 'Absent' this block will remove the $existing controller instead of the one you're running the script from
+        
         $scriptBlock = {
 
             Import-Module "$env:ProgramFiles\Citrix\XenDesktopPoshSdk\Module\Citrix.XenDesktop.Admin.V1\Citrix.XenDesktop.Admin\Citrix.XenDesktop.Admin.psd1" -Verbose:$false;
@@ -180,21 +178,19 @@ function Set-TargetResource {
             ErrorAction = 'Stop';
         }
 
+        Write-Verbose ($localizedData.InvokingScriptBlockWithParams -f [System.String]::Join("','", $scriptBlockParams));
+        $scriptBlockParams = @($ExistingControllerName, $localHostName, $Ensure, $Credential)    
+
         if ($Credential) {
             AddInvokeScriptBlockCredentials -Hashtable $invokeCommandParams -Credential $Credential;
             ## Override the local computer name returned by AddInvokeScriptBlockCredentials with the existing XenDesktop controller address
             $invokeCommandParams['ComputerName'] = $ExistingControllerName;
-            $scriptBlockParams = @($ExistingControllerName, $localHostName, $Ensure, $Credential)
-            Write-Verbose ($localizedData.InvokingScriptBlockWithParams -f [System.String]::Join("','", $scriptBlockParams));
             [ref] $null = Invoke-Command @invokeCommandParams;
         }
         else {
             $invokeCommandParams['ScriptBlock'] = [System.Management.Automation.ScriptBlock]::Create($scriptBlock.ToString().Replace('$using:','$'));
-            $scriptBlockParams = @($ExistingControllerName, $localHostName, $Ensure, $Credential)
-            Write-Verbose ($localizedData.InvokingScriptBlockWithParams -f [System.String]::Join("','", $scriptBlockParams));
             [ref] $null = & $invokeCommandParams.ScriptBlock
         }
-
     } #end process
 } #end function Set-TargetResource
 
