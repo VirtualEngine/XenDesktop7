@@ -40,7 +40,7 @@ function Get-TargetResource {
                 ExistingControllerName = $using:ExistingControllerName;
                 Ensure = 'Absent';
             }
-            if (($xdSite.Name -eq $SiteName) -and ($xdSite.Controllers.DnsName -contains $localHostName)) {
+            if (($xdSite.Name -eq $using:SiteName) -and ($xdSite.Controllers.DnsName -contains $using:localHostName)) {
                 $targetResource['Ensure'] = 'Present';
             }
             return $targetResource;
