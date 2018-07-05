@@ -62,29 +62,28 @@ function Get-TargetResource {
                 LicenseEdition = $xdSiteConfig.ProductEdition;
                 LicenseModel = $xdSiteConfig.LicensingModel;
                 TrustLicenseServerCertificate = !([System.String]::IsNullOrEmpty($xdSiteConfig.MetaDataMap.CertificateHash));
-                Ensure = $Ensure;
+                Ensure = $using:Ensure;
             };
 
             return $targetResource;
         } #end scriptblock
-        <# 
+        
         $invokeCommandParams = @{
             ScriptBlock = $scriptBlock;
             ErrorAction = 'Stop';
         }
 
+        $scriptBlockParams = @($LicenseServer, $LicenseServerPort, $LicenseEdition, $LicenseModel);
+        Write-Verbose ($localizedData.InvokingScriptBlockWithParams -f [System.String]::Join("','", $scriptBlockParams));
+
         if ($Credential) {
             AddInvokeScriptBlockCredentials -Hashtable $invokeCommandParams -Credential $Credential;
+            return Invoke-Command @invokeCommandParams;
         }
         else {
             $invokeCommandParams['ScriptBlock'] = [System.Management.Automation.ScriptBlock]::Create($scriptBlock.ToString().Replace('$using:','$'));
+            return & $invokeCommandParams.ScriptBlock
         }
-
-        $scriptBlockParams = @($LicenseServer, $LicenseServerPort, $LicenseEdition, $LicenseModel);
-        Write-Verbose ($localizedData.InvokingScriptBlockWithParams -f [System.String]::Join("','", $scriptBlockParams));
-        #>
-        & $scriptblock;
-
     } #end process
 } #end function Get-TargetResource
 
@@ -246,18 +245,17 @@ function Set-TargetResource {
             ErrorAction = 'Stop';
         }
 
-        if ($Credential) {
-            AddInvokeScriptBlockCredentials -Hashtable $invokeCommandParams -Credential $Credential;
-        }
-        else {
-            $invokeCommandParams['ScriptBlock'] = [System.Management.Automation.ScriptBlock]::Create($scriptBlock.ToString().Replace('$using:','$'));
-        }
-
         $scriptBlockParams = @($LicenseServer, $LicenseServerPort, $LicenseEdition, $LicenseModel);
         Write-Verbose ($localizedData.InvokingScriptBlockWithParams -f [System.String]::Join("','", $scriptBlockParams));
 
-        [ref] $null = Invoke-Command @invokeCommandParams;
-
+        if ($Credential) {
+            AddInvokeScriptBlockCredentials -Hashtable $invokeCommandParams -Credential $Credential;
+            [ref] $null = Invoke-Command @invokeCommandParams;
+        }
+        else {
+            $invokeCommandParams['ScriptBlock'] = [System.Management.Automation.ScriptBlock]::Create($scriptBlock.ToString().Replace('$using:','$'));
+            [ref] $null =  & $invokeCommandParams.ScriptBlock
+        }
     } #end process
 } #end function Set-TargetResource
 
