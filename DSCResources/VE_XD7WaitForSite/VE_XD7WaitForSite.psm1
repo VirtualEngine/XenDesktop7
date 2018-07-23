@@ -190,19 +190,18 @@ function TestXDSite {
             ErrorAction = 'Stop';
         }
 
-        if ($null -ne $Credential) {
-
-            AddInvokeScriptBlockCredentials -Hashtable $invokeCommandParams -Credential $Credential;
-        }
-        else {
-
-            $invokeCommandParams['ScriptBlock'] = [System.Management.Automation.ScriptBlock]::Create($scriptBlock.ToString().Replace('$using:','$'));
-        }
-
         Write-Verbose $localizedData.InvokingScriptBlock;
 
-        return Invoke-Command @invokeCommandParams;
+        if ($null -ne $Credential) {
 
+            AddInvokeScriptBlockCredentials -Hashtable $invokeCommandParams -Credential $Credential;            
+            return Invoke-Command @invokeCommandParams;
+        }
+        else {
+            
+            $invokeCommandParams['ScriptBlock'] = [System.Management.Automation.ScriptBlock]::Create($scriptBlock.ToString().Replace('$using:','$'));            
+            return & $invokeCommandParams.ScriptBlock
+        }        
     } #end process
 } #end function TestXDSite
 

@@ -57,15 +57,16 @@ function Get-TargetResource {
             ErrorAction = 'Stop';
         }
 
+        Write-Verbose ($localizedData.InvokingScriptBlockWithParams -f [System.String]::Join("','", @($Name, $Enabled, $Ensure)));
+
         if ($Credential) {
-            AddInvokeScriptBlockCredentials -Hashtable $invokeCommandParams -Credential $Credential;
+            AddInvokeScriptBlockCredentials -Hashtable $invokeCommandParams -Credential $Credential;            
+            $targetResource = Invoke-Command  @invokeCommandParams;            
         }
         else {
             $invokeCommandParams['ScriptBlock'] = [System.Management.Automation.ScriptBlock]::Create($scriptBlock.ToString().Replace('$using:','$'));
+            $targetResource = & $invokeCommandParams.ScriptBlock;
         }
-
-        Write-Verbose ($localizedData.InvokingScriptBlockWithParams -f [System.String]::Join("','", @($Name, $Enabled, $Ensure)));
-        $targetResource = Invoke-Command  @invokeCommandParams;
 
         return $targetResource;
 
@@ -186,22 +187,21 @@ function Set-TargetResource {
                 }
             }
         } #end scriptblock
-
         $invokeCommandParams = @{
             ScriptBlock = $scriptBlock;
             ErrorAction = 'Stop';
         }
 
+        Write-Verbose ($localizedData.InvokingScriptBlockWithParams -f [System.String]::Join("','", @($Name, $Enabled, $Ensure)));
+
         if ($Credential) {
-            AddInvokeScriptBlockCredentials -Hashtable $invokeCommandParams -Credential $Credential;
+            AddInvokeScriptBlockCredentials -Hashtable $invokeCommandParams -Credential $Credential;            
+            [ref] $null = Invoke-Command @invokeCommandParams;
         }
         else {
             $invokeCommandParams['ScriptBlock'] = [System.Management.Automation.ScriptBlock]::Create($scriptBlock.ToString().Replace('$using:','$'));
-        }
-
-        Write-Verbose ($localizedData.InvokingScriptBlockWithParams -f [System.String]::Join("','", @($Name, $Enabled, $Ensure)));
-
-        [ref] $null = Invoke-Command @invokeCommandParams;
+            [ref] $null = & $invokeCommandParams.ScriptBlock
+        }        
 
     } #end process
 } #end function Set-TargetResource

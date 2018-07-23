@@ -93,14 +93,13 @@ function Get-TargetResource {
 
         if ($Credential) {
             AddInvokeScriptBlockCredentials -Hashtable $invokeCommandParams -Credential $Credential;
+            Write-Verbose ($localizedData.InvokingScriptBlockWithParams -f [System.String]::Join("','", @($Name)));
+            return Invoke-Command @invokeCommandParams;
         }
         else {
             $invokeCommandParams['ScriptBlock'] = [System.Management.Automation.ScriptBlock]::Create($scriptBlock.ToString().Replace('$using:','$'));
+            return & $invokeCommandParams.ScriptBlock
         }
-
-        Write-Verbose ($localizedData.InvokingScriptBlockWithParams -f [System.String]::Join("','", @($Name)));
-
-        return Invoke-Command @invokeCommandParams;
 
     } #end process
 } #end function Get-TargetResource
@@ -353,15 +352,16 @@ function Set-TargetResource {
 
         if ($Credential) {
             AddInvokeScriptBlockCredentials -Hashtable $invokeCommandParams -Credential $Credential;
+            $scriptBlockParams = @($Name, $Ensure, $Allocation, $Provisioning, $Persistence, $IsMultiSession, $Description, $PvsAddress, $PvsDomain);
+            Write-Verbose ($localizedData.InvokingScriptBlockWithParams -f [System.String]::Join("','", $scriptBlockParams));    
+            [ref] $null = Invoke-Command @invokeCommandParams;
         }
         else {
             $invokeCommandParams['ScriptBlock'] = [System.Management.Automation.ScriptBlock]::Create($scriptBlock.ToString().Replace('$using:','$'));
+            [ref] $null = & $invokeCommandParams.ScriptBlock
         }
 
-        $scriptBlockParams = @($Name, $Ensure, $Allocation, $Provisioning, $Persistence, $IsMultiSession, $Description, $PvsAddress, $PvsDomain);
-        Write-Verbose ($localizedData.InvokingScriptBlockWithParams -f [System.String]::Join("','", $scriptBlockParams));
-
-        [ref] $null = Invoke-Command @invokeCommandParams;
+        
 
     } #end process
 } #end function Set-TargetResource
