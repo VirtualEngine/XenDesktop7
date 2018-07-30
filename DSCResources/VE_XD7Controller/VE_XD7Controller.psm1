@@ -30,13 +30,13 @@ function Get-TargetResource {
 
     } #end begin
     process {
-        
+
         $scriptBlock = {
 
-            Import-Module "$env:ProgramFiles\Citrix\XenDesktopPoshSdk\Module\Citrix.XenDesktop.Admin.V1\Citrix.XenDesktop.Admin\Citrix.XenDesktop.Admin.psd1" -Verbose:$false;            
+            Import-Module "$env:ProgramFiles\Citrix\XenDesktopPoshSdk\Module\Citrix.XenDesktop.Admin.V1\Citrix.XenDesktop.Admin\Citrix.XenDesktop.Admin.psd1" -Verbose:$false;
             $xdSite = Get-XDSite -AdminAddress $using:ExistingControllerName -ErrorAction Stop;
             $targetResource = @{
-                SiteName = $xdSite.Name;               
+                SiteName = $xdSite.Name;
                 ExistingControllerName = $using:ExistingControllerName;
                 Ensure = 'Absent';
             }
@@ -58,14 +58,15 @@ function Get-TargetResource {
         if ($Credential) {
             AddInvokeScriptBlockCredentials -Hashtable $invokeCommandParams -Credential $Credential;
             ## Overwrite the local ComputerName returned by AddInvokeScriptBlockCredentials
-            $invokeCommandParams['ComputerName'] = $ExistingControllerName;            
-            return Invoke-Command @invokeCommandParams;
+            $invokeCommandParams['ComputerName'] = $ExistingControllerName;
+            $targetResource = Invoke-Command @invokeCommandParams;
         }
         else {
-            $invokeCommandParams['ScriptBlock'] = [System.Management.Automation.ScriptBlock]::Create($scriptBlock.ToString().Replace('$using:','$'));            
-            return & $invokeCommandParams.ScriptBlock
+            $invokeScriptBlock = [System.Management.Automation.ScriptBlock]::Create($scriptBlock.ToString().Replace('$using:','$'));
+            $targetResource = InvokeScriptBlock -ScriptBlock $invokeScriptBlock;
         }
-           
+        return $targetResource;
+
     } #end process
 } #end function Get-TargetResource
 
@@ -146,7 +147,7 @@ function Set-TargetResource {
 
     } #end begin
     process {
-        
+
         $scriptBlock = {
 
             Import-Module "$env:ProgramFiles\Citrix\XenDesktopPoshSdk\Module\Citrix.XenDesktop.Admin.V1\Citrix.XenDesktop.Admin\Citrix.XenDesktop.Admin.psd1" -Verbose:$false;
@@ -179,8 +180,7 @@ function Set-TargetResource {
         }
 
         $scriptBlockParams = @($ExistingControllerName, $localHostName, $Ensure, $Credential)
-        Write-Verbose ($localizedData.InvokingScriptBlockWithParams -f [System.String]::Join("','", $scriptBlockParams));         
-
+        Write-Verbose ($localizedData.InvokingScriptBlockWithParams -f [System.String]::Join("','", $scriptBlockParams));
         if ($Credential) {
             AddInvokeScriptBlockCredentials -Hashtable $invokeCommandParams -Credential $Credential;
             ## Override the local computer name returned by AddInvokeScriptBlockCredentials with the existing XenDesktop controller address
@@ -188,8 +188,8 @@ function Set-TargetResource {
             [ref] $null = Invoke-Command @invokeCommandParams;
         }
         else {
-            $invokeCommandParams['ScriptBlock'] = [System.Management.Automation.ScriptBlock]::Create($scriptBlock.ToString().Replace('$using:','$'));
-            [ref] $null = & $invokeCommandParams.ScriptBlock
+            $invokeScriptBlock = [System.Management.Automation.ScriptBlock]::Create($scriptBlock.ToString().Replace('$using:','$'));
+            [ref] $null = InvokeScriptBlock -ScriptBlock $invokeScriptBlock;
         }
     } #end process
 } #end function Set-TargetResource
@@ -200,5 +200,8 @@ $moduleRoot = Split-Path -Path $MyInvocation.MyCommand.Path -Parent;
 ## Import the XD7Common library functions
 $moduleParent = Split-Path -Path $moduleRoot -Parent;
 Import-Module (Join-Path -Path $moduleParent -ChildPath 'VE_XD7Common');
+
+## Import the InvokeScriptBlock function into the current scope
+. (Join-Path -Path (Join-Path -Path $moduleParent -ChildPath 'VE_XD7Common') -ChildPath 'InvokeScriptBlock.ps1');
 
 Export-ModuleMember -Function *-TargetResource;

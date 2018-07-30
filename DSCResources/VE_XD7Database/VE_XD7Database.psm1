@@ -36,18 +36,18 @@ function Get-TargetResource {
             DatabaseName = '';
         }
 
-        if ($PSBoundParameters.ContainsKey('Credential')) {
+        #if ($PSBoundParameters.ContainsKey('Credential')) {
 
             if (TestMSSQLDatabase -DatabaseServer $DatabaseServer -DatabaseName $DatabaseName -Credential $Credential) {
                 $targetResource['DatabaseName'] = $DatabaseName;
             }
-        }
-        else {
+        #}
+        #else {
 
-            if (TestMSSQLDatabase -DatabaseServer $DatabaseServer -DatabaseName $DatabaseName) {
-                $targetResource['DatabaseName'] = $DatabaseName;
-            }
-        }
+        #    if (TestMSSQLDatabase -DatabaseServer $DatabaseServer -DatabaseName $DatabaseName) {
+        #        $targetResource['DatabaseName'] = $DatabaseName;
+        #    }
+        #}
         return $targetResource;
 
     } #end process
@@ -158,20 +158,19 @@ function Set-TargetResource {
             ErrorAction = 'Stop';
         }
 
-        if ($Credential) {
-            AddInvokeScriptBlockCredentials -Hashtable $invokeCommandParams -Credential $Credential;
-        }
-        else {
-            $invokeCommandParams['ScriptBlock'] = [System.Management.Automation.ScriptBlock]::Create($scriptBlock.ToString().Replace('$using:','$'));
-        }
-
         $scriptBlockParams = @($Credential, $SiteName, $DatabaseServer, $DataStore, $DatabaseName);
         Write-Verbose ($localizedData.InvokingScriptBlockWithParams -f [System.String]::Join("','", $scriptBlockParams));
-
-        [ref] $null = Invoke-Command @invokeCommandParams;
+        if ($Credential) {
+            AddInvokeScriptBlockCredentials -Hashtable $invokeCommandParams -Credential $Credential;
+            [ref] $null = Invoke-Command @invokeCommandParams;
+        }
+        else {
+            $invokeScriptBlock = [System.Management.Automation.ScriptBlock]::Create($scriptBlock.ToString().Replace('$using:','$'));
+            [ref] $null = InvokeScriptBlock -ScriptBlock $invokeScriptBlock;
+        }
 
     } #end process
-} #end function Test-TargetResource
+} #end function Set-TargetResource
 
 #region Private Functions
 
@@ -231,16 +230,15 @@ function TestMSSQLDatabase {
             ErrorAction = 'Stop';
         }
 
+        Write-Verbose ($localizedData.InvokingScriptBlockWithParams -f [System.String]::Join("','", @($DatabaseServer, $DatabaseName)));
         if ($Credential) {
             AddInvokeScriptBlockCredentials -Hashtable $invokeCommandParams -Credential $Credential;
+            return Invoke-Command @invokeCommandParams;
         }
         else {
-            $invokeCommandParams['ScriptBlock'] = [System.Management.Automation.ScriptBlock]::Create($scriptBlock.ToString().Replace('$using:','$'));
+            $invokeScriptBlock = [System.Management.Automation.ScriptBlock]::Create($scriptBlock.ToString().Replace('$using:','$'));
+            return InvokeScriptBlock -ScriptBlock $invokeScriptBlock;
         }
-
-        Write-Verbose ($localizedData.InvokingScriptBlockWithParams -f [System.String]::Join("','", @($DatabaseServer, $DatabaseName)));
-
-        return Invoke-Command @invokeCommandParams;
 
     } #end process
 } #end function TestMSSQLDatabase
@@ -253,5 +251,8 @@ $moduleRoot = Split-Path -Path $MyInvocation.MyCommand.Path -Parent;
 ## Import the XD7Common library functions
 $moduleParent = Split-Path -Path $moduleRoot -Parent;
 Import-Module (Join-Path -Path $moduleParent -ChildPath 'VE_XD7Common');
+
+## Import the InvokeScriptBlock function into the current scope
+. (Join-Path -Path (Join-Path -Path $moduleParent -ChildPath 'VE_XD7Common') -ChildPath 'InvokeScriptBlock.ps1');
 
 Export-ModuleMember -Function *-TargetResource;

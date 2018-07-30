@@ -45,20 +45,18 @@ InModuleScope $sut {
         Context 'Get-TargetResource' {
             Mock -CommandName AssertXDModule { };
             Mock -CommandName Add-PSSnapin -MockWith { };
+            Mock -CommandName InvokeScriptBlock -MockWith { & $ScriptBlock; };
 
             It 'Returns a System.Collections.Hashtable type' {
                 Mock -CommandName Get-BrokerDesktopGroup { return $testBrokerGroup; }
-                Mock -CommandName Invoke-Command -MockWith { & $ScriptBlock; }
 
                 (Get-TargetResource @testDesktopGroup) -is [System.Collections.Hashtable] | Should Be $true;
             }
 
             It 'Invokes script block without credentials by default' {
-                Mock -CommandName Invoke-Command -ParameterFilter { $Credential -eq $null -and $Authentication -eq $null } { }
-
                 Get-TargetResource @testDesktopGroup;
 
-                Assert-MockCalled Invoke-Command -ParameterFilter { $Credential -eq $null -and $Authentication -eq $null } -Exactly 1 -Scope It;
+                Assert-MockCalled InvokeScriptBlock -Exactly 1 -Scope It;
             }
 
             It 'Invokes script block with credentials and CredSSP when specified' {
@@ -185,13 +183,13 @@ InModuleScope $sut {
 
         Context 'Set-TargetResource' {
             Mock -CommandName AssertXDModule { };
-            Mock -CommandName Import-Module -MockWith { }
+            Mock -CommandName Import-Module -MockWith { };
             Mock -CommandName Add-PSSnapin -MockWith { };
+            Mock -CommandName InvokeScriptBlock -MockWith { & $ScriptBlock; };
 
             It 'Calls "New-BrokerDesktopGroup" when "Ensure" = "Present" and delivery group does not exists' {
                 Mock -CommandName Get-BrokerDesktopGroup -MockWith { }
                 Mock -CommandName New-BrokerDesktopGroup -MockWith { }
-                Mock -CommandName Invoke-Command -MockWith { & $ScriptBlock }
 
                 Set-TargetResource @testDesktopGroup;
 
@@ -201,7 +199,6 @@ InModuleScope $sut {
             It 'Calls "Set-BrokerDesktopGroup" when "Ensure" = "Present" and delivery group exists' {
                 Mock -CommandName Get-BrokerDesktopGroup -MockWith { return $testBrokerGroup; }
                 Mock -CommandName Set-BrokerDesktopGroup -MockWith { }
-                Mock -CommandName Invoke-Command -MockWith { & $ScriptBlock }
 
                 Set-TargetResource @testDesktopGroup;
 
@@ -211,7 +208,6 @@ InModuleScope $sut {
             It 'Does not call "Remove-BrokerDesktopGroup" when "Ensure" = "Absent" and delivery group does not exist' {
                 Mock -CommandName Get-BrokerDesktopGroup -MockWith { }
                 Mock -CommandName Remove-BrokerDesktopGroup -MockWith { }
-                Mock -CommandName Invoke-Command -MockWith { & $ScriptBlock }
 
                 Set-TargetResource @testDesktopGroup -Ensure Absent;
 
@@ -221,7 +217,6 @@ InModuleScope $sut {
             It 'Calls "Remove-BrokerDesktopGroup" when "Ensure" = "Absent" and delivery group exists' {
                 Mock -CommandName Get-BrokerDesktopGroup -MockWith { return $testBrokerGroup; }
                 Mock -CommandName Remove-BrokerDesktopGroup -MockWith { }
-                Mock -CommandName Invoke-Command -MockWith { & $ScriptBlock }
 
                 Set-TargetResource @testDesktopGroup -Ensure Absent;
 
@@ -230,7 +225,6 @@ InModuleScope $sut {
 
             It 'Throws when changing "IsMultiSession" property and delivery group exists' {
                 Mock -CommandName Get-BrokerDesktopGroup -MockWith { return $testBrokerGroup; }
-                Mock -CommandName Invoke-Command -MockWith { & $ScriptBlock }
                 $testDesktopGroupMultiSession = $testDesktopGroup.Clone();
                 $testDesktopGroupMultiSession['IsMultiSession'] = $false;
 
@@ -239,7 +233,6 @@ InModuleScope $sut {
 
             It 'Throws when changing "DesktopType" property and delivery group exists' {
                 Mock -CommandName Get-BrokerDesktopGroup -MockWith { return $testBrokerGroup; }
-                Mock -CommandName Invoke-Command -MockWith { & $ScriptBlock }
                 $testDesktopGroupDesktopType = $testDesktopGroup.Clone();
                 $testDesktopGroupDesktopType['DesktopType'] = 'Private';
 
@@ -247,11 +240,10 @@ InModuleScope $sut {
             }
 
             It 'Invokes script block without credentials by default' {
-                Mock -CommandName Invoke-Command -ParameterFilter { $Credential -eq $null -and $Authentication -eq $null } { }
 
                 Set-TargetResource @testDesktopGroup;
 
-                Assert-MockCalled Invoke-Command -ParameterFilter { $Credential -eq $null -and $Authentication -eq $null } -Exactly 1 -Scope It;
+                Assert-MockCalled InvokeScriptBlock -Exactly 1 -Scope It;
             }
 
             It 'Invokes script block with credentials and CredSSP when specified' {

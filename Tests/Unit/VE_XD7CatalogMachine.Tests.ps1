@@ -24,20 +24,19 @@ InModuleScope $sut {
         Context 'Get-TargetResource' {
             Mock -CommandName AssertXDModule -MockWith { };
             Mock -CommandName Add-PSSnapin -MockWith { };
+            Mock -CommandName InvokeScriptBlock -MockWith { & $ScriptBlock; };
 
             It 'Returns a System.Collections.Hashtable type' {
                 Mock -CommandName Get-BrokerMachine { }
-                Mock -CommandName Invoke-Command -MockWith { & $ScriptBlock; }
 
                 (Get-TargetResource @testMachineCatalog) -is [System.Collections.Hashtable] | Should Be $true;
             }
 
             It 'Invokes script block without credentials by default' {
-                Mock -CommandName Invoke-Command -ParameterFilter { $Credential -eq $null -and $Authentication -eq $null } { }
 
                 Get-TargetResource @testMachineCatalog;
 
-                Assert-MockCalled Invoke-Command -ParameterFilter { $Credential -eq $null -and $Authentication -eq $null } -Exactly 1 -Scope It;
+                Assert-MockCalled InvokeScriptBlock -Exactly 1 -Scope It;
             }
 
             It 'Invokes script block with credentials and CredSSP when specified' {
@@ -90,13 +89,13 @@ InModuleScope $sut {
             Mock -CommandName Import-Module -MockWith { }
             Mock -CommandName Add-PSSnapin -MockWith { };
             Mock -CommandName Get-BrokerCatalog -MockWith { return @{ Name = $testCatalogName; Uid = 1; }; }
+            Mock -CommandName InvokeScriptBlock -MockWith { & $ScriptBlock; };
 
             It 'Calls "New-BrokerMachine" when "Ensure" = "Present" and machine is registered, but not assigned' {
                 Mock -CommandName Get-BrokerMachine -MockWith { return $testMachineCatalog; }
                 Mock -CommandName ResolveXDBrokerMachine -MockWith { return [PSCustomObject] @{ CatalogName = $null }; }
                 Mock -CommandName GetXDBrokerMachine -MockWith { return $testMachineCatalogMembers[0]; }
                 Mock -CommandName New-BrokerMachine -MockWith { }
-                Mock -CommandName Invoke-Command -MockWith { & $ScriptBlock }
 
                 Set-TargetResource @testMachineCatalog;
 
@@ -108,7 +107,6 @@ InModuleScope $sut {
                 Mock -CommandName ResolveXDBrokerMachine -MockWith { return @{ CatalogName = $testMachineCatalogName; }; }
                 Mock -CommandName GetXDBrokerMachine -MockWith { return $testMachineCatalogMembers[0]; }
                 Mock -CommandName New-BrokerMachine -MockWith { }
-                Mock -CommandName Invoke-Command -MockWith { & $ScriptBlock }
 
                 Set-TargetResource @testMachineCatalog;
 
@@ -120,7 +118,6 @@ InModuleScope $sut {
                 Mock -CommandName ResolveXDBrokerMachine -MockWith { return @{ CatalogName = $testMachineCatalogName; }; }
                 Mock -CommandName GetXDBrokerMachine -MockWith { return $testMachineCatalogMembers[0]; }
                 Mock -CommandName Remove-BrokerMachine -MockWith { }
-                Mock -CommandName Invoke-Command -MockWith { & $ScriptBlock }
 
                 Set-TargetResource @testMachineCatalogAbsent;
 
@@ -132,7 +129,6 @@ InModuleScope $sut {
                 Mock -CommandName ResolveXDBrokerMachine -MockWith { return @{ CatalogName = ''; }; }
                 Mock -CommandName GetXDBrokerMachine -MockWith { return $testMachineCatalogMembers[0]; }
                 Mock -CommandName Remove-BrokerMachine -MockWith { }
-                Mock -CommandName Invoke-Command -MockWith { & $ScriptBlock }
 
                 Set-TargetResource @testMachineCatalogAbsent;
 
@@ -144,7 +140,6 @@ InModuleScope $sut {
                 Mock -CommandName ResolveXDBrokerMachine -MockWith { return @{ CatalogName = "$($testMachineCatalogName)2"; }; }
                 Mock -CommandName GetXDBrokerMachine -MockWith { return $testMachineCatalogMembers[0]; }
                 Mock -CommandName Remove-BrokerMachine -MockWith { }
-                Mock -CommandName Invoke-Command -MockWith { & $ScriptBlock }
 
                 Set-TargetResource @testMachineCatalogAbsent;
 
@@ -156,7 +151,7 @@ InModuleScope $sut {
 
                 Set-TargetResource @testMachineCatalog;
 
-                Assert-MockCalled Invoke-Command -ParameterFilter { $Credential -eq $null -and $Authentication -eq $null } -Exactly 1 -Scope It;
+                Assert-MockCalled InvokeScriptBlock -Exactly 1 -Scope It;
             }
 
             It 'Invokes script block with credentials and CredSSP when specified' {

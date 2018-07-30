@@ -42,11 +42,11 @@ InModuleScope $sut {
 
         Context 'Get-TargetResource' {
             Mock -CommandName AssertXDModule -MockWith { };
-            Mock -CommandName Add-PSSnapin -MockWith { }
+            Mock -CommandName Add-PSSnapin -MockWith { };
+            Mock -CommandName InvokeScriptBlock -MockWith { & $ScriptBlock; };
 
             It 'Returns a System.Collections.Hashtable type' {
                 Mock -CommandName Get-BrokerCatalog -MockWith { return $fakeBrokerCatalog; }
-                Mock -CommandName Invoke-Command -MockWith { & $ScriptBlock; }
 
                 (Get-TargetResource @testCatalog) -is [System.Collections.Hashtable] | Should Be $true;
             }
@@ -55,17 +55,15 @@ InModuleScope $sut {
                 $nonexistentTestCatalog = $testCatalog.Clone();
                 $nonexistentTestCatalog['Name'] = 'Nonexistent Catalog';
                 Mock -CommandName Get-BrokerCatalog -ParameterFilter { $Name -eq 'Nonexistent Catalog' -and $ErrorAction -eq 'SilentlyContinue' } -MockWith { Write-Error 'Nonexistent' }
-                Mock -CommandName Invoke-Command -MockWith { & $ScriptBlock; }
 
                 { Get-TargetResource @nonexistentTestCatalog } | Should Not Throw;
             }
 
             It 'Invokes script block without credentials by default' {
-                Mock -CommandName Invoke-Command -ParameterFilter { $Credential -eq $null -and $Authentication -eq $null } { }
 
                 Get-TargetResource @testCatalog;
 
-                Assert-MockCalled Invoke-Command -ParameterFilter { $Credential -eq $null -and $Authentication -eq $null } -Exactly 1 -Scope It;
+                Assert-MockCalled InvokeScriptBlock -Exactly 1 -Scope It;
             }
 
             It 'Invokes script block with credentials and CredSSP when specified' {
@@ -191,8 +189,6 @@ InModuleScope $sut {
 
                 $result | Should Be $false;
             }
-
-
 
         } #end context Test-TargetResource
 

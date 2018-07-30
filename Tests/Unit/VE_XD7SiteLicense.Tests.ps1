@@ -40,6 +40,7 @@ InModuleScope $sut {
             Mock -CommandName AssertXDModule -MockWith { };
             Mock -CommandName Add-PSSnapin -MockWith { };
             Mock -CommandName Get-SiteConfig -MockWith { return $stubSiteLicense; };
+            Mock -CommandName InvokeScriptBlock -MockWith { & $ScriptBlock; };
 
             It 'Returns a System.Collections.Hashtable type' {
                 $targetResource = Get-TargetResource @testSiteLicense;
@@ -47,11 +48,10 @@ InModuleScope $sut {
             }
 
             It 'Invokes script block without credentials by default' {
-                Mock -CommandName Invoke-Command -ParameterFilter { $Credential -eq $null -and $Authentication -eq $null } { }
 
-                $targetResource = Get-TargetResource @testSiteLicense;
+                $null = Get-TargetResource @testSiteLicense;
 
-                Assert-MockCalled Invoke-Command -ParameterFilter { $Credential -eq $null -and $Authentication -eq $null } -Exactly 1 -Scope It;
+                Assert-MockCalled InvokeScriptBlock -Exactly 1 -Scope It;
             }
 
             It 'Invokes script block with credentials and CredSSP when specified' {
@@ -59,7 +59,7 @@ InModuleScope $sut {
                 $testSiteLicenseWithCredential = $testSiteLicense.Clone();
                 $testSiteLicenseWithCredential['Credential'] = $testCredential;
 
-                $targetResource = Get-TargetResource @testSiteLicenseWithCredential;
+                $null = Get-TargetResource @testSiteLicenseWithCredential;
 
                 Assert-MockCalled Invoke-Command -ParameterFilter { $Credential -eq $testCredential -and $Authentication -eq 'CredSSP' } -Exactly 1 -Scope It;
             }
@@ -67,7 +67,7 @@ InModuleScope $sut {
             It 'Asserts "Citrix.Configuration.Admin.V2" module is registered' {
                 Mock AssertXDModule -ParameterFilter { $Name -eq 'Citrix.Configuration.Admin.V2' } -MockWith { }
 
-                $targetResource = Get-TargetResource @testSiteLicense;
+                $null = Get-TargetResource @testSiteLicense;
 
                 Assert-MockCalled AssertXDModule -ParameterFilter { $Name -eq 'Citrix.Configuration.Admin.V2' } -Scope It;
             }
@@ -107,9 +107,9 @@ InModuleScope $sut {
             Mock -CommandName AssertXDModule -MockWith { };
             Mock -CommandName Add-PSSnapin -MockWith { };
             Mock -CommandName Get-SiteConfig -MockWith { return $stubSiteLicense; };
+            Mock -CommandName InvokeScriptBlock -MockWith { & $ScriptBlock; };
 
             It 'Calls "Set-SiteConfig"' {
-                Mock -CommandName Invoke-Command -MockWith { & $ScriptBlock; }
                 $filter = {
                     ($LicenseServerName -eq $targetResource.LicenseServer) -and
                     ($LicenseServerPort -eq $targetResource.LicenseServerPort) -and
@@ -124,7 +124,6 @@ InModuleScope $sut {
             }
 
             It 'Calls "Set-SiteConfigMetadata" when "TrustLicenseServerCertificate" = "True"' {
-                Mock -CommandName Invoke-Command -MockWith { & $ScriptBlock; }
                 Mock -CommandName Get-LicCertificate -MockWith { return [PSCustomObject] @{ CertHash = 'MyTestCertificateHash';  }}
                 Mock -CommandName Set-ConfigSiteMetadata -ParameterFilter { $Name -eq 'CertificateHash' -and $Value -eq 'MyTestCertificateHash' } -MockWith { }
 
@@ -134,7 +133,6 @@ InModuleScope $sut {
             }
 
             It 'Does not call "Set-SiteConfigMetadata" when "TrustLicenseServerCertificate" = "False"' {
-                Mock -CommandName Invoke-Command -MockWith { & $ScriptBlock; }
                 Mock -CommandName Set-ConfigSiteMetadata -MockWith { }
 
                 Set-TargetResource @testSiteLicense -TrustLicenseServerCertificate $false;
@@ -143,11 +141,10 @@ InModuleScope $sut {
             }
 
             It 'Invokes script block without credentials by default' {
-                Mock -CommandName Invoke-Command -ParameterFilter { $Credential -eq $null -and $Authentication -eq $null } { }
 
                 Set-TargetResource @testSiteLicense;
 
-                Assert-MockCalled Invoke-Command -ParameterFilter { $Credential -eq $null -and $Authentication -eq $null } -Exactly 1 -Scope It;
+                Assert-MockCalled InvokeScriptBlock -Exactly 1 -Scope It;
             }
 
             It 'Invokes script block with credentials and CredSSP when specified' {

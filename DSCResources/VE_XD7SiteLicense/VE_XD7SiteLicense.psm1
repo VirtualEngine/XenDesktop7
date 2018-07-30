@@ -67,7 +67,7 @@ function Get-TargetResource {
 
             return $targetResource;
         } #end scriptblock
-        
+
         $invokeCommandParams = @{
             ScriptBlock = $scriptBlock;
             ErrorAction = 'Stop';
@@ -75,15 +75,16 @@ function Get-TargetResource {
 
         $scriptBlockParams = @($LicenseServer, $LicenseServerPort, $LicenseEdition, $LicenseModel);
         Write-Verbose ($localizedData.InvokingScriptBlockWithParams -f [System.String]::Join("','", $scriptBlockParams));
-
         if ($Credential) {
             AddInvokeScriptBlockCredentials -Hashtable $invokeCommandParams -Credential $Credential;
-            return Invoke-Command @invokeCommandParams;
+            $targetResource = Invoke-Command @invokeCommandParams;
         }
         else {
-            $invokeCommandParams['ScriptBlock'] = [System.Management.Automation.ScriptBlock]::Create($scriptBlock.ToString().Replace('$using:','$'));
-            return & $invokeCommandParams.ScriptBlock
+            $invokeScriptBlock = [System.Management.Automation.ScriptBlock]::Create($scriptBlock.ToString().Replace('$using:','$'));
+            $targetResource = InvokeScriptBlock -ScriptBlock $invokeScriptBlock;
         }
+        return $targetResource;
+
     } #end process
 } #end function Get-TargetResource
 
@@ -247,15 +248,15 @@ function Set-TargetResource {
 
         $scriptBlockParams = @($LicenseServer, $LicenseServerPort, $LicenseEdition, $LicenseModel);
         Write-Verbose ($localizedData.InvokingScriptBlockWithParams -f [System.String]::Join("','", $scriptBlockParams));
-
         if ($Credential) {
             AddInvokeScriptBlockCredentials -Hashtable $invokeCommandParams -Credential $Credential;
             [ref] $null = Invoke-Command @invokeCommandParams;
         }
         else {
-            $invokeCommandParams['ScriptBlock'] = [System.Management.Automation.ScriptBlock]::Create($scriptBlock.ToString().Replace('$using:','$'));
-            [ref] $null =  & $invokeCommandParams.ScriptBlock
+            $invokeScriptBlock = [System.Management.Automation.ScriptBlock]::Create($scriptBlock.ToString().Replace('$using:','$'));
+            [ref] $null = InvokeScriptBlock -ScriptBlock $invokeScriptBlock;
         }
+
     } #end process
 } #end function Set-TargetResource
 
@@ -265,5 +266,8 @@ $moduleRoot = Split-Path -Path $MyInvocation.MyCommand.Path -Parent;
 ## Import the XD7Common library functions
 $moduleParent = Split-Path -Path $moduleRoot -Parent;
 Import-Module (Join-Path -Path $moduleParent -ChildPath 'VE_XD7Common');
+
+## Import the InvokeScriptBlock function into the current scope
+. (Join-Path -Path (Join-Path -Path $moduleParent -ChildPath 'VE_XD7Common') -ChildPath 'InvokeScriptBlock.ps1');
 
 Export-ModuleMember -Function *-TargetResource;

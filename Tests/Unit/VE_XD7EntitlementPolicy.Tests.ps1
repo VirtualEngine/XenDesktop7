@@ -47,12 +47,12 @@ InModuleScope $sut {
         $testCredential = [System.Management.Automation.PSCredential]::Empty;
 
         Context 'Get-TargetResource' {
-            Mock -CommandName AssertXDModule -MockWith { }
+            Mock -CommandName AssertXDModule -MockWith { };
             Mock -CommandName Add-PSSnapin { };
+            Mock -CommandName InvokeScriptBlock -MockWith { & $ScriptBlock; };
 
             It 'Returns a System.Collections.Hashtable type' {
                 Mock -CommandName Get-BrokerDesktopGroup { return $stubBrokerEntitlementPolicy; }
-                Mock -CommandName Invoke-Command -MockWith { & $ScriptBlock; }
 
                 (Get-TargetResource @testEntitlementPolicy) -is [System.Collections.Hashtable] | Should Be $true;
             }
@@ -62,7 +62,7 @@ InModuleScope $sut {
                 Mock -CommandName Get-BrokerEntitlementPolicyRule -MockWith { }
                 Mock -CommandName Get-BrokerAppEntitlementPolicyRule -MockWith { }
 
-                $targetResource = Get-TargetResource @testEntitlementPolicy;
+                $null = Get-TargetResource @testEntitlementPolicy;
 
                 Assert-MockCalled -CommandName Get-BrokerEntitlementPolicyRule -Exactly 1 -Scope It;
                 Assert-MockCalled -CommandName Get-BrokerAppEntitlementPolicyRule -Exactly 0 -Scope It;
@@ -76,18 +76,17 @@ InModuleScope $sut {
                 $getTargetResourceParams = $testEntitlementPolicy.Clone();
                 $getTargetResourceParams['EntitlementType'] = 'Application';
 
-                $targetResource = Get-TargetResource @getTargetResourceParams;
+                $null = Get-TargetResource @getTargetResourceParams;
 
                 Assert-MockCalled -CommandName Get-BrokerEntitlementPolicyRule -Exactly 0 -Scope It;
                 Assert-MockCalled -CommandName Get-BrokerAppEntitlementPolicyRule -Exactly 1 -Scope It;
             }
 
             It 'Invokes script block without credentials by default' {
-                Mock -CommandName Invoke-Command -ParameterFilter { $Credential -eq $null -and $Authentication -eq $null } { }
 
-                $targetResource = Get-TargetResource @testEntitlementPolicy;
+                $null = Get-TargetResource @testEntitlementPolicy;
 
-                Assert-MockCalled Invoke-Command -ParameterFilter { $Credential -eq $null -and $Authentication -eq $null } -Exactly 1 -Scope It;
+                Assert-MockCalled InvokeScriptBlock -Exactly 1 -Scope It;
             }
 
             It 'Invokes script block with credentials and CredSSP when specified' {
@@ -95,7 +94,7 @@ InModuleScope $sut {
                 $testEntitlementPolicyWithCredential = $testEntitlementPolicy.Clone();
                 $testEntitlementPolicyWithCredential['Credential'] = $testCredential;
 
-                $targetResource = Get-TargetResource @testEntitlementPolicyWithCredential;
+                $null = Get-TargetResource @testEntitlementPolicyWithCredential;
 
                 Assert-MockCalled Invoke-Command -ParameterFilter { $Credential -eq $testCredential -and $Authentication -eq 'CredSSP' } -Exactly 1 -Scope It;
             }

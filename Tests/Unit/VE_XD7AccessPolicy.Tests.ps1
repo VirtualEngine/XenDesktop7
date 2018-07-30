@@ -34,19 +34,18 @@ InModuleScope $sut {
         Context 'Get-TargetResource' {
             Mock -CommandName AssertXDModule -MockWith { };
             Mock -CommandName Add-PSSnapin -MockWith { };
+            Mock -CommandName InvokeScriptBlock -MockWith { & $ScriptBlock; };
 
             It 'Returns a System.Collections.Hashtable type' {
-                Mock -CommandName Invoke-Command -MockWith { & $ScriptBlock; }
 
                 (Get-TargetResource @testAccessPolicy) -is [System.Collections.Hashtable] | Should Be $true;
             }
 
              It 'Invokes script block without credentials by default' {
-                Mock -CommandName Invoke-Command -ParameterFilter { $Credential -eq $null -and $Authentication -eq $null } { }
 
                 Get-TargetResource @testAccessPolicy;
 
-                Assert-MockCalled Invoke-Command -ParameterFilter { $Credential -eq $null -and $Authentication -eq $null } -Exactly 1 -Scope It;
+                Assert-MockCalled InvokeScriptBlock -Exactly 1 -Scope It;
             }
 
             It 'Invokes script block with credentials and CredSSP when specified' {

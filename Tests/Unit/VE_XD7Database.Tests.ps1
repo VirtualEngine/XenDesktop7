@@ -19,11 +19,11 @@ InModuleScope $sut {
             $testDatabase = @{ DatabaseServer = 'TestServer'; DatabaseName = 'Site'; }
 
             It 'Invokes script block without credentials by default' {
-                Mock -CommandName Invoke-Command -ParameterFilter { $Credential -eq $null -and $Authentication -eq $null } { }
+                Mock -CommandName InvokeScriptBlock -MockWith { };
 
                 TestMSSQLDatabase @testDatabase;
 
-                Assert-MockCalled Invoke-Command -ParameterFilter { $Credential -eq $null -and $Authentication -eq $null } -Exactly 1 -Scope It;
+                Assert-MockCalled InvokeScriptBlock -Exactly 1 -Scope It;
             }
             It 'Invokes script block with credentials and CredSSP when specified' {
                 $testDatabaseWithCredential = $testDatabase.Clone();
@@ -69,10 +69,10 @@ InModuleScope $sut {
             Mock -CommandName AssertXDModule { };
             Mock -CommandName Get-TargetResource -MockWith { return $testSiteDatabase; }
             Mock -CommandName Import-Module { };
+            Mock -CommandName InvokeScriptBlock -MockWith { & $ScriptBlock; };
 
             It 'Calls New-XDDatabase' {
                 Mock -CommandName New-XDDatabase { };
-                Mock -CommandName Invoke-Command -MockWith { & $ScriptBlock; }
 
                 Set-TargetResource @testSiteDatabase;
 
@@ -80,11 +80,10 @@ InModuleScope $sut {
             }
 
             It 'Invokes script block without credentials by default' {
-                Mock -CommandName Invoke-Command -ParameterFilter { $Credential -eq $null -and $Authentication -eq $null } { }
 
                 Set-TargetResource @testSiteDatabase;
 
-                Assert-MockCalled Invoke-Command -ParameterFilter { $Credential -eq $null -and $Authentication -eq $null } -Exactly 1 -Scope It;
+                Assert-MockCalled InvokeScriptBlock -Exactly 1 -Scope It;
             }
 
             It 'Invokes script block with credentials and CredSSP when specified' {

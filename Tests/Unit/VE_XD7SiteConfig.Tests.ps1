@@ -33,6 +33,7 @@ InModuleScope $sut {
         Context 'Get-TargetResource' {
             Mock AssertXDModule { }
             Mock Add-PSSnapin;
+            Mock -CommandName InvokeScriptBlock -MockWith { & $ScriptBlock; };
 
             It 'Returns a System.Collections.Hashtable type' {
                 Mock Get-BrokerSite { return $stubSiteConfig; }
@@ -43,11 +44,10 @@ InModuleScope $sut {
             }
 
             It 'Invokes script block without credentials by default' {
-                Mock Invoke-Command -ParameterFilter { $Credential -eq $null -and $Authentication -eq $null }
 
-                $targetResource = Get-TargetResource @testSiteConfig;
+                $null = Get-TargetResource @testSiteConfig;
 
-                Assert-MockCalled Invoke-Command -ParameterFilter { $Credential -eq $null -and $Authentication -eq $null } -Exactly 1 -Scope It;
+                Assert-MockCalled InvokeScriptBlock -Exactly 1 -Scope It;
             }
 
             It 'Invokes script block with credentials and CredSSP when specified' {
@@ -56,13 +56,13 @@ InModuleScope $sut {
                 $testSiteWithCredential = $testSiteConfig.Clone();
                 $testSiteWithCredential['Credential'] = $testCredential;
 
-                $targetResource = Get-TargetResource @testSiteWithCredential;
+                $null = Get-TargetResource @testSiteWithCredential;
 
                 Assert-MockCalled Invoke-Command -ParameterFilter { $Credential -eq $testCredential -and $Authentication -eq 'CredSSP' } -Exactly 1 -Scope It;
             }
 
             It 'Asserts "Citrix.Broker.Admin.V2" module is registered' {
-                $targetResource = Get-TargetResource @testSiteConfig;
+                $null = Get-TargetResource @testSiteConfig;
 
                 Assert-MockCalled AssertXDModule -ParameterFilter { $Name -eq 'Citrix.Broker.Admin.V2' } -Scope It;
             }
@@ -105,13 +105,13 @@ InModuleScope $sut {
         Context 'Set-TargetResource' {
             Mock AssertXDModule { };
             Mock Add-PSSnapin;
+            Mock -CommandName InvokeScriptBlock -MockWith { & $ScriptBlock; };
 
             It 'Invokes script block without credentials by default' {
-                Mock -CommandName Invoke-Command -ParameterFilter { $Credential -eq $null -and $Authentication -eq $null } { }
 
                 Set-TargetResource @testSiteConfig;
 
-                Assert-MockCalled Invoke-Command -ParameterFilter { $Credential -eq $null -and $Authentication -eq $null } -Exactly 1 -Scope It;
+                Assert-MockCalled InvokeScriptBlock -Exactly 1 -Scope It;
             }
 
             It 'Invokes script block with credentials and CredSSP when specified' {

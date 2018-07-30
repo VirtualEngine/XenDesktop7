@@ -21,22 +21,21 @@ InModuleScope $sut {
         $testCredential = [System.Management.Automation.PSCredential]::Empty;
 
         Context 'Get-TargetResource' {
-            Mock -CommandName AssertXDModule -MockWith { }
+            Mock -CommandName AssertXDModule -MockWith { };
             Mock -CommandName Add-PSSnapin -MockWith { };
+            Mock -CommandName InvokeScriptBlock -MockWith { & $ScriptBlock; };
 
             It 'Returns a System.Collections.Hashtable type' {
                 Mock -CommandName Get-BrokerMachine { }
-                Mock -CommandName Invoke-Command -MockWith { & $ScriptBlock; }
 
                 (Get-TargetResource @testDesktopGroupMember) -is [System.Collections.Hashtable] | Should Be $true;
             }
 
             It 'Invokes script block without credentials by default' {
-                Mock -CommandName Invoke-Command -ParameterFilter { $Credential -eq $null -and $Authentication -eq $null } { }
 
-                $targetResource = Get-TargetResource @testDesktopGroupMember;
+                $null = Get-TargetResource @testDesktopGroupMember;
 
-                Assert-MockCalled Invoke-Command -ParameterFilter { $Credential -eq $null -and $Authentication -eq $null } -Exactly 1 -Scope It;
+                Assert-MockCalled InvokeScriptBlock -Exactly 1 -Scope It;
             }
 
             It 'Invokes script block with credentials and CredSSP when specified' {
@@ -44,7 +43,7 @@ InModuleScope $sut {
                 $testDesktopGroupMemberWithCredential = $testDesktopGroupMember.Clone();
                 $testDesktopGroupMemberWithCredential['Credential'] = $testCredential;
 
-                $targetResource = Get-TargetResource @testDesktopGroupMemberWithCredential;
+                $null = Get-TargetResource @testDesktopGroupMemberWithCredential;
 
                 Assert-MockCalled Invoke-Command -ParameterFilter { $Credential -eq $testCredential -and $Authentication -eq 'CredSSP' } -Exactly 1 -Scope It;
             }
@@ -52,7 +51,7 @@ InModuleScope $sut {
             It 'Asserts "Citrix.Broker.Admin.V2" module is registered' {
                 Mock AssertXDModule -ParameterFilter { $Name -eq 'Citrix.Broker.Admin.V2' } -MockWith { }
 
-                $targetResource = Get-TargetResource @testDesktopGroupMember;
+                $null = Get-TargetResource @testDesktopGroupMember;
 
                 Assert-MockCalled AssertXDModule -ParameterFilter { $Name -eq 'Citrix.Broker.Admin.V2' } -Scope It;
             }
@@ -85,16 +84,16 @@ InModuleScope $sut {
         } #end context Test-TargetResource
 
         Context 'Set-TargetResource' {
-            Mock -CommandName AssertXDModule -MockWith { }
-            Mock -CommandName Import-Module -MockWith { }
+            Mock -CommandName AssertXDModule -MockWith { };
+            Mock -CommandName Import-Module -MockWith { };
             Mock -CommandName Add-PSSnapin -MockWith { };
+            Mock -CommandName InvokeScriptBlock -MockWith { & $ScriptBlock; };
 
             It 'Calls "Add-BrokerMachine" when "Ensure" = "Present" and machine is registered, but not assigned' {
                 Mock -CommandName Get-BrokerMachine -MockWith { return $testDesktopGroupMember; }
                 Mock -CommandName ResolveXDBrokerMachine -MockWith { return @{ DesktopGroupName = $null }; }
                 Mock -CommandName GetXDBrokerMachine -MockWith { return $testDesktopGroupMembers[0]; }
                 Mock -CommandName Add-BrokerMachine -MockWith { }
-                Mock -CommandName Invoke-Command -MockWith { & $ScriptBlock }
 
                 Set-TargetResource @testDesktopGroupMember;
 
@@ -106,7 +105,6 @@ InModuleScope $sut {
                 Mock -CommandName ResolveXDBrokerMachine -MockWith { return @{ DesktopGroupName = "$($testDesktopGroupName)2"; }; }
                 Mock -CommandName GetXDBrokerMachine -MockWith { return $testDesktopGroupMembers[0]; }
                 Mock -CommandName Add-BrokerMachine -MockWith { }
-                Mock -CommandName Invoke-Command -MockWith { & $ScriptBlock }
 
                 Set-TargetResource @testDesktopGroupMember;
 
@@ -118,7 +116,6 @@ InModuleScope $sut {
                 Mock -CommandName ResolveXDBrokerMachine -MockWith { return @{ DesktopGroupName = $testDesktopGroupName; }; }
                 Mock -CommandName GetXDBrokerMachine -MockWith { return $testDesktopGroupMembers[0]; }
                 Mock -CommandName Add-BrokerMachine -MockWith { }
-                Mock -CommandName Invoke-Command -MockWith { & $ScriptBlock }
 
                 Set-TargetResource @testDesktopGroupMember;
 
@@ -129,7 +126,6 @@ InModuleScope $sut {
                 Mock -CommandName Get-BrokerMachine -MockWith { return $testDesktopGroupMember; }
                 Mock -CommandName ResolveXDBrokerMachine -MockWith { return $null; }
                 Mock -CommandName GetXDBrokerMachine -MockWith { return $null; }
-                Mock -CommandName Invoke-Command -MockWith { & $ScriptBlock }
 
                 { Set-TargetResource @testDesktopGroupMember } | Should Throw;
             }
@@ -139,7 +135,6 @@ InModuleScope $sut {
                 Mock -CommandName ResolveXDBrokerMachine -MockWith { return @{ DesktopGroupName = $testDesktopGroupName; }; }
                 Mock -CommandName GetXDBrokerMachine -MockWith { return $testDesktopGroupMembers[0]; }
                 Mock -CommandName Remove-BrokerMachine -MockWith { }
-                Mock -CommandName Invoke-Command -MockWith { & $ScriptBlock }
 
                 Set-TargetResource @testDesktopGroupMemberAbsent;
 
@@ -151,7 +146,6 @@ InModuleScope $sut {
                 Mock -CommandName ResolveXDBrokerMachine -MockWith { return @{ DesktopGroupName = ''; }; }
                 Mock -CommandName GetXDBrokerMachine -MockWith { return $testDesktopGroupMembers[0]; }
                 Mock -CommandName Remove-BrokerMachine -MockWith { }
-                Mock -CommandName Invoke-Command -MockWith { & $ScriptBlock }
 
                 Set-TargetResource @testDesktopGroupMemberAbsent;
 
@@ -163,7 +157,6 @@ InModuleScope $sut {
                 Mock -CommandName ResolveXDBrokerMachine -MockWith { return @{ DesktopGroupName = "$($testDesktopGroupName)2"; }; }
                 Mock -CommandName GetXDBrokerMachine -MockWith { return $testDesktopGroupMembers[0]; }
                 Mock -CommandName Remove-BrokerMachine -MockWith { }
-                Mock -CommandName Invoke-Command -MockWith { & $ScriptBlock }
 
                 Set-TargetResource @testDesktopGroupMemberAbsent;
 
@@ -171,11 +164,10 @@ InModuleScope $sut {
             }
 
             It 'Invokes script block without credentials by default' {
-                Mock -CommandName Invoke-Command -ParameterFilter { $Credential -eq $null -and $Authentication -eq $null } { }
 
                 Set-TargetResource @testDesktopGroupMember;
 
-                Assert-MockCalled Invoke-Command -ParameterFilter { $Credential -eq $null -and $Authentication -eq $null } -Exactly 1 -Scope It;
+                Assert-MockCalled InvokeScriptBlock -Exactly 1 -Scope It;
             }
 
             It 'Invokes script block with credentials and CredSSP when specified' {

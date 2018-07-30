@@ -50,21 +50,22 @@ InModuleScope $sut {
         Context 'Get-TargetResource' {
             Mock -CommandName AssertXDModule -MockWith { };
             Mock -CommandName Add-PSSnapin -MockWith { };
+            Mock -CommandName InvokeScriptBlock -MockWith { & $ScriptBlock; };
 
             It 'Returns a System.Collections.Hashtable type' {
                 Mock -CommandName Get-BrokerDesktopGroup { return $fakeBrokerGroup; }
-                Mock -CommandName Invoke-Command -MockWith { & $ScriptBlock; }
+                #Mock -CommandName Invoke-Command -MockWith { & $ScriptBlock; }
 
                 $targetResource = Get-TargetResource @testApplication;
                 $targetResource -is [System.Collections.Hashtable] | Should Be $true;
             }
 
             It 'Invokes script block without credentials by default' {
-                Mock -CommandName Invoke-Command -ParameterFilter { $Credential -eq $null -and $Authentication -eq $null } { }
+                #Mock -CommandName Invoke-Command -ParameterFilter { $Credential -eq $null -and $Authentication -eq $null } { }
 
-                $targetResource =Get-TargetResource @testApplication;
+                $null = Get-TargetResource @testApplication;
 
-                Assert-MockCalled Invoke-Command -ParameterFilter { $Credential -eq $null -and $Authentication -eq $null } -Exactly 1 -Scope It;
+                Assert-MockCalled InvokeScriptBlock -Exactly 1 -Scope It;
             }
 
             It 'Invokes script block with credentials and CredSSP when specified' {
@@ -72,13 +73,13 @@ InModuleScope $sut {
                 $testApplicationWithCredential = $testApplication.Clone();
                 $testApplicationWithCredential['Credential'] = $testCredential;
 
-                $targetResource = Get-TargetResource @testApplicationWithCredential;
+                $null = Get-TargetResource @testApplicationWithCredential;
 
                 Assert-MockCalled Invoke-Command -ParameterFilter { $Credential -eq $testCredential -and $Authentication -eq 'CredSSP' } -Exactly 1 -Scope It;
             }
 
             It 'Asserts "Citrix.Broker.Admin.V2" is registered' {
-                $targetResource = Get-TargetResource @testApplication
+                $null = Get-TargetResource @testApplication
 
                 Assert-MockCalled AssertXDModule -Scope It;
             }
@@ -138,10 +139,10 @@ InModuleScope $sut {
             Mock -CommandName Add-PSSnapin -MockWith { };
 
             It 'Calls "New-BrokerApplication" when "Ensure" = "Present" and application does not exists' {
-                Mock -CommandName Get-BrokerDesktopGroup -MockWith { return $fakeBrokerGroup }
-                Mock -CommandName New-BrokerApplication -MockWith { }
-                Mock -CommandName Get-CtxIcon -MockWith { }
-                Mock -CommandName Invoke-Command -MockWith { & $ScriptBlock }
+                Mock -CommandName Get-BrokerDesktopGroup -MockWith { return $fakeBrokerGroup };
+                Mock -CommandName New-BrokerApplication -MockWith { };
+                Mock -CommandName Get-CtxIcon -MockWith { };
+                Mock -CommandName InvokeScriptBlock -MockWith { & $ScriptBlock; };
 
                 Set-TargetResource @testApplication;
 
@@ -152,7 +153,6 @@ InModuleScope $sut {
                 Mock -CommandName Get-BrokerDesktopGroup -MockWith { return $fakeBrokerGroup }
                 Mock -CommandName New-BrokerApplication -ParameterFilter { $ApplicationType -eq 'InstalledOnClient' } -MockWith { }
                 Mock -CommandName Get-CtxIcon -MockWith { }
-                Mock -CommandName Invoke-Command -MockWith { & $ScriptBlock }
 
                 Set-TargetResource -ApplicationType 'InstalledOnClient' @testApplication;
 
@@ -163,7 +163,6 @@ InModuleScope $sut {
                 Mock -CommandName Get-BrokerDesktopGroup -MockWith { return $fakeBrokerGroup }
                 Mock -CommandName Get-BrokerApplication -MockWith { return  $fakeApplication }
                 Mock -CommandName Set-BrokerApplication -MockWith { }
-                Mock -CommandName Invoke-Command -MockWith { & $ScriptBlock }
 
                 Set-TargetResource @testApplication;
 
@@ -174,7 +173,6 @@ InModuleScope $sut {
                 Mock -CommandName Get-BrokerDesktopGroup -MockWith { return $fakeBrokerGroup }
                 Mock -CommandName Get-BrokerApplication -MockWith { return  $fakeApplication }
                 Mock -CommandName Remove-BrokerApplication -MockWith { }
-                Mock -CommandName Invoke-Command -MockWith { & $ScriptBlock }
 
                 Set-TargetResource @testApplication -Ensure Absent;
 
@@ -185,7 +183,6 @@ InModuleScope $sut {
                 Mock -CommandName Get-BrokerDesktopGroup -MockWith { return $fakeBrokerGroup }
                 Mock -CommandName Get-BrokerApplication -MockWith { }
                 Mock -CommandName Remove-BrokerApplication -MockWith { }
-                Mock -CommandName Invoke-Command -MockWith { & $ScriptBlock }
 
                 Set-TargetResource @testApplication -Ensure Absent;
 
@@ -195,11 +192,10 @@ InModuleScope $sut {
             It 'Invokes script block without credentials by default' {
                 Mock -CommandName Get-BrokerDesktopGroup -MockWith { return $fakeBrokerGroup }
                 Mock -CommandName Get-BrokerApplication -MockWith { return  $fakeApplication }
-                Mock -CommandName Invoke-Command -ParameterFilter { $Credential -eq $null -and $Authentication -eq $null } { }
 
                 Set-TargetResource @testApplication;
 
-                Assert-MockCalled Invoke-Command -ParameterFilter { $Credential -eq $null -and $Authentication -eq $null } -Exactly 1 -Scope It;
+                Assert-MockCalled InvokeScriptBlock -Exactly 1 -Scope It;
             }
 
             It 'Invokes script block with credentials and CredSSP when specified' {

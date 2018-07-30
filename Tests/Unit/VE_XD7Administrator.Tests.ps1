@@ -22,7 +22,8 @@ InModuleScope $sut {
 
         Context 'Get-TargetResource' {
             Mock -CommandName AssertXDModule -MockWith { };
-            Mock -CommandName Add-PSSnapin -MockWith { }
+            Mock -CommandName Add-PSSnapin -MockWith { };
+            Mock -CommandName InvokeScriptBlock -MockWith { & $ScriptBlock; };
 
             It 'Returns a System.Collections.Hashtable type' {
                 Mock -CommandName Get-AdminAdministrator { return $PSBoundParameters; }
@@ -35,11 +36,10 @@ InModuleScope $sut {
             }
 
             It 'Invokes script block without credentials by default' {
-                Mock -CommandName Invoke-Command -ParameterFilter { $Credential -eq $null -and $Authentication -eq $null } { }
 
                 Get-TargetResource @testAdmin;
 
-                Assert-MockCalled Invoke-Command -ParameterFilter { $Credential -eq $null -and $Authentication -eq $null } -Exactly 1 -Scope It;
+                Assert-MockCalled InvokeScriptBlock -Exactly 1 -Scope It;
             }
 
             It 'Invokes script block with credentials and CredSSP when specified' {
@@ -95,12 +95,12 @@ InModuleScope $sut {
 
         Context 'Set-TargetResource' {
             Mock -CommandName AssertXDModule -MockWith { };
-            Mock -CommandName Add-PSSnapin -MockWith { }
+            Mock -CommandName Add-PSSnapin -MockWith { };
+            Mock -CommandName InvokeScriptBlock -MockWith { & $ScriptBlock; };
 
             It 'Calls New-AdminAdministrator when administrator does not exist' {
                 Mock -CommandName Get-AdminAdministrator -MockWith { }
                 Mock -CommandName New-AdminAdministrator -MockWith { }
-                Mock -CommandName Invoke-Command -MockWith { & $ScriptBlock; }
 
                 Set-TargetResource @testAdmin;
 
@@ -110,7 +110,6 @@ InModuleScope $sut {
             It 'Calls Set-AdminAdministrator when administrator does exist' {
                 Mock -CommandName Get-AdminAdministrator -MockWith { return $PSBoundParameters; }
                 Mock -CommandName Set-AdminAdministrator -MockWith { }
-                Mock -CommandName Invoke-Command -MockWith { & $ScriptBlock; }
 
                 Set-TargetResource @testAdmin;
 
@@ -120,7 +119,6 @@ InModuleScope $sut {
             It 'Calls Remove-AdminAdministrator when "Ensure" = "Absent"' {
                 Mock -CommandName Get-AdminAdministrator -MockWith { return $PSBoundParameters; }
                 Mock -CommandName Remove-AdminAdministrator -MockWith { }
-                Mock -CommandName Invoke-Command -MockWith { & $ScriptBlock; }
 
                 Set-TargetResource @testAdminAbsent;
 
@@ -128,11 +126,10 @@ InModuleScope $sut {
             }
 
             It 'Invokes script block without credentials by default' {
-                Mock -CommandName Invoke-Command -ParameterFilter { $Credential -eq $null -and $Authentication -eq $null } { }
 
                 Set-TargetResource @testAdmin;
 
-                Assert-MockCalled Invoke-Command -ParameterFilter { $Credential -eq $null -and $Authentication -eq $null } -Exactly 1 -Scope It;
+                Assert-MockCalled InvokeScriptBlock -Exactly 1 -Scope It;
             }
 
             It 'Invokes script block with credentials and CredSSP when specified' {

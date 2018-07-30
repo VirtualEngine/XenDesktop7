@@ -37,10 +37,18 @@ function Get-TargetResource {
 
             Add-PSSnapin -Name 'Citrix.DelegatedAdmin.Admin.V1' -ErrorAction Stop;
 
-            $xdAdminRoleMembers = Get-AdminAdministrator |
-                Select-Object -Property Name -ExpandProperty Rights |
-                    Where-Object { $_.RoleName -eq $using:Name -and $_.ScopeName -eq $using:RoleScope } |
-                        ForEach-Object { $_.Name };
+            $xdAdministrators = Get-AdminAdministrator |
+                                    ForEach-Object {
+                                        [PSCustomObject] @{
+                                            Name = $_.Name;
+                                            RoleName = $_.Rights.RoleName;
+                                            ScopeName = $_.Rights.ScopeName
+                                        }
+                                    }
+
+            $xdAdminRoleMembers = $xdAdministrators |
+                Where-Object { $_.RoleName -eq $using:Name -and $_.ScopeName -eq $using:RoleScope } |
+                    ForEach-Object { $_.Name };
 
             $targetResource = @{
                 Name = $using:Name;
@@ -58,17 +66,16 @@ function Get-TargetResource {
             ErrorAction = 'Stop';
         }
 
+        $scriptBlockParams = @($Name, $RoleScope, $Members, $Ensure);
+        Write-Verbose ($localizedData.InvokingScriptBlockWithParams -f [System.String]::Join("','", $scriptBlockParams));
         if ($Credential) {
             AddInvokeScriptBlockCredentials -Hashtable $invokeCommandParams -Credential $Credential;
-            $scriptBlockParams = @($Name, $RoleScope, $Members, $Ensure);
-            Write-Verbose ($localizedData.InvokingScriptBlockWithParams -f [System.String]::Join("','", $scriptBlockParams));
             $targetResource = Invoke-Command  @invokeCommandParams;
         }
         else {
-            $invokeCommandParams['ScriptBlock'] = [System.Management.Automation.ScriptBlock]::Create($scriptBlock.ToString().Replace('$using:','$'));
-            $targetResource = & $invokeCommandParams.ScriptBlock
+            $invokeScriptBlock = [System.Management.Automation.ScriptBlock]::Create($scriptBlock.ToString().Replace('$using:','$'));
+            $targetResource = InvokeScriptBlock -ScriptBlock $invokeScriptBlock;
         }
-
         return $targetResource;
 
     } #end process
@@ -226,15 +233,15 @@ function Set-TargetResource {
             ErrorAction = 'Stop';
         }
 
+        $scriptBlockParams = @($Name, $RoleScope, $Members, $Ensure);
+        Write-Verbose ($localizedData.InvokingScriptBlockWithParams -f [System.String]::Join("','", $scriptBlockParams));
         if ($Credential) {
             AddInvokeScriptBlockCredentials -Hashtable $invokeCommandParams -Credential $Credential;
-            $scriptBlockParams = @($Name, $RoleScope, $Members, $Ensure);
-            Write-Verbose ($localizedData.InvokingScriptBlockWithParams -f [System.String]::Join("','", $scriptBlockParams));
             [ref] $null = Invoke-Command  @invokeCommandParams;
         }
         else {
-            $invokeCommandParams['ScriptBlock'] = [System.Management.Automation.ScriptBlock]::Create($scriptBlock.ToString().Replace('$using:','$'));
-            [ref] $null = & $invokeCommandParams.ScriptBlock
+            $invokeScriptBlock = [System.Management.Automation.ScriptBlock]::Create($scriptBlock.ToString().Replace('$using:','$'));
+            [ref] $null = InvokeScriptBlock -ScriptBlock $invokeScriptBlock;
         }
 
     } #end process
@@ -246,5 +253,8 @@ $moduleRoot = Split-Path -Path $MyInvocation.MyCommand.Path -Parent;
 ## Import the XD7Common library functions
 $moduleParent = Split-Path -Path $moduleRoot -Parent;
 Import-Module (Join-Path -Path $moduleParent -ChildPath 'VE_XD7Common');
+
+## Import the InvokeScriptBlock function into the current scope
+. (Join-Path -Path (Join-Path -Path $moduleParent -ChildPath 'VE_XD7Common') -ChildPath 'InvokeScriptBlock.ps1');
 
 Export-ModuleMember -Function *-TargetResource;

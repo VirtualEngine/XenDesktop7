@@ -35,8 +35,9 @@ InModuleScope $sut {
                         ForEach { $_.Name }; #>
 
         Context 'Get-TargetResource' {
-            Mock -CommandName AssertXDModule -MockWith { }
-            Mock -CommandName Add-PSSnapin -MockWith { }
+            Mock -CommandName AssertXDModule -MockWith { };
+            Mock -CommandName Add-PSSnapin -MockWith { };
+            Mock -CommandName InvokeScriptBlock -MockWith { & $ScriptBlock; };
 
             It 'Returns a System.Collections.Hashtable type' {
                 Mock -CommandName Get-AdminAdministrator { return $stubAdmins; }
@@ -63,11 +64,10 @@ InModuleScope $sut {
             #>
 
             It 'Invokes script block without credentials by default' {
-                Mock -CommandName Invoke-Command -ParameterFilter { $Credential -eq $null -and $Authentication -eq $null } { }
 
-                $targetResource = Get-TargetResource @testRole;
+                $null = Get-TargetResource @testRole;
 
-                Assert-MockCalled Invoke-Command -ParameterFilter { $Credential -eq $null -and $Authentication -eq $null } -Exactly 1 -Scope It;
+                Assert-MockCalled InvokeScriptBlock -Exactly 1 -Scope It;
             }
 
             It 'Invokes script block with credentials and CredSSP when specified' {
@@ -75,7 +75,7 @@ InModuleScope $sut {
                 $testRoleWithCredential = $testRole.Clone();
                 $testRoleWithCredential['Credential'] = $testCredential;
 
-                $targetResource = Get-TargetResource @testRoleWithCredential;
+                $null = Get-TargetResource @testRoleWithCredential;
 
                 Assert-MockCalled Invoke-Command -ParameterFilter { $Credential -eq $testCredential -and $Authentication -eq 'CredSSP' } -Exactly 1 -Scope It;
             }
@@ -83,7 +83,7 @@ InModuleScope $sut {
             It 'Asserts "Citrix.DelegatedAdmin.Admin.V1" module is registered' {
                 Mock AssertXDModule -ParameterFilter { $Name -eq 'Citrix.DelegatedAdmin.Admin.V1' } -MockWith { }
 
-                $targetResource = Get-TargetResource @testRole;
+                $null = Get-TargetResource @testRole;
 
                 Assert-MockCalled AssertXDModule -ParameterFilter { $Name -eq 'Citrix.DelegatedAdmin.Admin.V1' } -Scope It;
             }
@@ -197,11 +197,11 @@ InModuleScope $sut {
         } #end context Test-TargetResource
 
         Context 'Set-TargetResource' {
-            Mock -CommandName AssertXDModule -MockWith { }
-            Mock -CommandName Add-PSSnapin -MockWith { }
+            Mock -CommandName AssertXDModule -MockWith { };
+            Mock -CommandName Add-PSSnapin -MockWith { };
+            Mock -CommandName InvokeScriptBlock -MockWith { & $ScriptBlock; };
 
             It 'Calls "Add-AdminRight" once per administrator when "Ensure" = "Present"' {
-                Mock -CommandName Invoke-Command -MockWith { & $ScriptBlock; }
                 Mock -CommandName Add-AdminRight -MockWith { }
 
                 Set-TargetResource @testRole;
@@ -210,7 +210,6 @@ InModuleScope $sut {
             }
 
             It 'Calls "Remove-AdminRight" once per administrator when "Ensure" = "Absent"' {
-                Mock -CommandName Invoke-Command -MockWith { & $ScriptBlock; }
                 Mock -CommandName Get-AdminAdministrator -MockWith { return [PSCustomObject] @{ Rights = @{ RoleName = $testRoleName; ScopeName = $testScopeName; } } }
                 Mock -CommandName Remove-AdminRight -MockWith { }
 
@@ -220,11 +219,10 @@ InModuleScope $sut {
             }
 
             It 'Invokes script block without credentials by default' {
-                Mock -CommandName Invoke-Command -ParameterFilter { $Credential -eq $null -and $Authentication -eq $null } { }
 
                 Set-TargetResource @testRole;
 
-                Assert-MockCalled Invoke-Command -ParameterFilter { $Credential -eq $null -and $Authentication -eq $null } -Exactly 1 -Scope It;
+                Assert-MockCalled InvokeScriptBlock -Exactly 1 -Scope It;
             }
 
             It 'Invokes script block with credentials and CredSSP when specified' {

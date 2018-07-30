@@ -26,17 +26,16 @@ InModuleScope $sut {
             Mock -CommandName AssertXDModule { };
             Mock -CommandName Import-Module { };
             Mock -CommandName GetHostName -MockWith { return $testControllerName; }
+            Mock -CommandName InvokeScriptBlock -MockWith { & $ScriptBlock; };
 
             It 'Returns a System.Collections.Hashtable type' {
                 Mock -CommandName Get-XDSite { return $testSite; }
-                Mock -CommandName Invoke-Command -MockWith { & $ScriptBlock; }
 
                 (Get-TargetResource @testController) -is [System.Collections.Hashtable] | Should Be $true;
             }
 
             It 'Returns "Present" when controller exists and "Ensure" = "Present" is specified' {
                 Mock -CommandName Get-XDSite { return $testSite; }
-                Mock -CommandName Invoke-Command -MockWith { & $ScriptBlock; }
 
                 $targetResource = Get-TargetResource @testController;
 
@@ -45,7 +44,6 @@ InModuleScope $sut {
 
             It 'Returns "Absent" when controller does not exist and "Ensure" = "Present" is specified' {
                 Mock -CommandName Get-XDSite { return $testSiteControllerNonExistent; }
-                Mock -CommandName Invoke-Command -MockWith { & $ScriptBlock; }
 
                 $targetResource = Get-TargetResource @testController;
 
@@ -54,7 +52,6 @@ InModuleScope $sut {
 
             It 'Returns "Present" when controller exists and "Ensure" = "Absent" is specified' {
                 Mock -CommandName Get-XDSite { return $testSite; }
-                Mock -CommandName Invoke-Command -MockWith { & $ScriptBlock; }
 
                 $targetResource = Get-TargetResource @testControllerNonExistent;
 
@@ -63,7 +60,6 @@ InModuleScope $sut {
 
             It 'Returns "Absent" when controller does not exist and "Ensure" = "Absent" is specified' {
                 Mock -CommandName Get-XDSite { return $testSiteControllerNonExistent; }
-                Mock -CommandName Invoke-Command -MockWith { & $ScriptBlock; }
 
                 $targetResource = Get-TargetResource @testControllerNonExistent;
 
@@ -75,7 +71,7 @@ InModuleScope $sut {
 
                 Get-TargetResource @testController;
 
-                Assert-MockCalled Invoke-Command -ParameterFilter { $Credential -eq $null -and $Authentication -eq $null } -Exactly 1 -Scope It;
+                Assert-MockCalled InvokeScriptBlock -Exactly 1 -Scope It;
             }
 
             It 'Invokes script block with credentials and CredSSP when specified' {
@@ -131,10 +127,10 @@ InModuleScope $sut {
             Mock -CommandName AssertXDModule -ParameterFilter { $IsSnapin -eq $false } -MockWith { }
             Mock -CommandName Import-Module { };
             Mock -CommandName GetHostName -MockWith { return $testControllerName; }
+            Mock -CommandName InvokeScriptBlock -MockWith { & $ScriptBlock; };
 
             It 'Calls Add-XDController when "Ensure" = "Present"' {
                 Mock -CommandName Add-XDController -ParameterFilter { $AdminAddress -eq $testControllerName } -MockWith { }
-                Mock -CommandName Invoke-Command -MockWith { & $ScriptBlock; }
 
                 Set-TargetResource @testController;
 
@@ -143,7 +139,6 @@ InModuleScope $sut {
 
             It 'Calls Remove-XDController when "Ensure" = "Absent"' {
                 Mock -CommandName Remove-XDController -ParameterFilter { $ControllerName -eq $testControllerName } -MockWith { }
-                Mock -CommandName Invoke-Command -MockWith { & $ScriptBlock; }
 
                 Set-TargetResource @testControllerNonExistent;
 
@@ -151,11 +146,10 @@ InModuleScope $sut {
             }
 
             It 'Invokes script block without credentials by default' {
-                Mock -CommandName Invoke-Command -ParameterFilter { $Credential -eq $null -and $Authentication -eq $null } { }
 
                 Set-TargetResource @testController;
 
-                Assert-MockCalled Invoke-Command -ParameterFilter { $Credential -eq $null -and $Authentication -eq $null } -Exactly 1 -Scope It;
+                Assert-MockCalled InvokeScriptBlock -Exactly 1 -Scope It;
             }
 
             It 'Invokes script block with credentials and CredSSP when specified' {
