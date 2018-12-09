@@ -198,15 +198,14 @@ function TestXDModule {
 
         if ($IsSnapin) {
 
-            if (Get-PSSnapin -Name $Name -Registered) {
+            if (Get-PSSnapin -Name $Name -Registered -ErrorAction SilentlyContinue) {
                 return $true;
             }
         }
-        else {
 
-            if (FindXDModule -Name $Name -Path $Path) {
-                return $true;
-            }
+        ## If testing a snap-in and it fails, try resolving it as a module (#18)
+        if (FindXDModule -Name $Name -Path $Path) {
+            return $true;
         }
 
         return $false;

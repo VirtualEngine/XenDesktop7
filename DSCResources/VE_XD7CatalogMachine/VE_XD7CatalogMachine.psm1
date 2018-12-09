@@ -138,7 +138,8 @@ function Set-TargetResource {
         $scriptBlock = {
 
             Add-PSSnapin -Name 'Citrix.Broker.Admin.V2' -ErrorAction Stop;
-            Import-Module "$env:ProgramFiles\WindowsPowerShell\Modules\XenDesktop7\DSCResources\VE_XD7Common\VE_XD7Common.psd1" -Verbose:$false;
+            ## Load modules from relative path to avoid v5 module versioning interference (#15)
+            Import-Module (Join-Path -Path $using:moduleParent -ChildPath 'VE_XD7Common');
 
             $brokerMachines = Get-BrokerMachine -CatalogName $using:Name;
             $brokerCatalog = Get-BrokerCatalog -Name $using:Name;

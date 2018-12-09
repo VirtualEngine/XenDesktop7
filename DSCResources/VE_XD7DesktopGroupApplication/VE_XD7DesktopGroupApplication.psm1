@@ -270,7 +270,7 @@ function Set-TargetResource {
     )
     begin {
 
-        AssertXDModule -Name 'Citrix.Common.Commands','Citrix.Broker.Admin.V2' -IsSnapin;
+        AssertXDModule -Name 'Citrix.Common.Commands', 'Citrix.Broker.Admin.V2' -IsSnapin -Path "$env:ProgramFiles\Citrix\Broker\Modules\Citrix.Common.Commands\Citrix.Common.Commands.psd1";
 
     }
     process {
@@ -278,7 +278,14 @@ function Set-TargetResource {
         $scriptBlock = {
 
             Add-PSSnapin -Name 'Citrix.Broker.Admin.V2' -ErrorAction Stop;
-            Add-PSSnapin -Name 'Citrix.Common.Commands' -ErrorAction Stop;
+            ## Test to see if the 'Citrix.Common.Commands' snapin is available, and if not, try loading the module (#18)
+            if (Get-PSSnapin -Name 'Citrix.Common.Commands' -Registered -ErrorAction SilentlyContinue) {
+                Add-PSSnapin -Name 'Citrix.Common.Commands' -ErrorAction Stop;
+            }
+            else {
+                Import-Module -Name 'Citrix.Common.Commands' -Force -Verbose:$false -ErrorAction Stop;
+            }
+
             $desktopGroup = Get-BrokerDesktopGroup -Name $using:DesktopGroupName;
             $application = Get-BrokerApplication -Name $using:Name -DesktopGroupUid $desktopGroup.Uid -ErrorAction SilentlyContinue;
 
