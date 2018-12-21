@@ -120,6 +120,8 @@ InModuleScope $sut {
 
             ## Ensure secure boot is not triggered
             Mock Confirm-SecureBootUEFI -MockWith { return $false; }
+            Mock -CommandName ResolveXDSetupMedia { return 'TestDrive' }
+            Mock -CommandName Get-Item { return [PSCustomObject] @{ VersionInfo = @{ FileVersion = '7.11' } } }
 
             It 'Returns a System.Boolean type.' {
                 Mock -CommandName GetXDInstalledRole -ParameterFilter { $Role -eq 'DesktopVDA' } -MockWith { }
@@ -159,6 +161,25 @@ InModuleScope $sut {
                 $targetResource = Test-TargetResource -Role 'DesktopVDA' -SourcePath $testDrivePath -Ensure 'Absent';
 
                 $targetResource | Should Be $false;
+            }
+
+            It 'Does not throw when VDA version is "7.12" (or later) and "SecureBoot" is enabled' {
+                Mock -CommandName Confirm-SecureBootUEFI -MockWith { return $true; }
+                Mock -CommandName TestXDInstalledRole -MockWith { return $false; }
+                Mock -CommandName ResolveXDSetupMedia { return 'TestDrive' }
+                Mock -CommandName Get-Item { return [PSCustomObject] @{ VersionInfo = @{ FileVersion = '7.12' } } }
+
+                { Test-TargetResource -Role 'DesktopVDA' -SourcePath $testDrivePath } | Should Not Throw
+            }
+
+
+            It 'Throws when VDA version is "7.11" (or earlier) and "SecureBoot" is enabled' {
+                Mock -CommandName Confirm-SecureBootUEFI -MockWith { return $true; }
+                Mock -CommandName TestXDInstalledRole -MockWith { return $false; }
+                Mock -CommandName ResolveXDSetupMedia { return 'TestDrive' }
+                Mock -CommandName Get-Item { return [PSCustomObject] @{ VersionInfo = @{ FileVersion = '7.11' } } }
+
+                { Test-TargetResource -Role 'DesktopVDA' -SourcePath $testDrivePath } | Should Throw 'Secure Boot is not supported. Disable Secure Boot.'
             }
 
         } #end context Test-TargetResource

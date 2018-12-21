@@ -115,7 +115,9 @@ function Test-TargetResource {
 
             try {
 
-                if (Confirm-SecureBootUEFI -ErrorAction SilentlyContinue) {
+                ## SecureBoot is supported from XenDesktop version 7.12 and later
+                $vdaSetupFileVersion = ((Get-Item -Path (ResolveXDSetupMedia -Role $Role -SourcePath $SourcePath)).VersionInfo.FileVersion) -as [System.Version];
+                if (($vdaSetupFileVersion -lt ('7.12' -as [System.Version])) -and (Confirm-SecureBootUEFI -ErrorAction SilentlyContinue)) {
                     throw ($localizedData.SecureBootEnabledError);
                 }
             }
