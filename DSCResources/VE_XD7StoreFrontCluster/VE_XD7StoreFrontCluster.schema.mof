@@ -1,0 +1,15 @@
+
+[ClassVersion("1.0"), FriendlyName("XD7StoreFrontCluster")]
+class VE_XD7StoreFrontCluster : OMI_BaseResource
+{
+	[Key, Description("StoreFront Site Name")] String SiteName;
+	[Required, Description("StoreFront Port")] UInt32 Port;
+	[Required, Description("StoreFront Transport Type"), ValueMap{"HTTP","HTTPS","SSL"}, Values{"HTTP","HTTPS","SSL"}] String TransportType;
+	[Required, Description("StoreFront Servers")] String Servers;
+	[Required, Description("StoreFront Load Balancing")] Boolean LoadBalance;
+	[Required, Description("StoreFront Farm Type"), ValueMap{"XenApp","XenDesktop","AppController"}, Values{"XenApp","XenDesktop","AppController"}] String FarmType;
+	[Required, Description("StoreFront Farm Name")] String FarmName;
+	[Required, Description("StoreFront Authentication Type"), ValueMap{"Explicit","Anonymous"}, Values{"Explicit","Anonymous"}] String AuthType;
+	[Write, Description("Ensure"), ValueMap{"Present","Absent"}, Values{"Present","Absent"}] String Ensure;
+};
+

@@ -1,11 +1,7 @@
-<# VE_XD7StoreFrontCluster\VE_XD7StoreFrontCluster.Resources.psd1 #>
+<# VE_XD7StoreFrontBaseUrl\VE_XD7StoreFrontBaseUrl.Resources.psd1 #>
 ConvertFrom-StringData @'
-    MissingDeliveryController    = Citrix XenDesktop 7.x delivery controller '{0}' is missing and will be added.
-    AdditionalDeliveryController = Citrix XenDesktop 7.x delivery controller '{0}' is present and will be removed.
-    AddingDeliveryController     = Adding Citrix XenDesktop 7.x '{0}' delivery controller.
-    RemovingDeliveryController   = Removing Citrix XenDesktop 7.x '{0}' delivery controller.
-    SettingRegSZValue            = Setting registry REG_SZ '{0}' value with '{1}'.
-    RestartingService            = Restarting Citrix XenDesktop 7.x '{0}' service.
-    ResourceInDesiredState       = Citrix XenDesktop 7.x VDA controller is in the desired state.
-    ResourceNotInDesiredState    = Citrix XenDesktop 7.x VDA controller is NOT in the desired state.
+    UpdatingBaseUrl               = Updating Citrix XenDesktop 7.x StoreFront base url '{0}'.
+    ResourcePropertyMismatch      = Property '{0}' is NOT in desired state; expected '{1}', actual '{2}'.
+    ResourceInDesiredState        = Citrix XenDesktop 7.x StoreFront base url '{0}' is in the desired state.
+    ResourceNotInDesiredState     = Citrix XenDesktop 7.x StoreFront base url '{0}' is NOT in the desired state.
 '@

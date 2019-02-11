@@ -11,7 +11,7 @@
 #>
 
 
-Import-LocalizedData -BindingVariable localizedData -FileName VE_XD7StoreFrontFarm.Resources.psd1;
+Import-LocalizedData -BindingVariable localizedData -FileName VE_XD7StoreFront.ResClusterources.psd1;
 
 function Get-TargetResource {
     [CmdletBinding()]
@@ -52,10 +52,10 @@ function Get-TargetResource {
         [ValidateSet("Explicit","Anonymous")]
         [System.String]
         $AuthType
+
     )
     begin {
 
-        AssertXDModule -Name 'Citrix.StoreFront';
 
     }
     process {
@@ -127,7 +127,6 @@ function Test-TargetResource {
         [ValidateSet("Present","Absent")]
         [System.String]
         $Ensure
-
     )
     process {
 
@@ -223,51 +222,22 @@ function Set-TargetResource {
         Import-module Citrix.StoreFront -ErrorAction Stop
         add-pssnapin Citrix.DeliveryServices.Framework.Commands -ErrorAction Stop
 
-        $DefSite = Get-Website | Where-Object { $_.name -eq "Default Web Site" }
-        $SiteID = $DefSite.Id
-        $StoreVirtPath = "/Citrix/$($using:SiteName)"
-        $Controller = Get-DSFrameworkController
-        $TenantID = $Controller.DefaultTenant.Id
-
-        $SetStoreFarmParams = @{
-            StoreService = Get-STFStoreService | Where-object {$_.name -eq $using:SiteName};
-            FarmName = $using:FarmName
-            Port = $using:port
-            TransportType = $using:transportType
-            Servers = $using:servers
-            LoadBalance = $using:LoadBalance
-            FarmType = $using:farmType
-        }
-
-        $NewStoreFarmParams = @{
-            SiteID = $SiteID
-            VirtualPath = $StoreVirtPath
-            FarmName = $using:FarmName
-            servicePort = $using:port
+        $NewClusterParams = @{
+            hostBaseUrl = $using:HostBaseUrl
+            farmName = $using:farmName
+            port = $using:port
             transportType = $using:transportType
+            sslRelayPOrt = $using:sslRelayPort
             Servers = $using:servers
             LoadBalance = $using:LoadBalance
-            FarmType = $using:farmType
-            friendlyName = $using:SiteName
-            tenantId = $TenantID.GUID
+            farmType = $using:farmType
         }
 
-        If (Get-STFStoreService | Where-Object {$_.name -eq $using:SiteName}) {
-            Set-STFStoreFarm @SetStoreFarmParams | Out-Null
+        If (Get-DSClusterId) {
+            #Set-STFStoreFarm @SetStoreFarmParams | Out-Null
         }
         Else {
-            Import-Module "C:\Program Files\Citrix\Receiver StoreFront\Management\Cmdlets\StoreModule.psm1"
-            Import-Module "C:\Program Files\Citrix\Receiver StoreFront\Management\Cmdlets\AuthenticationModule.psm1"
-            If ($AuthType -eq "Explicit") {
-                $AuthSite = (Get-DSWebSite).applications | Where-Object { $_.name -eq 'Authentication' }
-                $AuthVirtPath = $AuthSite.VirtualPath
-                $AuthSummary = Get-DSAuthenticationServiceSummary -SiteId $SiteID -VirtualPath $AuthVirtPath
-                $NewStoreFarmParams.Add("authSummary",$AuthSummary)
-                Install-DSStoreServiceAndConfigure @NewStoreFarmParams | Out-Null
-            }
-            Else {
-                Install-DSAnonymousStoreService @NewStoreFarmParams | Out-Null
-            }
+            Set-DSInitialConfiguration @NewClusterParams | Out-Null
         }
 
     } #end process

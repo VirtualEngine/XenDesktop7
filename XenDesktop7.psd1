@@ -1,5 +1,5 @@
 @{
-    ModuleVersion        = '2.6.1';
+    ModuleVersion        = '2.6.2';
     GUID                 = '3bacd95f-494b-4ea2-989b-09cb5e324940';
     Author               = 'Iain Brighton';
     CompanyName          = 'Virtual Engine';
@@ -22,6 +22,8 @@
                                 'XD7Site',
                                 'XD7SiteLicense',
                                 'XD7StoreFrontBaseUrl',
+                                'XD7StoreFrontFarm',
+                                'XD7StoreFrontCluster',
                                 'XD7VDAController',
                                 'XD7VDAFeature',
                                 'XD7WaitForSite'

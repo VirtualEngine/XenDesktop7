@@ -6,6 +6,8 @@
   <Files>
     <File Build="2">VE_XD7StoreFrontFarm.psd1</File>
     <File Build="0" ExportFunctions="True">VE_XD7StoreFrontFarm.psm1</File>
+    <File Build="1" Shared="False" ReferenceFunction="Invoke-Test-Module_ps1" ExportFunctions="False">C:\Users\cerbdm\Documents\GitHub\XenDesktop7\DSCResources\VE_XD7StoreFrontCluster\Test-Module.ps1</File>
+    <File Build="2">VE_XD7StoreFrontFarm.schema.mof</File>
   </Files>
   <StartupScript>C:\Users\cerbdm\Documents\GitHub\XenDesktop7\DSCResources\VE_XD7StoreFrontCluster\Test-Module.ps1</StartupScript>
 </Project>
