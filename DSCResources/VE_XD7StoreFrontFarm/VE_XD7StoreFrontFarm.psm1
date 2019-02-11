@@ -55,7 +55,7 @@ function Get-TargetResource {
     )
     begin {
 
-        AssertXDModule -Name 'Citrix.StoreFront';
+        #AssertXDModule -Name 'Citrix.StoreFront';
 
     }
     process {
@@ -63,10 +63,15 @@ function Get-TargetResource {
         Import-module Citrix.StoreFront -ErrorAction Stop;
         
         try {
-            $StoreService = Get-STFStoreService | Where-object {$_.name -eq $using:SiteName}
+            $StoreService = Get-STFStoreService | Where-object {$_.name -eq $SiteName}
             $StoreFarm = Get-STFStoreFarm -StoreService $StoreService
         }
         catch { }
+
+        switch ($StoreFarm.service.Anonymous) {
+            $True {$CurrentAuthType = "Anonymous"}
+            $False {$CurrentAuthType = "Explicit"}
+        }
 
         $targetResource = @{
             SiteName = $StoreService.Name
@@ -76,7 +81,7 @@ function Get-TargetResource {
             servers = $StoreFarm.Servers
             LoadBalance = $StoreFarm.LoadBalance
             farmType = $StoreFarm.FarmType
-            AuthType = $StoreFarm.AuthType
+            AuthType = $CurrentAuthType
         };
 
         return $targetResource;
@@ -122,11 +127,11 @@ function Test-TargetResource {
         [parameter(Mandatory = $true)]
         [ValidateSet("Explicit","Anonymous")]
         [System.String]
-        $AuthType,
+        $AuthType   #,
 
-        [ValidateSet("Present","Absent")]
-        [System.String]
-        $Ensure
+        #[ValidateSet("Present","Absent")]
+        #[System.String]
+        #$Ensure
 
     )
     process {
@@ -207,56 +212,76 @@ function Set-TargetResource {
         [parameter(Mandatory = $true)]
         [ValidateSet("Explicit","Anonymous")]
         [System.String]
-        $AuthType,
+        $AuthType   #,
 
-        [ValidateSet("Present","Absent")]
-        [System.String]
-        $Ensure
+        #[ValidateSet("Present","Absent")]
+        #[System.String]
+        #$Ensure
 
     )
     begin {
 
-        AssertXDModule -Name 'Citrix.StoreFront';
+        #AssertXDModule -Name 'Citrix.StoreFront';
 
     }
     process {
         Import-module Citrix.StoreFront -ErrorAction Stop
+        add-pssnapin Citrix.DeliveryServices.Web.Commands -ErrorAction Stop
         add-pssnapin Citrix.DeliveryServices.Framework.Commands -ErrorAction Stop
 
         $DefSite = Get-Website | Where-Object { $_.name -eq "Default Web Site" }
         $SiteID = $DefSite.Id
-        $StoreVirtPath = "/Citrix/$($using:SiteName)"
+        $StoreVirtPath = "/Citrix/$($SiteName)"
         $Controller = Get-DSFrameworkController
         $TenantID = $Controller.DefaultTenant.Id
 
         $SetStoreFarmParams = @{
-            StoreService = Get-STFStoreService | Where-object {$_.name -eq $using:SiteName};
-            FarmName = $using:FarmName
-            Port = $using:port
-            TransportType = $using:transportType
-            Servers = $using:servers
-            LoadBalance = $using:LoadBalance
-            FarmType = $using:farmType
+            StoreService = Get-STFStoreService | Where-object {$_.name -eq $SiteName};
+            FarmName = $FarmName
+            Port = $port
+            TransportType = $transportType
+            Servers = $servers
+            LoadBalance = $LoadBalance
+            FarmType = $farmType
         }
 
         $NewStoreFarmParams = @{
             SiteID = $SiteID
             VirtualPath = $StoreVirtPath
-            FarmName = $using:FarmName
-            servicePort = $using:port
-            transportType = $using:transportType
-            Servers = $using:servers
-            LoadBalance = $using:LoadBalance
-            FarmType = $using:farmType
-            friendlyName = $using:SiteName
+            FarmName = $FarmName
+            servicePort = $port
+            transportType = $transportType
+            Servers = $servers
+            LoadBalance = $LoadBalance
+            FarmType = $farmType
+            friendlyName = $SiteName
             tenantId = $TenantID.GUID
         }
 
-        If (Get-STFStoreService | Where-Object {$_.name -eq $using:SiteName}) {
+        If ($AuthType -eq "Explicit") {
+            Import-Module "C:\Program Files\Citrix\Receiver StoreFront\Management\Cmdlets\UtilsModule.psm1" -Scope Global
+            Import-Module "C:\Program Files\Citrix\Receiver StoreFront\Management\Cmdlets\StoresModule.psm1"
+            Import-Module "C:\Program Files\Citrix\Receiver StoreFront\Management\Cmdlets\AuthenticationModule.psm1"
+            $AuthSite = (Get-DSWebSite).applications | Where-Object { $_.name -eq 'Authentication' }
+            $AuthVirtPath = $AuthSite.VirtualPath
+            $AuthSummary = Get-DSAuthenticationServiceSummary -SiteId $SiteID -VirtualPath $AuthVirtPath
+        }
+
+        If (Get-STFStoreService | Where-Object {$_.name -eq $SiteName}) {
+            #TODO: how to check to see if AuthType was wrong
+            If ($AuthType -eq "Explicit") {
+                Set-STFStoreService -AuthenticationService $AuthSummary
+                #Not sure if need to reset this or not.  doing just in case
+                $SetStoreFarmParams["StoreService"] = Get-STFStoreService | Where-object {$_.name -eq $SiteName}
+            }
+            Else {
+                #TODO: What to put if anonymous
+            }
             Set-STFStoreFarm @SetStoreFarmParams | Out-Null
         }
         Else {
-            Import-Module "C:\Program Files\Citrix\Receiver StoreFront\Management\Cmdlets\StoreModule.psm1"
+            Import-Module "C:\Program Files\Citrix\Receiver StoreFront\Management\Cmdlets\UtilsModule.psm1" -Scope Global
+            Import-Module "C:\Program Files\Citrix\Receiver StoreFront\Management\Cmdlets\StoresModule.psm1"
             Import-Module "C:\Program Files\Citrix\Receiver StoreFront\Management\Cmdlets\AuthenticationModule.psm1"
             If ($AuthType -eq "Explicit") {
                 $AuthSite = (Get-DSWebSite).applications | Where-Object { $_.name -eq 'Authentication' }
@@ -277,7 +302,7 @@ $moduleRoot = Split-Path -Path $MyInvocation.MyCommand.Path -Parent;
 
 ## Import the XD7Common library functions
 $moduleParent = Split-Path -Path $moduleRoot -Parent;
-Import-Module (Join-Path -Path $moduleParent -ChildPath 'VE_XD7Common');
+#Import-Module (Join-Path -Path $moduleParent -ChildPath 'VE_XD7Common');
 
 Export-ModuleMember -Function *-TargetResource;
 

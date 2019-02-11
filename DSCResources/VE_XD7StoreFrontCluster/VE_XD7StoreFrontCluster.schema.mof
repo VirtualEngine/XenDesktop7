@@ -9,7 +9,7 @@ class VE_XD7StoreFrontCluster : OMI_BaseResource
 	[Required, Description("StoreFront Load Balancing")] Boolean LoadBalance;
 	[Required, Description("StoreFront Farm Type"), ValueMap{"XenApp","XenDesktop","AppController"}, Values{"XenApp","XenDesktop","AppController"}] String FarmType;
 	[Required, Description("StoreFront Farm Name")] String FarmName;
-	[Required, Description("StoreFront Authentication Type"), ValueMap{"Explicit","Anonymous"}, Values{"Explicit","Anonymous"}] String AuthType;
-	[Write, Description("Ensure"), ValueMap{"Present","Absent"}, Values{"Present","Absent"}] String Ensure;
+	[Required, Description("StoreFront URL")] String HostBaseUrl;
+	[Required, Description("StoreFront SSL Relay Port")] UInt32 SSLRelayPort;
 };
 

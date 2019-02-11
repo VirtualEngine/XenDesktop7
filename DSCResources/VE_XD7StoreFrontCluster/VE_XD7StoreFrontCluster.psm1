@@ -11,7 +11,7 @@
 #>
 
 
-Import-LocalizedData -BindingVariable localizedData -FileName VE_XD7StoreFront.ResClusterources.psd1;
+Import-LocalizedData -BindingVariable localizedData -FileName VE_XD7StoreFrontCluster.Resources.psd1;
 
 function Get-TargetResource {
     [CmdletBinding()]
@@ -49,13 +49,16 @@ function Get-TargetResource {
         $SiteName,
 
         [parameter(Mandatory = $true)]
-        [ValidateSet("Explicit","Anonymous")]
         [System.String]
-        $AuthType
+        $HostBaseUrl,
+
+        [parameter(Mandatory = $true)]
+        [System.UInt32]
+        $SSLRelayPort
+
 
     )
     begin {
-
 
     }
     process {
@@ -63,7 +66,7 @@ function Get-TargetResource {
         Import-module Citrix.StoreFront -ErrorAction Stop;
         
         try {
-            $StoreService = Get-STFStoreService | Where-object {$_.name -eq $using:SiteName}
+            $StoreService = Get-STFStoreService | Where-object {$_.name -eq $SiteName}
             $StoreFarm = Get-STFStoreFarm -StoreService $StoreService
         }
         catch { }
@@ -76,7 +79,8 @@ function Get-TargetResource {
             servers = $StoreFarm.Servers
             LoadBalance = $StoreFarm.LoadBalance
             farmType = $StoreFarm.FarmType
-            AuthType = $StoreFarm.AuthType
+            SSLRelayPort = $StoreFarm.SSLRelayPort
+            HostBaseUrl = $StoreFarm.ServiceUrls
         };
 
         return $targetResource;
@@ -120,13 +124,16 @@ function Test-TargetResource {
         $SiteName,
 
         [parameter(Mandatory = $true)]
-        [ValidateSet("Explicit","Anonymous")]
         [System.String]
-        $AuthType,
+        $HostBaseUrl,
 
-        [ValidateSet("Present","Absent")]
-        [System.String]
-        $Ensure
+        [parameter(Mandatory = $true)]
+        [System.UInt32]
+        $SSLRelayPort
+
+        #[ValidateSet("Present","Absent")]
+        #[System.String]
+        #$Ensure
     )
     process {
 
@@ -204,37 +211,46 @@ function Set-TargetResource {
         $SiteName,
 
         [parameter(Mandatory = $true)]
-        [ValidateSet("Explicit","Anonymous")]
         [System.String]
-        $AuthType,
+        $HostBaseUrl,
 
-        [ValidateSet("Present","Absent")]
-        [System.String]
-        $Ensure
+        [parameter(Mandatory = $true)]
+        [System.UInt32]
+        $SSLRelayPort
+
+        #[ValidateSet("Present","Absent")]
+        #[System.String]
+        #$Ensure
 
     )
     begin {
 
-        AssertXDModule -Name 'Citrix.StoreFront';
+        #AssertXDModule -Name 'Citrix.StoreFront';
 
     }
     process {
+        Import-Module "C:\Program Files\Citrix\Receiver StoreFront\Management\Cmdlets\UtilsModule.psm1"
         Import-module Citrix.StoreFront -ErrorAction Stop
+        Import-Module "C:\Program Files\Citrix\Receiver StoreFront\Management\Cmdlets\ClusterConfigurationModule.psm1"
         add-pssnapin Citrix.DeliveryServices.Framework.Commands -ErrorAction Stop
 
         $NewClusterParams = @{
-            hostBaseUrl = $using:HostBaseUrl
-            farmName = $using:farmName
-            port = $using:port
-            transportType = $using:transportType
-            sslRelayPOrt = $using:sslRelayPort
-            Servers = $using:servers
-            LoadBalance = $using:LoadBalance
-            farmType = $using:farmType
+            hostBaseUrl = $HostBaseUrl
+            farmName = $farmName
+            port = $port
+            transportType = $transportType
+            sslRelayPOrt = $sslRelayPort
+            Servers = $servers
+            LoadBalance = $LoadBalance
+            farmType = $farmType
         }
 
         If (Get-DSClusterId) {
-            #Set-STFStoreFarm @SetStoreFarmParams | Out-Null
+            $StoreService = Get-STFStoreService | Where-object {$_.name -eq $SiteName}
+            $NewClusterParams.Add("StoreService",$StoreService)
+            $NewClusterParams.Remove("hostBaseUrl")
+            $NewClusterParams.Add("ServiceUrls",$HostBaseUrl)
+            Set-STFStoreFarm @NewClusterParams | Out-Null
         }
         Else {
             Set-DSInitialConfiguration @NewClusterParams | Out-Null
@@ -247,7 +263,7 @@ $moduleRoot = Split-Path -Path $MyInvocation.MyCommand.Path -Parent;
 
 ## Import the XD7Common library functions
 $moduleParent = Split-Path -Path $moduleRoot -Parent;
-Import-Module (Join-Path -Path $moduleParent -ChildPath 'VE_XD7Common');
+#Import-Module (Join-Path -Path $moduleParent -ChildPath 'VE_XD7Common');
 
 Export-ModuleMember -Function *-TargetResource;
 
