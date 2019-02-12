@@ -4,9 +4,9 @@
 	 Created on:   	2/8/2019 12:12 PM
 	 Created by:   	CERBDM
 	 Organization: 	
-	 Filename:     	VE_XD7StoreFrontFarm.psm1
+	 Filename:     	VE_XD7StoreFrontStore.psm1
 	-------------------------------------------------------------------------
-	 Module Name: VE_XD7StoreFrontFarm
+	 Module Name: VE_XD7StoreFrontStore
 	===========================================================================
 #>
 
