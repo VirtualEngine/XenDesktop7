@@ -229,11 +229,19 @@ function Set-TargetResource {
         add-pssnapin Citrix.DeliveryServices.Web.Commands -ErrorAction Stop
         add-pssnapin Citrix.DeliveryServices.Framework.Commands -ErrorAction Stop
 
+        $dsInstallProp = Get-ItemProperty -Path HKLM:\SOFTWARE\Citrix\DeliveryServicesManagement -Name InstallDir
+        $dsInstallDir = $dsInstallProp.InstallDir
+        $modules = Get-ChildItem -Path "$dsInstallDir\Cmdlets" | Where-Object {$_.Name -like "*.psm1"} | Select-Object -ExpandProperty FullName
+        foreach ($dsModule in $modules) {
+            Import-Module $dsModule -Scope Global
+        }
+
         $DefSite = Get-Website | Where-Object { $_.name -eq "Default Web Site" }
         $SiteID = $DefSite.Id
         $StoreVirtPath = "/Citrix/$($SiteName)"
         $Controller = Get-DSFrameworkController
         $TenantID = $Controller.DefaultTenant.Id
+        $Servers = $Servers.Split(",")
 
         $SetStoreFarmParams = @{
             StoreService = Get-STFStoreService | Where-object {$_.name -eq $SiteName};
@@ -259,9 +267,6 @@ function Set-TargetResource {
         }
 
         If ($AuthType -eq "Explicit") {
-            Import-Module "C:\Program Files\Citrix\Receiver StoreFront\Management\Cmdlets\UtilsModule.psm1" -Scope Global
-            Import-Module "C:\Program Files\Citrix\Receiver StoreFront\Management\Cmdlets\StoresModule.psm1"
-            Import-Module "C:\Program Files\Citrix\Receiver StoreFront\Management\Cmdlets\AuthenticationModule.psm1"
             $AuthSite = (Get-DSWebSite).applications | Where-Object { $_.name -eq 'Authentication' }
             $AuthVirtPath = $AuthSite.VirtualPath
             $AuthSummary = Get-DSAuthenticationServiceSummary -SiteId $SiteID -VirtualPath $AuthVirtPath
@@ -280,13 +285,7 @@ function Set-TargetResource {
             Set-STFStoreFarm @SetStoreFarmParams | Out-Null
         }
         Else {
-            Import-Module "C:\Program Files\Citrix\Receiver StoreFront\Management\Cmdlets\UtilsModule.psm1" -Scope Global
-            Import-Module "C:\Program Files\Citrix\Receiver StoreFront\Management\Cmdlets\StoresModule.psm1"
-            Import-Module "C:\Program Files\Citrix\Receiver StoreFront\Management\Cmdlets\AuthenticationModule.psm1"
             If ($AuthType -eq "Explicit") {
-                $AuthSite = (Get-DSWebSite).applications | Where-Object { $_.name -eq 'Authentication' }
-                $AuthVirtPath = $AuthSite.VirtualPath
-                $AuthSummary = Get-DSAuthenticationServiceSummary -SiteId $SiteID -VirtualPath $AuthVirtPath
                 $NewStoreFarmParams.Add("authSummary",$AuthSummary)
                 Install-DSStoreServiceAndConfigure @NewStoreFarmParams | Out-Null
             }

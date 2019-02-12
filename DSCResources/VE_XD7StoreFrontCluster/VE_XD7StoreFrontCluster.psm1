@@ -229,7 +229,7 @@ function Set-TargetResource {
 
     }
     process {
-        Import-Module "C:\Program Files\Citrix\Receiver StoreFront\Management\Cmdlets\UtilsModule.psm1"
+        Import-Module "C:\Program Files\Citrix\Receiver StoreFront\Management\Cmdlets\UtilsModule.psm1" -Scope Global
         Import-module Citrix.StoreFront -ErrorAction Stop
         Import-Module "C:\Program Files\Citrix\Receiver StoreFront\Management\Cmdlets\ClusterConfigurationModule.psm1"
         add-pssnapin Citrix.DeliveryServices.Framework.Commands -ErrorAction Stop

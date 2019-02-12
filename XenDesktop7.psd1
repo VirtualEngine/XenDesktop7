@@ -22,7 +22,7 @@
                                 'XD7Site',
                                 'XD7SiteLicense',
                                 'XD7StoreFrontBaseUrl',
-                                'XD7StoreFrontFarm',
+                                'XD7StoreFront',
                                 'XD7StoreFrontCluster',
                                 'XD7VDAController',
                                 'XD7VDAFeature',

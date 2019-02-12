@@ -1,0 +1,9 @@
+
+[ClassVersion("1.0"), FriendlyName("XD7StoreFront")]
+class VE_XD7StoreFront : OMI_BaseResource
+{
+	[Key, Description("Citrix StoreFront base url")] UInt64 SiteId;
+	[Write, Description("Citrix StoreFront host base url")] String HostBaseUrl;
+	[Write, Description("Ensure"), ValueMap{"Present","Absent"}, Values{"Present","Absent"}] String Ensure;
+};
+
