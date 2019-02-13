@@ -59,7 +59,11 @@ function Get-TargetResource {
 
         [parameter()]
         [System.String]
-        $VirtualPath="/Citrix/$($StoreName)auth",
+        $AuthVirtualPath="/Citrix/$($StoreName)auth",
+
+        [parameter()]
+        [System.String]
+        $StoreVirtualPath="/Citrix/$($StoreName)",
 
         [parameter()]
         [System.UInt64]
@@ -109,17 +113,19 @@ function Get-TargetResource {
             $True {$CurrentAuthType = "Anonymous"}
             $False {$CurrentAuthType = "Explicit"}
         }
+        $StrServers = ($StoreFarm.Servers) -join(",")
 
         $targetResource = @{
             StoreName = $StoreService.FriendlyName
             FarmName = $StoreFarm.FarmName
             port = $StoreFarm.Port
             transportType = $StoreFarm.TransportType
-            servers = $StoreFarm.Servers
+            servers = $strServers
             LoadBalance = $StoreFarm.LoadBalance
             farmType = $StoreFarm.FarmType
             AuthType = $CurrentAuthType
-            VirtualPath = $StoreService.VirtualPath
+            AuthVirtualPath = $StoreService.AuthenticationServiceVirtualPath
+            StoreVirtualPath = $StoreService.VirtualPath
             SiteId = $StoreService.SiteId
             ServiceUrls = $StoreFarm.ServiceUrls
             SSLRelayPort = $StoreFarm.SSLRelayPort
@@ -176,7 +182,11 @@ function Test-TargetResource {
 
         [parameter()]
         [System.String]
-        $VirtualPath="/Citrix/$($StoreName)auth",
+        $AuthVirtualPath="/Citrix/$($StoreName)auth",
+
+        [parameter()]
+        [System.String]
+        $StoreVirtualPath="/Citrix/$($StoreName)",
 
         [parameter()]
         [System.UInt64]
@@ -299,7 +309,11 @@ function Set-TargetResource {
 
         [parameter()]
         [System.String]
-        $VirtualPath="/Citrix/$($StoreName)auth",
+        $AuthVirtualPath="/Citrix/$($StoreName)auth",
+
+        [parameter()]
+        [System.String]
+        $StoreVirtualPath="/Citrix/$($StoreName)",
 
         [parameter()]
         [System.UInt64]
@@ -340,16 +354,17 @@ function Set-TargetResource {
         Import-module Citrix.StoreFront -ErrorAction Stop
 
         #Add Mandatory Params
+        $ArrServers = $Servers.Split(",")
         $StoreParams = @{
             FriendlyName = $StoreName
-            servers = $Servers
-            VirtualPath = $VirtualPath
-            SiteId = $SiteId
+            servers = $ArrServers
+            VirtualPath = $StoreVirtualPath
         }
+        $FarmParams = @{}
         $AllStoreParams = @{
             FriendlyName = $StoreName
-            servers = $Servers
-            VirtualPath = $VirtualPath
+            servers = $ArrServers
+            VirtualPath = $StoreVirtualPath
             SiteId = $SiteId
         }
         #Add Optional Params but only if wrong
@@ -363,45 +378,58 @@ function Set-TargetResource {
                 $actual = $targetResource[$property];
                 if ($PSBoundParameters[$property] -is [System.String[]]) {
                     if (Compare-Object -ReferenceObject $expected -DifferenceObject $actual) {
-                        if (!($StoreParams.ContainsKey($property))) {
-                            $StoreParams.Add($property,$PSBoundParameters[$property])
+                        if (!($FarmParams.ContainsKey($property))) {
+                            Write-Verbose "Adding $property to FarmParams"
+                            $FarmParams.Add($property,$PSBoundParameters[$property])
                         }
                     }
                 }
                 elseif ($expected -ne $actual) {
-                    if (!($StoreParams.ContainsKey($property))) {
-                        $StoreParams.Add($property,$PSBoundParameters[$property])
+                    if (!($FarmParams.ContainsKey($property))) {
+                        Write-Verbose "Adding $property to FarmParams"
+                        $FarmParams.Add($property,$PSBoundParameters[$property])
                     }
                 }
             }
         }
 
         If ($Ensure -eq 'Present') {
-            $StoreParams.Remove("AuthType")
+            $FarmParams.Remove("AuthType")
             $AllStoreParams.Remove("AuthType")
             If ($AuthType -eq "Anonymous") {
-                $StoreParams.Add("Anonymous",$true)
                 $AllStoreParams.Add("Anonymous",$true)
             }
             Else {
-                $Auth = Get-STFAuthenticationService -VirtualPath $VirtualPath -SiteID $SiteId
-                If ($Auth.VirtualPath -ne $VirtualPath) {
+                $Auth = Get-STFAuthenticationService -VirtualPath $AuthVirtualPath -SiteID $SiteId
+                If ($Auth.VirtualPath -ne $AuthVirtualPath) {
                     Write-Verbose "Running Add-STFAuthenicationService"
-                    $Auth = Add-STFAuthenticationService -VirtualPath $VirtualPath -SiteID $SiteId -confirm:$false
+                    $Auth = Add-STFAuthenticationService -VirtualPath $AuthVirtualPath -SiteID $SiteId -confirm:$false
                 }
-                $StoreParams.Add("AuthenticationService",$Auth)
                 $AllStoreParams.Add("AuthenticationService",$Auth)
             }
 
-            $StoreParams.Remove("StoreName")
+            $FarmParams.Remove("StoreName")
             $AllStoreParams.Remove("StoreName")
-            $StoreParams | Export-Clixml c:\Temp\storeparams.xml
-            $AllStoreParams | Export-Clixml c:\Temp\allstoreparams.xml
             $StoreService = Get-STFStoreService | Where-object {$_.friendlyname -eq $StoreName}
+            $StoreFarm = Get-STFStoreFarm -StoreService $StoreService
+            If ($FarmParams.Count -gt 0) {
+                $FarmParams.Add("StoreService",$StoreService)
+                if (!($FarmParams.ContainsKey("FarmName"))) {
+                    $FarmParams.Add("FarmName",$StoreFarm.FarmName)
+                }
+                if (!($FarmParams.ContainsKey("Servers"))) {
+                    $FarmParams.Add("Servers",$ArrServers)
+                }
+            }
+
+            $FarmParams | Export-Clixml c:\Temp\farmparams.xml
+            $AllStoreParams | Export-Clixml c:\Temp\allstoreparams.xml
             If ($StoreService.friendlyName -eq $StoreName) {
-                #Update settings
-                Write-Verbose "Running Set-STFStoreService"
-                Set-STFStoreService @StoreParams -confirm:$false
+                If ($FarmParams.Count -gt 0) {
+                    #Update settings
+                    Write-Verbose "Running Set-STFStoreFarm"
+                    Set-STFStoreFarm @FarmParams -confirm:$false
+                }
             }
             Else {
                 #Create
@@ -411,11 +439,12 @@ function Set-TargetResource {
         }
         Else {
             #Uninstall
-            Write-Verbose "Running Remove-STFStoreService"
             $StoreService = Get-STFStoreService | Where-object {$_.friendlyname -eq $StoreName}
-            $Auth = Get-STFAuthenticationService -VirtualPath $StoreService.VirtualPath -SiteID $StoreService.SiteId
-            $Auth | Remove-STFAuthenticationService -confirm:$false
+            $Auth = Get-STFAuthenticationService -VirtualPath $StoreService.AuthenticationServiceVirtualPath -SiteID $StoreService.SiteId
+            Write-Verbose "Running Remove-STFStoreService"
             $StoreService | Remove-STFStoreService -confirm:$false
+            Write-Verbose "Running Remove-STFAuthenticationService"
+            $Auth | Remove-STFAuthenticationService -confirm:$false
         }
 
     } #end process
