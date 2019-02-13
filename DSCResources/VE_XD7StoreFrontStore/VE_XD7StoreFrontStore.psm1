@@ -11,9 +11,9 @@
 #>
 
 
-#TODO: Issue creating a store if the auth service already exists
 #TODO: Test switching auth
-#TODO: WebApplicationAlreadyExists erro
+#TODO: Test explicit auth
+#TODO: Test creating storefarm if storeservice already exists
 
 Import-LocalizedData -BindingVariable localizedData -FileName VE_XD7StoreFrontStore.Resources.psd1;
 
@@ -33,7 +33,7 @@ function Get-TargetResource {
 
         [parameter()]
         [System.String]
-        $FarmName="$($StoreName)farm",
+        $FarmName,
 
         [parameter()]
         [System.UInt32]
@@ -156,7 +156,7 @@ function Test-TargetResource {
 
         [parameter()]
         [System.String]
-        $FarmName="$($StoreName)farm",
+        $FarmName,
 
         [parameter()]
         [System.UInt32]
@@ -283,7 +283,7 @@ function Set-TargetResource {
 
         [parameter()]
         [System.String]
-        $FarmName="$($StoreName)farm",
+        $FarmName,
 
         [parameter()]
         [System.UInt32]
@@ -411,11 +411,21 @@ function Set-TargetResource {
             $FarmParams.Remove("StoreName")
             $AllStoreParams.Remove("StoreName")
             $StoreService = Get-STFStoreService | Where-object {$_.friendlyname -eq $StoreName}
-            $StoreFarm = Get-STFStoreFarm -StoreService $StoreService
+            If ($StoreService) {
+                $StoreFarm = Get-STFStoreFarm -StoreService $StoreService
+            }
             If ($FarmParams.Count -gt 0) {
                 $FarmParams.Add("StoreService",$StoreService)
                 if (!($FarmParams.ContainsKey("FarmName"))) {
-                    $FarmParams.Add("FarmName",$StoreFarm.FarmName)
+                    If ($FarmName.Length -gt 0) {
+                        $FarmParams.Add("FarmName",$FarmName)
+                    }
+                    elseif ($StoreFarm.FarmName.length -gt 0) {
+                        $FarmParams.Add("FarmName",$StoreFarm.FarmName)
+                    }
+                    Else {
+                        $FarmParams.Add("FarmName","$($StoreName)farm")
+                    }
                 }
                 if (!($FarmParams.ContainsKey("Servers"))) {
                     $FarmParams.Add("Servers",$ArrServers)
