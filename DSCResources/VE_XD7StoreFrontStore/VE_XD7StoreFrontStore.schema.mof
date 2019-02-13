@@ -3,11 +3,11 @@
 class VE_XD7StoreFrontStore : OMI_BaseResource
 {
 	[Key, Description("Citrix StoreFront name")] String StoreName;
-	[Mandatory, Description("Citrix StoreFront Authentication type")] String AuthType;
+	[Required, Description("Citrix StoreFront Authentication type")] String AuthType;
 	[Write, Description("Citrix StoreFront farm name")] String FarmName;
 	[Write, Description("Citrix StoreFront port")] UInt32 Port;
 	[Write, Description("Citrix StoreFront transport type")] String TransportType;
-	[Mandatory, Description("Citrix StoreFront director servers")] String Servers;
+	[Required, Description("Citrix StoreFront director servers")] String Servers;
 	[Write, Description("Citrix StoreFront enable load balancing")] Boolean LoadBalance;
 	[Write, Description("Citrix StoreFront farm type")] String FarmType;
 	[Write, Description("Citrix StoreFront virtual path")] String VirtualPath;
