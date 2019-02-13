@@ -11,6 +11,10 @@
 #>
 
 
+#TODO: Issue creating a store if the auth service already exists
+#TODO: Test switching auth
+#TODO: WebApplicationAlreadyExists erro
+
 Import-LocalizedData -BindingVariable localizedData -FileName VE_XD7StoreFrontStore.Resources.psd1;
 
 function Get-TargetResource {
@@ -59,7 +63,7 @@ function Get-TargetResource {
 
         [parameter()]
         [System.UInt64]
-        $SiteId,
+        $SiteId=1,
 
         [parameter()]
         [System.String]
@@ -96,18 +100,18 @@ function Get-TargetResource {
         Import-module Citrix.StoreFront -ErrorAction Stop;
         
         try {
-            $StoreService = Get-STFStoreService | Where-object {$_.name -eq $StoreName};
+            $StoreService = Get-STFStoreService | Where-object {$_.friendlyname -eq $StoreName};
             $StoreFarm = Get-STFStoreFarm -StoreService $StoreService
         }
         catch { }
 
-        switch ($StoreFarm.service.Anonymous) {
+        switch ($StoreService.service.Anonymous) {
             $True {$CurrentAuthType = "Anonymous"}
             $False {$CurrentAuthType = "Explicit"}
         }
 
         $targetResource = @{
-            StoreName = $StoreService.Name
+            StoreName = $StoreService.FriendlyName
             FarmName = $StoreFarm.FarmName
             port = $StoreFarm.Port
             transportType = $StoreFarm.TransportType
@@ -176,7 +180,7 @@ function Test-TargetResource {
 
         [parameter()]
         [System.UInt64]
-        $SiteId,
+        $SiteId=1,
 
         [parameter()]
         [System.String]
@@ -299,7 +303,7 @@ function Set-TargetResource {
 
         [parameter()]
         [System.UInt64]
-        $SiteId,
+        $SiteId=1,
 
         [parameter()]
         [System.String]
@@ -337,50 +341,80 @@ function Set-TargetResource {
 
         #Add Mandatory Params
         $StoreParams = @{
-            StoreName = $StoreName
+            FriendlyName = $StoreName
             servers = $Servers
+            VirtualPath = $VirtualPath
+            SiteId = $SiteId
+        }
+        $AllStoreParams = @{
+            FriendlyName = $StoreName
+            servers = $Servers
+            VirtualPath = $VirtualPath
+            SiteId = $SiteId
         }
         #Add Optional Params but only if wrong
+        $targetResource = Get-TargetResource @PSBoundParameters;
         foreach ($property in $PSBoundParameters.Keys) {
             if ($targetResource.ContainsKey($property)) {
+                if (!($AllStoreParams.ContainsKey($property))) {
+                    $AllStoreParams.Add($property,$PSBoundParameters[$property])
+                }
                 $expected = $PSBoundParameters[$property];
                 $actual = $targetResource[$property];
                 if ($PSBoundParameters[$property] -is [System.String[]]) {
                     if (Compare-Object -ReferenceObject $expected -DifferenceObject $actual) {
-                        $StoreParams.Add($property,$PSBoundParameters[$property])
+                        if (!($StoreParams.ContainsKey($property))) {
+                            $StoreParams.Add($property,$PSBoundParameters[$property])
+                        }
                     }
                 }
                 elseif ($expected -ne $actual) {
-                    $StoreParams.Add($property,$PSBoundParameters[$property])
+                    if (!($StoreParams.ContainsKey($property))) {
+                        $StoreParams.Add($property,$PSBoundParameters[$property])
+                    }
                 }
             }
         }
 
         If ($Ensure -eq 'Present') {
             $StoreParams.Remove("AuthType")
+            $AllStoreParams.Remove("AuthType")
             If ($AuthType -eq "Anonymous") {
                 $StoreParams.Add("Anonymous",$true)
+                $AllStoreParams.Add("Anonymous",$true)
             }
             Else {
                 $Auth = Get-STFAuthenticationService -VirtualPath $VirtualPath -SiteID $SiteId
                 If ($Auth.VirtualPath -ne $VirtualPath) {
-                    $Auth = Add-STFAuthenticationService -VirtualPath $VirtualPath -SiteID $SiteId
+                    Write-Verbose "Running Add-STFAuthenicationService"
+                    $Auth = Add-STFAuthenticationService -VirtualPath $VirtualPath -SiteID $SiteId -confirm:$false
                 }
                 $StoreParams.Add("AuthenticationService",$Auth)
+                $AllStoreParams.Add("AuthenticationService",$Auth)
             }
 
-            $StoreService = Get-STFStoreService | Where-object {$_.name -eq $StoreName}
-            If ($StoreService.Name -eq $StoreName) {
+            $StoreParams.Remove("StoreName")
+            $AllStoreParams.Remove("StoreName")
+            $StoreParams | Export-Clixml c:\Temp\storeparams.xml
+            $AllStoreParams | Export-Clixml c:\Temp\allstoreparams.xml
+            $StoreService = Get-STFStoreService | Where-object {$_.friendlyname -eq $StoreName}
+            If ($StoreService.friendlyName -eq $StoreName) {
                 #Update settings
-                Set-STFStoreService @StoreParams
+                Write-Verbose "Running Set-STFStoreService"
+                Set-STFStoreService @StoreParams -confirm:$false
             }
             Else {
                 #Create
-                Add-STFStoreService @StoreParams
+                Write-Verbose "Running Add-STFStoreService"
+                Add-STFStoreService @AllStoreParams -confirm:$false
             }
         }
         Else {
             #Uninstall
+            Write-Verbose "Running Remove-STFStoreService"
+            $StoreService = Get-STFStoreService | Where-object {$_.friendlyname -eq $StoreName}
+            $Auth = Get-STFAuthenticationService -VirtualPath $StoreService.VirtualPath -SiteID $StoreService.SiteId
+            $Auth | Remove-STFAuthenticationService -confirm:$false
             $StoreService | Remove-STFStoreService -confirm:$false
         }
 
