@@ -11,7 +11,7 @@
 #>
 
 
-Import-LocalizedData -BindingVariable localizedData -FileName VE_XD7StoreFrontFarm.Resources.psd1;
+Import-LocalizedData -BindingVariable localizedData -FileName VE_XD7StoreFrontStore.Resources.psd1;
 
 function Get-TargetResource {
     [CmdletBinding()]
@@ -20,13 +20,22 @@ function Get-TargetResource {
     param (
         [parameter(Mandatory = $true)]
         [System.String]
-        $FarmName,
+        $StoreName,
 
         [parameter(Mandatory = $true)]
+        [ValidateSet("Explicit","Anonymous")]
+        [System.String]
+        $AuthType,
+
+        [parameter()]
+        [System.String]
+        $FarmName,
+
+        [parameter()]
         [System.UInt32]
         $Port,
 
-        [parameter(Mandatory = $true)]
+        [parameter()]
         [ValidateSet("HTTP","HTTPS","SSL")]
         [System.String]
         $TransportType,
@@ -35,23 +44,47 @@ function Get-TargetResource {
         [System.String]
         $Servers,
 
-        [parameter(Mandatory = $true)]
+        [parameter()]
         [System.Boolean]
         $LoadBalance,
 
-        [parameter(Mandatory = $true)]
+        [parameter()]
         [ValidateSet("XenApp","XenDesktop","AppController")]
         [System.String]
         $FarmType,
 
-        [parameter(Mandatory = $true)]
+        [parameter()]
         [System.String]
-        $SiteName,
+        $VirtualPath="/Citrix/$($StoreName)auth",
 
-        [parameter(Mandatory = $true)]
-        [ValidateSet("Explicit","Anonymous")]
+        [parameter()]
+        [System.UInt64]
+        $SiteId,
+
+        [parameter()]
         [System.String]
-        $AuthType
+        $ServiceUrls,
+
+        [parameter()]
+        [System.UInt32]
+        $SSLRelayPort,
+
+        [parameter()]
+        [System.UInt32]
+        $AllFailedBypassDuration,
+
+        [parameter()]
+        [System.UInt32]
+        $BypassDuration,
+
+        [parameter()]
+        [System.String]
+        $Zones,
+
+        [ValidateSet("Present","Absent")]
+        [System.String]
+        $Ensure
+
     )
     begin {
 
@@ -63,7 +96,7 @@ function Get-TargetResource {
         Import-module Citrix.StoreFront -ErrorAction Stop;
         
         try {
-            $StoreService = Get-STFStoreService | Where-object {$_.name -eq $SiteName}
+            $StoreService = Get-STFStoreService | Where-object {$_.name -eq $StoreName};
             $StoreFarm = Get-STFStoreFarm -StoreService $StoreService
         }
         catch { }
@@ -74,7 +107,7 @@ function Get-TargetResource {
         }
 
         $targetResource = @{
-            SiteName = $StoreService.Name
+            StoreName = $StoreService.Name
             FarmName = $StoreFarm.FarmName
             port = $StoreFarm.Port
             transportType = $StoreFarm.TransportType
@@ -82,6 +115,14 @@ function Get-TargetResource {
             LoadBalance = $StoreFarm.LoadBalance
             farmType = $StoreFarm.FarmType
             AuthType = $CurrentAuthType
+            VirtualPath = $StoreService.VirtualPath
+            SiteId = $StoreService.SiteId
+            ServiceUrls = $StoreFarm.ServiceUrls
+            SSLRelayPort = $StoreFarm.SSLRelayPort
+            AllFailedBypassDuration = $StoreFarm.AllFailedBypassDuration
+            BypassDuration = $StoreFarm.BypassDuration
+            FriendlyName = $StoreService.FriendlyName
+            Zones = $StoreFarm.Zones
         };
 
         return $targetResource;
@@ -96,13 +137,22 @@ function Test-TargetResource {
     param (
         [parameter(Mandatory = $true)]
         [System.String]
-        $FarmName,
+        $StoreName,
 
         [parameter(Mandatory = $true)]
+        [ValidateSet("Explicit","Anonymous")]
+        [System.String]
+        $AuthType,
+
+        [parameter()]
+        [System.String]
+        $FarmName,
+
+        [parameter()]
         [System.UInt32]
         $Port,
 
-        [parameter(Mandatory = $true)]
+        [parameter()]
         [ValidateSet("HTTP","HTTPS","SSL")]
         [System.String]
         $TransportType,
@@ -111,32 +161,52 @@ function Test-TargetResource {
         [System.String]
         $Servers,
 
-        [parameter(Mandatory = $true)]
+        [parameter()]
         [System.Boolean]
         $LoadBalance,
 
-        [parameter(Mandatory = $true)]
+        [parameter()]
         [ValidateSet("XenApp","XenDesktop","AppController")]
         [System.String]
         $FarmType,
 
-        [parameter(Mandatory = $true)]
+        [parameter()]
         [System.String]
-        $SiteName,
+        $VirtualPath="/Citrix/$($StoreName)auth",
 
-        [parameter(Mandatory = $true)]
-        [ValidateSet("Explicit","Anonymous")]
+        [parameter()]
+        [System.UInt64]
+        $SiteId,
+
+        [parameter()]
         [System.String]
-        $AuthType   #,
+        $ServiceUrls,
 
-        #[ValidateSet("Present","Absent")]
-        #[System.String]
-        #$Ensure
+        [parameter()]
+        [System.UInt32]
+        $SSLRelayPort,
+
+        [parameter()]
+        [System.UInt32]
+        $AllFailedBypassDuration,
+
+        [parameter()]
+        [System.UInt32]
+        $BypassDuration,
+
+        [parameter()]
+        [System.String]
+        $Zones,
+
+        [ValidateSet("Present","Absent")]
+        [System.String]
+        $Ensure
 
     )
     process {
 
         $targetResource = Get-TargetResource @PSBoundParameters;
+        If ($Ensure -eq 'Present') {
             $inCompliance = $true;
             foreach ($property in $PSBoundParameters.Keys) {
 
@@ -159,15 +229,24 @@ function Test-TargetResource {
                 }
 
             }
-
-            if ($inCompliance) {
-                Write-Verbose ($localizedData.ResourceInDesiredState -f $DeliveryGroup);
+        }
+        Else {
+            If ($targetResource.StoreName) {
+                $inCompliance = $false
             }
-            else {
-                Write-Verbose ($localizedData.ResourceNotInDesiredState -f $DeliveryGroup);
+            Else {
+                $inCompliance = $true
             }
+        }
 
-            return $inCompliance;
+        if ($inCompliance) {
+            Write-Verbose ($localizedData.ResourceInDesiredState -f $DeliveryGroup);
+        }
+        else {
+            Write-Verbose ($localizedData.ResourceNotInDesiredState -f $DeliveryGroup);
+        }
+
+        return $inCompliance;
 
     } #end process
 } #end function Test-TargetResource
@@ -181,13 +260,22 @@ function Set-TargetResource {
     param (
         [parameter(Mandatory = $true)]
         [System.String]
-        $FarmName,
+        $StoreName,
 
         [parameter(Mandatory = $true)]
+        [ValidateSet("Explicit","Anonymous")]
+        [System.String]
+        $AuthType,
+
+        [parameter()]
+        [System.String]
+        $FarmName,
+
+        [parameter()]
         [System.UInt32]
         $Port,
 
-        [parameter(Mandatory = $true)]
+        [parameter()]
         [ValidateSet("HTTP","HTTPS","SSL")]
         [System.String]
         $TransportType,
@@ -196,27 +284,46 @@ function Set-TargetResource {
         [System.String]
         $Servers,
 
-        [parameter(Mandatory = $true)]
+        [parameter()]
         [System.Boolean]
         $LoadBalance,
 
-        [parameter(Mandatory = $true)]
+        [parameter()]
         [ValidateSet("XenApp","XenDesktop","AppController")]
         [System.String]
         $FarmType,
 
-        [parameter(Mandatory = $true)]
+        [parameter()]
         [System.String]
-        $SiteName,
+        $VirtualPath="/Citrix/$($StoreName)auth",
 
-        [parameter(Mandatory = $true)]
-        [ValidateSet("Explicit","Anonymous")]
+        [parameter()]
+        [System.UInt64]
+        $SiteId,
+
+        [parameter()]
         [System.String]
-        $AuthType   #,
+        $ServiceUrls,
 
-        #[ValidateSet("Present","Absent")]
-        #[System.String]
-        #$Ensure
+        [parameter()]
+        [System.UInt32]
+        $SSLRelayPort,
+
+        [parameter()]
+        [System.UInt32]
+        $AllFailedBypassDuration,
+
+        [parameter()]
+        [System.UInt32]
+        $BypassDuration,
+
+        [parameter()]
+        [System.String]
+        $Zones,
+
+        [ValidateSet("Present","Absent")]
+        [System.String]
+        $Ensure
 
     )
     begin {
@@ -225,73 +332,56 @@ function Set-TargetResource {
 
     }
     process {
+
         Import-module Citrix.StoreFront -ErrorAction Stop
-        add-pssnapin Citrix.DeliveryServices.Web.Commands -ErrorAction Stop
-        add-pssnapin Citrix.DeliveryServices.Framework.Commands -ErrorAction Stop
 
-        $dsInstallProp = Get-ItemProperty -Path HKLM:\SOFTWARE\Citrix\DeliveryServicesManagement -Name InstallDir
-        $dsInstallDir = $dsInstallProp.InstallDir
-        $modules = Get-ChildItem -Path "$dsInstallDir\Cmdlets" | Where-Object {$_.Name -like "*.psm1"} | Select-Object -ExpandProperty FullName
-        foreach ($dsModule in $modules) {
-            Import-Module $dsModule -Scope Global
+        #Add Mandatory Params
+        $StoreParams = @{
+            StoreName = $StoreName
+            servers = $Servers
+        }
+        #Add Optional Params but only if wrong
+        foreach ($property in $PSBoundParameters.Keys) {
+            if ($targetResource.ContainsKey($property)) {
+                $expected = $PSBoundParameters[$property];
+                $actual = $targetResource[$property];
+                if ($PSBoundParameters[$property] -is [System.String[]]) {
+                    if (Compare-Object -ReferenceObject $expected -DifferenceObject $actual) {
+                        $StoreParams.Add($property,$PSBoundParameters[$property])
+                    }
+                }
+                elseif ($expected -ne $actual) {
+                    $StoreParams.Add($property,$PSBoundParameters[$property])
+                }
+            }
         }
 
-        $DefSite = Get-Website | Where-Object { $_.name -eq "Default Web Site" }
-        $SiteID = $DefSite.Id
-        $StoreVirtPath = "/Citrix/$($SiteName)"
-        $Controller = Get-DSFrameworkController
-        $TenantID = $Controller.DefaultTenant.Id
-        $Servers = $Servers.Split(",")
-
-        $SetStoreFarmParams = @{
-            StoreService = Get-STFStoreService | Where-object {$_.name -eq $SiteName};
-            FarmName = $FarmName
-            Port = $port
-            TransportType = $transportType
-            Servers = $servers
-            LoadBalance = $LoadBalance
-            FarmType = $farmType
-        }
-
-        $NewStoreFarmParams = @{
-            SiteID = $SiteID
-            VirtualPath = $StoreVirtPath
-            FarmName = $FarmName
-            servicePort = $port
-            transportType = $transportType
-            Servers = $servers
-            LoadBalance = $LoadBalance
-            FarmType = $farmType
-            friendlyName = $SiteName
-            tenantId = $TenantID.GUID
-        }
-
-        If ($AuthType -eq "Explicit") {
-            $AuthSite = (Get-DSWebSite).applications | Where-Object { $_.name -eq 'Authentication' }
-            $AuthVirtPath = $AuthSite.VirtualPath
-            $AuthSummary = Get-DSAuthenticationServiceSummary -SiteId $SiteID -VirtualPath $AuthVirtPath
-        }
-
-        If (Get-STFStoreService | Where-Object {$_.name -eq $SiteName}) {
-            #TODO: how to check to see if AuthType was wrong
-            If ($AuthType -eq "Explicit") {
-                Set-STFStoreService -AuthenticationService $AuthSummary
-                #Not sure if need to reset this or not.  doing just in case
-                $SetStoreFarmParams["StoreService"] = Get-STFStoreService | Where-object {$_.name -eq $SiteName}
+        If ($Ensure -eq 'Present') {
+            $StoreParams.Remove("AuthType")
+            If ($AuthType -eq "Anonymous") {
+                $StoreParams.Add("Anonymous",$true)
             }
             Else {
-                #TODO: What to put if anonymous
+                $Auth = Get-STFAuthenticationService -VirtualPath $VirtualPath -SiteID $SiteId
+                If ($Auth.VirtualPath -ne $VirtualPath) {
+                    $Auth = Add-STFAuthenticationService -VirtualPath $VirtualPath -SiteID $SiteId
+                }
+                $StoreParams.Add("AuthenticationService",$Auth)
             }
-            Set-STFStoreFarm @SetStoreFarmParams | Out-Null
+
+            $StoreService = Get-STFStoreService | Where-object {$_.name -eq $StoreName}
+            If ($StoreService.Name -eq $StoreName) {
+                #Update settings
+                Set-STFStoreService @StoreParams
+            }
+            Else {
+                #Create
+                Add-STFStoreService @StoreParams
+            }
         }
         Else {
-            If ($AuthType -eq "Explicit") {
-                $NewStoreFarmParams.Add("authSummary",$AuthSummary)
-                Install-DSStoreServiceAndConfigure @NewStoreFarmParams | Out-Null
-            }
-            Else {
-                Install-DSAnonymousStoreService @NewStoreFarmParams | Out-Null
-            }
+            #Uninstall
+            $StoreService | Remove-STFStoreService -confirm:$false
         }
 
     } #end process

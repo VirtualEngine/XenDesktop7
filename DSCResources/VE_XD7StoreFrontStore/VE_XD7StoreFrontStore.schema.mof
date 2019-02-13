@@ -1,15 +1,22 @@
 
-[ClassVersion("1.0"), FriendlyName("XD7StoreFrontFarm")]
-class VE_XD7StoreFrontFarm : OMI_BaseResource
+[ClassVersion("1.0"), FriendlyName("XD7StoreFrontStore")]
+class VE_XD7StoreFrontStore : OMI_BaseResource
 {
-	[Key, Description("StoreFront Farm Name")] String FarmName;
-	[Required, Description("StoreFront Port")] UInt32 Port;
-	[Required, Description("StoreFront Transport Type"), ValueMap{"HTTP","HTTPS","SSL"}, Values{"HTTP","HTTPS","SSL"}] String TransportType;
-	[Required, Description("StoreFront Servers")] String Servers;
-	[Required, Description("StoreFront Load Balancing")] Boolean LoadBalance;
-	[Required, Description("StoreFront Farm Type"), ValueMap{"XenApp","XenDesktop","AppController"}, Values{"XenApp","XenDesktop","AppController"}] String FarmType;
-	[Required, Description("StoreFront Site Name")] String SiteName;
-	[Required, Description("StoreFront Authentication Type"), ValueMap{"Explicit","Anonymous"}, Values{"Explicit","Anonymous"}] String AuthType;
+	[Key, Description("Citrix StoreFront name")] String StoreName;
+	[Mandatory, Description("Citrix StoreFront Authentication type")] String AuthType;
+	[Write, Description("Citrix StoreFront farm name")] String FarmName;
+	[Write, Description("Citrix StoreFront port")] UInt32 Port;
+	[Write, Description("Citrix StoreFront transport type")] String TransportType;
+	[Mandatory, Description("Citrix StoreFront director servers")] String Servers;
+	[Write, Description("Citrix StoreFront enable load balancing")] Boolean LoadBalance;
+	[Write, Description("Citrix StoreFront farm type")] String FarmType;
+	[Write, Description("Citrix StoreFront virtual path")] String VirtualPath;
+	[Write, Description("Citrix StoreFront site id")] UInt64 SiteId;
+	[Write, Description("Citrix StoreFront service urls")] String ServiceUrls;
+	[Write, Description("Citrix StoreFront ssl relay port")] UInt32 SSLRelayPort;
+	[Write, Description("Citrix StoreFront all failed bypass duration")] UInt32 AllFailedBypassDuration;
+	[Write, Description("Citrix StoreFront bypass duration")] UInt32 BypassDuration;
+	[Write, Description("Citrix StoreFront zones")] String Zones;
 	[Write, Description("Ensure"), ValueMap{"Present","Absent"}, Values{"Present","Absent"}] String Ensure;
 };
 
