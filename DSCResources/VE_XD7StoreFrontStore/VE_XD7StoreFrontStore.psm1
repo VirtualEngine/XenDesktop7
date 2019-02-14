@@ -11,9 +11,7 @@
 #>
 
 
-#TODO: Test switching auth
-#TODO: Test explicit auth
-#TODO: Test creating storefarm if storeservice already exists
+#TODO: Test switching auth - See TODOs below
 
 Import-LocalizedData -BindingVariable localizedData -FileName VE_XD7StoreFrontStore.Resources.psd1;
 
@@ -352,52 +350,65 @@ function Set-TargetResource {
     process {
 
         Import-module Citrix.StoreFront -ErrorAction Stop
-
-        #Add Mandatory Params
-        $ArrServers = $Servers.Split(",")
-        $StoreParams = @{
-            FriendlyName = $StoreName
-            servers = $ArrServers
-            VirtualPath = $StoreVirtualPath
-        }
-        $FarmParams = @{}
-        $AllStoreParams = @{
-            FriendlyName = $StoreName
-            servers = $ArrServers
-            VirtualPath = $StoreVirtualPath
-            SiteId = $SiteId
-        }
-        #Add Optional Params but only if wrong
-        $targetResource = Get-TargetResource @PSBoundParameters;
-        foreach ($property in $PSBoundParameters.Keys) {
-            if ($targetResource.ContainsKey($property)) {
-                if (!($AllStoreParams.ContainsKey($property))) {
-                    $AllStoreParams.Add($property,$PSBoundParameters[$property])
-                }
-                $expected = $PSBoundParameters[$property];
-                $actual = $targetResource[$property];
-                if ($PSBoundParameters[$property] -is [System.String[]]) {
-                    if (Compare-Object -ReferenceObject $expected -DifferenceObject $actual) {
-                        if (!($FarmParams.ContainsKey($property))) {
-                            Write-Verbose "Adding $property to FarmParams"
-                            $FarmParams.Add($property,$PSBoundParameters[$property])
-                        }
-                    }
-                }
-                elseif ($expected -ne $actual) {
-                    if (!($FarmParams.ContainsKey($property))) {
-                        Write-Verbose "Adding $property to FarmParams"
-                        $FarmParams.Add($property,$PSBoundParameters[$property])
-                    }
-                }
-            }
+        $StoreService = Get-STFStoreService | Where-object {$_.friendlyname -eq $StoreName}
+        If ($StoreService) {
+            $StoreFarm = Get-STFStoreFarm -StoreService $StoreService
         }
 
         If ($Ensure -eq 'Present') {
-            $FarmParams.Remove("AuthType")
-            $AllStoreParams.Remove("AuthType")
+
+
+            #Region Create Params hashtable
+            $AllParams = @{}
+            $ChangedParams = @{}
+            $targetResource = Get-TargetResource @PSBoundParameters;
+            foreach ($property in $PSBoundParameters.Keys) {
+                if ($targetResource.ContainsKey($property)) {
+                    if (!($AllParams.ContainsKey($property))) {
+                        $AllParams.Add($property,$PSBoundParameters[$property])
+                    }
+                    $expected = $PSBoundParameters[$property];
+                    $actual = $targetResource[$property];
+                    if ($PSBoundParameters[$property] -is [System.String[]]) {
+                        if (Compare-Object -ReferenceObject $expected -DifferenceObject $actual) {
+                            if (!($ChangedParams.ContainsKey($property))) {
+                                Write-Verbose "Adding $property to FarmParams"
+                                $ChangedParams.Add($property,$PSBoundParameters[$property])
+                            }
+                        }
+                    }
+                    elseif ($expected -ne $actual) {
+                        if (!($ChangedParams.ContainsKey($property))) {
+                            Write-Verbose "Adding $property to FarmParams"
+                            $ChangedParams.Add($property,$PSBoundParameters[$property])
+                        }
+                    }
+                }
+            }
+            $AllParams.Remove("StoreName")
+            $ChangedParams.Remove("StoreName")
+            If ($FarmName.Length -gt 0) {
+                $FarmNameParam = $FarmName
+            }
+            elseif ($StoreFarm.FarmName.length -gt 0) {
+                $FarmNameParam = $StoreFarm.FarmName
+            }
+            Else {
+                $FarmNameParam = "$($StoreName)farm"
+            }
+            if (!($AllParams.ContainsKey("FarmName"))) {
+                $AllParams.Add("FarmName",$FarmNameParam)
+            }
+            if (!($ChangedParams.ContainsKey("FarmName"))) {
+                $ChangedParams.Add("FarmName",$FarmNameParam)
+            }
+            #endregion
+
+            #Region Check for Authentication service - create if needed
+            $AllParams.Remove("AuthType")
             If ($AuthType -eq "Anonymous") {
-                $AllStoreParams.Add("Anonymous",$true)
+                $AllParams.Add("Anonymous",$true)
+                $ChangedAuth = "Anonymous"
             }
             Else {
                 $Auth = Get-STFAuthenticationService -VirtualPath $AuthVirtualPath -SiteID $SiteId
@@ -405,72 +416,91 @@ function Set-TargetResource {
                     Write-Verbose "Running Add-STFAuthenicationService"
                     $Auth = Add-STFAuthenticationService -VirtualPath $AuthVirtualPath -SiteID $SiteId -confirm:$false
                 }
-                $AllStoreParams.Add("AuthenticationService",$Auth)
+                $AllParams.Add("AuthenticationService",$Auth)
+                $ChangedAuth = $Auth
             }
+            #endregion
 
-            $FarmParams.Remove("StoreName")
-            $AllStoreParams.Remove("StoreName")
-            $StoreService = Get-STFStoreService | Where-object {$_.friendlyname -eq $StoreName}
-            If ($StoreService) {
-                $StoreFarm = Get-STFStoreFarm -StoreService $StoreService
+            #Region Update Servers value to array
+            $ArrServers = $Servers.Split(",")
+            $AllParams.Servers = $ArrServers
+            If ($ChangedParams.ContainsKey("Servers")) {
+                $ChangedParams.Servers = $ArrServers
             }
-            If ($FarmParams.Count -gt 0) {
-                $FarmParams.Add("StoreService",$StoreService)
-                if (!($FarmParams.ContainsKey("FarmName"))) {
-                    If ($FarmName.Length -gt 0) {
-                        $FarmParams.Add("FarmName",$FarmName)
-                    }
-                    elseif ($StoreFarm.FarmName.length -gt 0) {
-                        $FarmParams.Add("FarmName",$StoreFarm.FarmName)
-                    }
-                    Else {
-                        $FarmParams.Add("FarmName","$($StoreName)farm")
-                    }
-                }
-                if (!($FarmParams.ContainsKey("Servers"))) {
-                    $FarmParams.Add("Servers",$ArrServers)
-                }
+            Else {
+                $ChangedParams.Add("Servers",$ArrServers)
             }
+            #endregion
 
-            $FarmParams | Export-Clixml c:\Temp\farmparams.xml
-            $AllStoreParams | Export-Clixml c:\Temp\allstoreparams.xml
             If ($StoreService.friendlyName -eq $StoreName) {
-                If ($StoreFarm) {
-                    If ($FarmParams.Count -gt 0) {
-                        #Update settings
-                        Write-Verbose "Running Set-STFStoreFarm"
-                        Set-STFStoreFarm @FarmParams -confirm:$false
+                If ($ChangedParams.ContainsKey("AuthType")) {
+                    $ChangedParams.Remove("AuthType")
+                    If ($ChangedAuth -eq "Anonymous") {
+                        $Auth = Get-STFAuthenticationService -VirtualPath $StoreService.AuthenticationServiceVirtualPath -SiteID $StoreService.SiteId
+                        If ($Auth) {
+                            #TODO: What do you do here?  The following doesn't work since it's in use
+                            #Write-Verbose "Running Remove-STFAuthenticationService"
+                            #$Auth | Remove-STFAuthenticationService -confirm:$false
+                        }
                     }
                     Else {
-                        #Nothing to do here?
+                        #TODO: Fix this.  It gets following error
+                            #set-stfstoreservice : An error occurred while updating the Store service: 
+                            # System.NullReferenceException: Object reference not set to an instance of an object.
+                            #   at
+                            #Citrix.StoreFront.Model.Store.StoreService.Citrix.StoreFront.Model.IAuthenticatedService.RemoveAuthenticationService(AuthenticationServiceauthenticationService)
+                            #   at Citrix.StoreFront.Stores.Cmdlets.SetStoreService.ProcessRecord().
+                            #At line:1 char:1
+                        #Write-Verbose "Running Set-STFStoreService"
+                        #Set-STFStoreService -StoreService $StoreService -AuthenticationService $Auth -Confirm:$false
                     }
+                }
+
+                If ($StoreFarm) {
+                    #update params
+                    $ChangedParams.Add("StoreService",$StoreService)
+                    $ChangedParams | Export-Clixml c:\Temp\changed.xml
+
+                    #Update settings
+                    Write-Verbose "Running Set-STFStoreFarm"
+                    Set-STFStoreFarm @ChangedParams -confirm:$false
                 }
                 Else {
+                    #update params
+                    $KeysToRemove = "AuthenticationService","Anonymous"
+                    $KeysToRemove | ForEach-Object {$AllParams.Remove($_)}
+                    $AllParams | Export-Clixml c:\Temp\allparams.xml
+
                     #Create farm
-                    $KeysToRemove = "StoreService","AuthenticationService","Anonymous","VirtualPath","SiteId"
-                    $KeysToRemove | ForEach-Object {$AllStoreParams.Remove($_)}
-                    $AllStoreParams | Export-Clixml c:\Temp\allstoreparams.xml
                     Write-Verbose "Running New-STFStoreFarm"
-                    New-STFStoreFarm @AllStoreParams -confirm:$false
+                    New-STFStoreFarm @AllParams -confirm:$false
                     #Add farm to storeservice
                     Write-Verbose "Running Add-STFStoreFarm"
-                    Add-STFStoreFarm -Farm $FarmName -StoreService $StoreService
+                    $StoreService = Get-STFStoreService | Where-object {$_.friendlyname -eq $StoreName}
+                    Add-STFStoreFarm -Farm $AllParams.FarmName -StoreService $StoreService
                 }
             }
             Else {
+                #update params
+                $AllParams.Add("FriendlyName",$StoreName)
+                $AllParams.Add("VirtualPath",$StoreVirtualPath)
+                $AllParams.Add("SiteId",$SiteId)
+                $AllParams | Export-Clixml c:\Temp\allparams.xml
+
                 #Create
                 Write-Verbose "Running Add-STFStoreService"
-                Add-STFStoreService @AllStoreParams -confirm:$false
+                Add-STFStoreService @AllParams -confirm:$false
             }
         }
         Else {
             #Uninstall
-            $StoreService = Get-STFStoreService | Where-object {$_.friendlyname -eq $StoreName}
-            $Auth = Get-STFAuthenticationService -VirtualPath $StoreService.AuthenticationServiceVirtualPath -SiteID $StoreService.SiteId
             Write-Verbose "Running Remove-STFStoreService"
             $StoreService | Remove-STFStoreService -confirm:$false
-            Write-Verbose "Running Remove-STFAuthenticationService"
-            $Auth | Remove-STFAuthenticationService -confirm:$false
+            $Auth = Get-STFAuthenticationService -VirtualPath $StoreService.AuthenticationServiceVirtualPath -SiteID $StoreService.SiteId
+            If ($Auth) {
+                Write-Verbose "Running Remove-STFAuthenticationService"
+                $Auth | Remove-STFAuthenticationService -confirm:$false
+            }
         }
 
     } #end process
