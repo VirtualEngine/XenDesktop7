@@ -24,6 +24,7 @@
                                 'XD7StoreFrontBaseUrl',
                                 'XD7StoreFront',
                                 'XD7StoreFrontStore',
+                                'XD7StoreFrontRoamingGateway',
                                 'XD7VDAController',
                                 'XD7VDAFeature',
                                 'XD7WaitForSite'
