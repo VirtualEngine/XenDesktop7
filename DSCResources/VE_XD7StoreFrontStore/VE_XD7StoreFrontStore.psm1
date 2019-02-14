@@ -435,10 +435,26 @@ function Set-TargetResource {
             $FarmParams | Export-Clixml c:\Temp\farmparams.xml
             $AllStoreParams | Export-Clixml c:\Temp\allstoreparams.xml
             If ($StoreService.friendlyName -eq $StoreName) {
-                If ($FarmParams.Count -gt 0) {
-                    #Update settings
-                    Write-Verbose "Running Set-STFStoreFarm"
-                    Set-STFStoreFarm @FarmParams -confirm:$false
+                If ($StoreFarm) {
+                    If ($FarmParams.Count -gt 0) {
+                        #Update settings
+                        Write-Verbose "Running Set-STFStoreFarm"
+                        Set-STFStoreFarm @FarmParams -confirm:$false
+                    }
+                    Else {
+                        #Nothing to do here?
+                    }
+                }
+                Else {
+                    #Create farm
+                    $KeysToRemove = "StoreService","AuthenticationService","Anonymous","VirtualPath","SiteId"
+                    $KeysToRemove | ForEach-Object {$AllStoreParams.Remove($_)}
+                    $AllStoreParams | Export-Clixml c:\Temp\allstoreparams.xml
+                    Write-Verbose "Running New-STFStoreFarm"
+                    New-STFStoreFarm @AllStoreParams -confirm:$false
+                    #Add farm to storeservice
+                    Write-Verbose "Running Add-STFStoreFarm"
+                    Add-STFStoreFarm -Farm $FarmName -StoreService $StoreService
                 }
             }
             Else {
