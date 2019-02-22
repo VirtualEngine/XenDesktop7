@@ -1,4 +1,3 @@
-
 [ClassVersion("1.0.0.0"), FriendlyName("XD7StoreFrontFarmConfiguration")]
 class VE_XD7StoreFrontFarmConfiguration : OMI_BaseResource
 {
@@ -14,4 +13,3 @@ class VE_XD7StoreFrontFarmConfiguration : OMI_BaseResource
 	[Write, Description("Period of time between polling XenApp\XenDesktop server health in seconds")] String BackgroundHealthCheckPollingPeriod;
 	[Write, Description("Indicates whether an advanced health-check should be performed")] Boolean AdvancedHealthCheck;
 };
-
