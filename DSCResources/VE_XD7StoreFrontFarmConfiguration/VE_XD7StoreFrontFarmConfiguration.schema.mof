@@ -1,3 +1,4 @@
+
 [ClassVersion("1.0.0.0"), FriendlyName("XD7StoreFrontFarmConfiguration")]
 class VE_XD7StoreFrontFarmConfiguration : OMI_BaseResource
 {
@@ -10,6 +11,6 @@ class VE_XD7StoreFrontFarmConfiguration : OMI_BaseResource
 	[Write, Description("Period of time before retrying a XenDesktop 7 and greater farm pending leasing mode in seconds")] String LeasingStatusExpiryPending;
 	[Write, Description("Use pooled sockets")] Boolean PooledSockets;
 	[Write, Description("Number of server connection attempts before failing")] UInt32 ServerCommunicationAttempts;
-	[Write, Description("Period of time between polling XenApp\XenDesktop server health in seconds")] String BackgroundHealthCheckPollingPeriod;
+	[Write, Description("Period of time between polling XenApp or XenDesktop server health in seconds")] String BackgroundHealthCheckPollingPeriod;
 	[Write, Description("Indicates whether an advanced health-check should be performed")] Boolean AdvancedHealthCheck;
 };
