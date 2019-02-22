@@ -1,0 +1,22 @@
+
+[ClassVersion("1.0.0.0"), FriendlyName("XD7StoreFrontWebReceiverPluginAssistant")]
+class VE_XD7StoreFrontWebReceiverPluginAssistant : OMI_BaseResource
+{
+	[Key, Description("StoreFront store name")] String StoreName;
+	[Write, Description("Enable Receiver client detection")] Boolean Enabled;
+	[Write, Description("Prompt to upgrade older clients")] Boolean UpgradeAtLogin;
+	[Write, Description("Show Receiver client detection after the user logs in")] Boolean ShowAfterLogin;
+	[Write, Description("Path to the Windows Receiver")] String Win32Path;
+	[Write, Description("Path to the MacOS Receiver")] String MacOSPath;
+	[Write, Description("Minimum version of the MacOS supported")] String MacOSMinimumSupportedVersion;
+	[Write, Description("Method of deploying and using the Html5 Receiver"), ValueMap{"Always","Fallback","Off"}, Values{"Always","Fallback","Off"}] String Html5Enabled;
+	[Write, Description("The supported Html5 platforms")] String Html5Platforms;
+	[Write, Description("Html5 Receiver preferences")] String Html5Preferences;
+	[Write, Description("Launch Html5 Receiver in the same browser tab")] Boolean Html5SingleTabLaunch;
+	[Write, Description("The Html5 Chrome Application Origins settings")] String Html5ChromeAppOrigins;
+	[Write, Description("The Html5 Chrome Application preferences")] String Html5ChromeAppPreferences;
+	[Write, Description("Enable the Receiver Protocol Handler")] Boolean ProtocolHandlerEnabled;
+	[Write, Description("The supported Protocol Handler platforms")] String ProtocolHandlerPlatforms;
+	[Write, Description("Skip the Protocol Handle double hop check")] Boolean ProtocolHandlerSkipDoubleHopCheckWhenDisabled;
+};
+
