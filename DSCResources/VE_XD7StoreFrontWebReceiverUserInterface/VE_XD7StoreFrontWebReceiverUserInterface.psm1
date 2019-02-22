@@ -4,13 +4,13 @@
 	 Created on:   	2/8/2019 12:12 PM
 	 Created by:   	CERBDM
 	 Organization: 	Cerner Corporation
-	 Filename:     	VE_XD7StoreFrontWebReceiverPluginAssistant.psm1
+	 Filename:     	VE_XD7StoreFrontWebReceiverUserInterface.psm1
 	-------------------------------------------------------------------------
-	 Module Name: VE_XD7StoreFrontWebReceiverPluginAssistant
+	 Module Name: VE_XD7StoreFrontWebReceiverUserInterface
 	===========================================================================
 #>
 
-Import-LocalizedData -BindingVariable localizedData -FileName VE_XD7StoreFrontWebReceiverPluginAssistant.Resources.psd1;
+Import-LocalizedData -BindingVariable localizedData -FileName VE_XD7StoreFrontWebReceiverUserInterface.Resources.psd1;
 
 function Get-TargetResource
 {
@@ -23,50 +23,48 @@ function Get-TargetResource
         $StoreName,
 
         [System.Boolean]
-        $Enabled,
+        $AutoLaunchDesktop,
+
+        [System.UInt32]
+        $MultiClickTimeout,
 
         [System.Boolean]
-        $UpgradeAtLogin,
+        $EnableAppsFolderView,
 
         [System.Boolean]
-        $ShowAfterLogin,
-
-        [System.String]
-        $Win32Path,
-
-        [System.String]
-        $MacOSPath,
-
-        [System.String]
-        $MacOSMinimumSupportedVersion,
-
-        [ValidateSet("Always","Fallback","Off")]
-        [System.String]
-        $Html5Enabled,
-
-        [System.String]
-        $Html5Platforms,
-
-        [System.String]
-        $Html5Preferences,
+        $ShowAppsView,
 
         [System.Boolean]
-        $Html5SingleTabLaunch,
+        $ShowDesktopsView,
 
+        [ValidateSet("Apps","Auto","Desktops")]
         [System.String]
-        $Html5ChromeAppOrigins,
-
-        [System.String]
-        $Html5ChromeAppPreferences,
+        $DefaultView,
 
         [System.Boolean]
-        $ProtocolHandlerEnabled,
-
-        [System.String]
-        $ProtocolHandlerPlatforms,
+        $WorkspaceControlEnabled,
 
         [System.Boolean]
-        $ProtocolHandlerSkipDoubleHopCheckWhenDisabled
+        $WorkspaceControlAutoReconnectAtLogon,
+
+        [ValidateSet("Disconnect","None","Terminate")]
+        [System.String]
+        $WorkspaceControlLogoffAction,
+
+        [System.Boolean]
+        $WorkspaceControlShowReconnectButton,
+
+        [System.Boolean]
+        $WorkspaceControlShowDisconnectButton,
+
+        [System.Boolean]
+        $ReceiverConfigurationEnabled,
+
+        [System.Boolean]
+        $AppShortcutsEnabled,
+
+        [System.Boolean]
+        $AppShortcutsAllowSessionReconnect
     )
 
     Import-module Citrix.StoreFront -ErrorAction Stop -Verbose:$false;
@@ -76,30 +74,29 @@ function Get-TargetResource
         $StoreService = Get-STFStoreService | Where-object {$_.friendlyname -eq $StoreName};
         Write-Verbose "Calling Get-STFWebReceiverService"
         $webreceiverservice = Get-STFWebReceiverService -StoreService $Storeservice
-        Write-Verbose "Calling Get-STFWebReceiverPluginAssistant"
-        $Configuration = Get-STFWebReceiverPluginAssistant -WebReceiverService $webreceiverservice
+        Write-Verbose "Calling Get-STFWebReceiverUserInterface"
+        $Configuration = Get-STFWebReceiverUserInterface -WebReceiverService $webreceiverservice
     }
     catch {
-        Write-Verbose "Trapped error getting web receiver plugin configuration. Error: $($Error[0].Exception.Message)"
+        Write-Verbose "Trapped error getting web receiver user interface. Error: $($Error[0].Exception.Message)"
     }
 
     $returnValue = @{
         StoreName = [System.String]$StoreName
-        Enabled = [System.Boolean]$Configuration.Enabled
-        UpgradeAtLogin = [System.Boolean]$Configuration.UpgradeAtLogin
-        ShowAfterLogin = [System.Boolean]$Configuration.ShowAfterLogin
-        Win32Path = [System.String]$Configuration.Win32.Path
-        MacOSPath = [System.String]$Configuration.MacOS.Path
-        MacOSMinimumSupportedVersion = [System.String]$Configuration.MacOS.MinimumSupportedVersion
-        Html5Enabled = [System.String]$Configuration.Html5.Enabled
-        Html5Platforms = [System.String]$Configuration.html5.Platforms
-        Html5Preferences = [System.String]$Configuration.html5.Preferences
-        Html5SingleTabLaunch = [System.Boolean]$Configuration.html5.SingleTabLaunch
-        Html5ChromeAppOrigins = [System.String]$Configuration.html5.ChromeAppOrigins
-        Html5ChromeAppPreferences = [System.String]$Configuration.html5.ChromeAppPreferences
-        ProtocolHandlerEnabled = [System.Boolean]$Configuration.ProtocolHandler.Enabled
-        ProtocolHandlerPlatforms = [System.String]$Configuration.ProtocolHandler.Platforms
-        ProtocolHandlerSkipDoubleHopCheckWhenDisabled = [System.Boolean]$Configuration.ProtocolHandler.SkipDoubleHopCheckWhenDisabled
+        AutoLaunchDesktop = [System.Boolean]$Configuration.AutoLaunchDesktop
+        MultiClickTimeout = [System.UInt32]$Configuration.MultiClickTimeout
+        EnableAppsFolderView = [System.Boolean]$Configuration.EnableAppsFolderView
+        ShowAppsView = [System.Boolean]$Configuration.UIViews.ShowAppsView
+        ShowDesktopsView = [System.Boolean]$Configuration.UIViews.ShowDesktopsView
+        DefaultView = [System.String]$Configuration.UIViews.DefaultView
+        WorkspaceControlEnabled = [System.Boolean]$Configuration.WorkspaceControl.Enabled
+        WorkspaceControlAutoReconnectAtLogon = [System.Boolean]$Configuration.WorkspaceControl.AutoReconnectAtLogon
+        WorkspaceControlLogoffAction = [System.String]$Configuration.WorkspaceControl.LogoffAction
+        WorkspaceControlShowReconnectButton = [System.Boolean]$Configuration.WorkspaceControl.ShowReconnectButton
+        WorkspaceControlShowDisconnectButton = [System.Boolean]$Configuration.WorkspaceControl.ShowDisconnectButton
+        ReceiverConfigurationEnabled = [System.Boolean]$Configuration.ReceiverConfiguration.Enabled
+        AppShortcutsEnabled = [System.Boolean]$Configuration.AppShortcuts.Enabled
+        AppShortcutsAllowSessionReconnect = [System.Boolean]$Configuration.AppShortcuts.AllowSessionReconnect
     }
 
     $returnValue
@@ -116,50 +113,48 @@ function Set-TargetResource
         $StoreName,
 
         [System.Boolean]
-        $Enabled,
+        $AutoLaunchDesktop,
+
+        [System.UInt32]
+        $MultiClickTimeout,
 
         [System.Boolean]
-        $UpgradeAtLogin,
+        $EnableAppsFolderView,
 
         [System.Boolean]
-        $ShowAfterLogin,
-
-        [System.String]
-        $Win32Path,
-
-        [System.String]
-        $MacOSPath,
-
-        [System.String]
-        $MacOSMinimumSupportedVersion,
-
-        [ValidateSet("Always","Fallback","Off")]
-        [System.String]
-        $Html5Enabled,
-
-        [System.String]
-        $Html5Platforms,
-
-        [System.String]
-        $Html5Preferences,
+        $ShowAppsView,
 
         [System.Boolean]
-        $Html5SingleTabLaunch,
+        $ShowDesktopsView,
 
+        [ValidateSet("Apps","Auto","Desktops")]
         [System.String]
-        $Html5ChromeAppOrigins,
-
-        [System.String]
-        $Html5ChromeAppPreferences,
+        $DefaultView,
 
         [System.Boolean]
-        $ProtocolHandlerEnabled,
-
-        [System.String]
-        $ProtocolHandlerPlatforms,
+        $WorkspaceControlEnabled,
 
         [System.Boolean]
-        $ProtocolHandlerSkipDoubleHopCheckWhenDisabled
+        $WorkspaceControlAutoReconnectAtLogon,
+
+        [ValidateSet("Disconnect","None","Terminate")]
+        [System.String]
+        $WorkspaceControlLogoffAction,
+
+        [System.Boolean]
+        $WorkspaceControlShowReconnectButton,
+
+        [System.Boolean]
+        $WorkspaceControlShowDisconnectButton,
+
+        [System.Boolean]
+        $ReceiverConfigurationEnabled,
+
+        [System.Boolean]
+        $AppShortcutsEnabled,
+
+        [System.Boolean]
+        $AppShortcutsAllowSessionReconnect
     )
 
     Import-module Citrix.StoreFront -ErrorAction Stop -Verbose:$false;
@@ -169,11 +164,11 @@ function Set-TargetResource
         $StoreService = Get-STFStoreService | Where-object {$_.friendlyname -eq $StoreName};
         Write-Verbose "Calling Get-STFWebReceiverService"
         $webreceiverservice = Get-STFWebReceiverService -StoreService $Storeservice
-        Write-Verbose "Calling Get-STFWebReceiverPluginAssistant"
-        $Configuration = Get-STFWebReceiverPluginAssistant -WebReceiverService $webreceiverservice
+        Write-Verbose "Calling Get-STFWebReceiverUserInterface"
+        $Configuration = Get-STFWebReceiverUserInterface -WebReceiverService $webreceiverservice
     }
     catch {
-        Write-Verbose "Trapped error getting web receiver plugin configuration. Error: $($Error[0].Exception.Message)"
+        Write-Verbose "Trapped error getting web receiver user interface. Error: $($Error[0].Exception.Message)"
     }
 
     $ChangedParams = @{
@@ -202,8 +197,8 @@ function Set-TargetResource
     }
 
     $ChangedParams.Remove('StoreName')
-    Write-Verbose "Calling Set-STFWebReceiverPluginAssistant"
-    Set-STFWebReceiverPluginAssistant @ChangedParams
+    Write-Verbose "Calling Set-STFWebReceiverUserInterface"
+    Set-STFWebReceiverUserInterface @ChangedParams
 
 }
 
@@ -219,50 +214,48 @@ function Test-TargetResource
         $StoreName,
 
         [System.Boolean]
-        $Enabled,
+        $AutoLaunchDesktop,
+
+        [System.UInt32]
+        $MultiClickTimeout,
 
         [System.Boolean]
-        $UpgradeAtLogin,
+        $EnableAppsFolderView,
 
         [System.Boolean]
-        $ShowAfterLogin,
-
-        [System.String]
-        $Win32Path,
-
-        [System.String]
-        $MacOSPath,
-
-        [System.String]
-        $MacOSMinimumSupportedVersion,
-
-        [ValidateSet("Always","Fallback","Off")]
-        [System.String]
-        $Html5Enabled,
-
-        [System.String]
-        $Html5Platforms,
-
-        [System.String]
-        $Html5Preferences,
+        $ShowAppsView,
 
         [System.Boolean]
-        $Html5SingleTabLaunch,
+        $ShowDesktopsView,
 
+        [ValidateSet("Apps","Auto","Desktops")]
         [System.String]
-        $Html5ChromeAppOrigins,
-
-        [System.String]
-        $Html5ChromeAppPreferences,
+        $DefaultView,
 
         [System.Boolean]
-        $ProtocolHandlerEnabled,
-
-        [System.String]
-        $ProtocolHandlerPlatforms,
+        $WorkspaceControlEnabled,
 
         [System.Boolean]
-        $ProtocolHandlerSkipDoubleHopCheckWhenDisabled
+        $WorkspaceControlAutoReconnectAtLogon,
+
+        [ValidateSet("Disconnect","None","Terminate")]
+        [System.String]
+        $WorkspaceControlLogoffAction,
+
+        [System.Boolean]
+        $WorkspaceControlShowReconnectButton,
+
+        [System.Boolean]
+        $WorkspaceControlShowDisconnectButton,
+
+        [System.Boolean]
+        $ReceiverConfigurationEnabled,
+
+        [System.Boolean]
+        $AppShortcutsEnabled,
+
+        [System.Boolean]
+        $AppShortcutsAllowSessionReconnect
     )
 
     $targetResource = Get-TargetResource @PSBoundParameters;

@@ -31,6 +31,7 @@
                                 'XD7StoreFrontRoamingGateway',
                                 'XD7StoreFrontFarmConfiguration',
                                 'XD7StoreFrontWebReceiverService',
+                                'XD7StoreFrontWebReceiverUserInterface',
                                 'XD7VDAController',
                                 'XD7VDAFeature',
                                 'XD7WaitForSite'
