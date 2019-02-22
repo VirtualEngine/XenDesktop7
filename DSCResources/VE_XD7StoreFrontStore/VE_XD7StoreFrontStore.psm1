@@ -87,6 +87,10 @@ function Get-TargetResource {
         [System.String[]]
         $Zones,
 
+        [parameter()]
+        [System.Boolean]
+        $LockedDown,
+
         [ValidateSet("Present","Absent")]
         [System.String]
         $Ensure
@@ -130,6 +134,7 @@ function Get-TargetResource {
             BypassDuration = $StoreFarm.BypassDuration
             FriendlyName = $StoreService.FriendlyName
             Zones = $StoreFarm.Zones
+            LockedDown = $storeservice.service.LockedDown
         };
 
         return $targetResource;
@@ -208,6 +213,10 @@ function Test-TargetResource {
         [parameter()]
         [System.String[]]
         $Zones,
+
+        [parameter()]
+        [System.Boolean]
+        $LockedDown,
 
         [ValidateSet("Present","Absent")]
         [System.String]
@@ -341,6 +350,10 @@ function Set-TargetResource {
         [System.String[]]
         $Zones,
 
+        [parameter()]
+        [System.Boolean]
+        $LockedDown,
+
         [ValidateSet("Present","Absent")]
         [System.String]
         $Ensure
@@ -377,19 +390,19 @@ function Set-TargetResource {
                         if ($actual) {
                             if (Compare-Object -ReferenceObject $expected -DifferenceObject $actual) {
                                 if (!($ChangedParams.ContainsKey($property))) {
-                                    Write-Verbose "Adding $property to FarmParams"
+                                    Write-Verbose "Adding $property to ChangedParams"
                                     $ChangedParams.Add($property,$PSBoundParameters[$property])
                                 }
                             }
                         }
                         Else {
-                            Write-Verbose "Adding $property to FarmParams"
+                            Write-Verbose "Adding $property to ChangedParams"
                             $ChangedParams.Add($property,$PSBoundParameters[$property])
                         }
                     }
                     elseif ($expected -ne $actual) {
                         if (!($ChangedParams.ContainsKey($property))) {
-                            Write-Verbose "Adding $property to FarmParams"
+                            Write-Verbose "Adding $property to ChangedParams"
                             $ChangedParams.Add($property,$PSBoundParameters[$property])
                         }
                     }
@@ -397,6 +410,7 @@ function Set-TargetResource {
             }
             $AllParams.Remove("StoreName")
             $ChangedParams.Remove("StoreName")
+            $AllParams.Remove('LockedDown')
             If ($FarmName.Length -gt 0) {
                 $FarmNameParam = $FarmName
             }
@@ -460,6 +474,11 @@ function Set-TargetResource {
                         #Set-STFStoreService -StoreService $StoreService -AuthenticationService $Auth -Confirm:$false
                     }
                 }
+                If ($ChangedParams.ContainsKey('LockedDown')) {
+                    Write-Verbose "Running Set-STFStoreFarm"
+                    Set-STFStoreService -StoreService $StoreService -LockedDown $LockedDown -confirm:$false
+                    $ChangedParams.Remove('LockedDown')
+                }
 
                 If ($StoreFarm) {
                     #update params
@@ -492,6 +511,14 @@ function Set-TargetResource {
                 #Create
                 Write-Verbose "Running Add-STFStoreService"
                 Add-STFStoreService @AllParams -confirm:$false
+
+                If ($ChangedParams.ContainsKey('LockedDown')) {
+                    #This setting isn't available to be set via the Add-STFStoreService
+                    Write-Verbose "Running Set-STFStoreFarm for LockedDown setting"
+                    $StoreService = Get-STFStoreService | Where-object {$_.friendlyname -eq $StoreName}
+                    Set-STFStoreService -StoreService $StoreService -LockedDown $LockedDown -confirm:$false
+                }
+
             }
         }
         Else {
