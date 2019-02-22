@@ -43,7 +43,7 @@ function Get-TargetResource {
         $TransportType,
 
         [parameter(Mandatory = $true)]
-        [System.String]
+        [System.String[]]
         $Servers,
 
         [parameter()]
@@ -68,7 +68,7 @@ function Get-TargetResource {
         $SiteId=1,
 
         [parameter()]
-        [System.String]
+        [System.String[]]
         $ServiceUrls,
 
         [parameter()]
@@ -84,7 +84,7 @@ function Get-TargetResource {
         $BypassDuration,
 
         [parameter()]
-        [System.String]
+        [System.String[]]
         $Zones,
 
         [ValidateSet("Present","Absent")]
@@ -99,7 +99,7 @@ function Get-TargetResource {
     }
     process {
 
-        Import-module Citrix.StoreFront -ErrorAction Stop;
+        Import-module Citrix.StoreFront -ErrorAction Stop -Verbose:$false;
         
         try {
             $StoreService = Get-STFStoreService | Where-object {$_.friendlyname -eq $StoreName};
@@ -111,21 +111,20 @@ function Get-TargetResource {
             $True {$CurrentAuthType = "Anonymous"}
             $False {$CurrentAuthType = "Explicit"}
         }
-        $StrServers = ($StoreFarm.Servers) -join(",")
 
         $targetResource = @{
             StoreName = $StoreService.FriendlyName
             FarmName = $StoreFarm.FarmName
             port = $StoreFarm.Port
             transportType = $StoreFarm.TransportType
-            servers = $strServers
+            servers = [System.String[]]$StoreFarm.Servers
             LoadBalance = $StoreFarm.LoadBalance
             farmType = $StoreFarm.FarmType
             AuthType = $CurrentAuthType
             AuthVirtualPath = $StoreService.AuthenticationServiceVirtualPath
             StoreVirtualPath = $StoreService.VirtualPath
             SiteId = $StoreService.SiteId
-            ServiceUrls = $StoreFarm.ServiceUrls
+            ServiceUrls = [System.String[]]$StoreFarm.ServiceUrls
             SSLRelayPort = $StoreFarm.SSLRelayPort
             AllFailedBypassDuration = $StoreFarm.AllFailedBypassDuration
             BypassDuration = $StoreFarm.BypassDuration
@@ -166,7 +165,7 @@ function Test-TargetResource {
         $TransportType,
 
         [parameter(Mandatory = $true)]
-        [System.String]
+        [System.String[]]
         $Servers,
 
         [parameter()]
@@ -191,7 +190,7 @@ function Test-TargetResource {
         $SiteId=1,
 
         [parameter()]
-        [System.String]
+        [System.String[]]
         $ServiceUrls,
 
         [parameter()]
@@ -207,7 +206,7 @@ function Test-TargetResource {
         $BypassDuration,
 
         [parameter()]
-        [System.String]
+        [System.String[]]
         $Zones,
 
         [ValidateSet("Present","Absent")]
@@ -227,8 +226,13 @@ function Test-TargetResource {
                     $expected = $PSBoundParameters[$property];
                     $actual = $targetResource[$property];
                     if ($PSBoundParameters[$property] -is [System.String[]]) {
-
-                        if (Compare-Object -ReferenceObject $expected -DifferenceObject $actual) {
+                        if ($actual) {
+                            if (Compare-Object -ReferenceObject $expected -DifferenceObject $actual -ErrorAction silentlycontinue) {
+                                Write-Verbose ($localizedData.ResourcePropertyMismatch -f $property, ($expected -join ','), ($actual -join ','));
+                                $inCompliance = $false;
+                            }
+                        }
+                        else {
                             Write-Verbose ($localizedData.ResourcePropertyMismatch -f $property, ($expected -join ','), ($actual -join ','));
                             $inCompliance = $false;
                         }
@@ -293,7 +297,7 @@ function Set-TargetResource {
         $TransportType,
 
         [parameter(Mandatory = $true)]
-        [System.String]
+        [System.String[]]
         $Servers,
 
         [parameter()]
@@ -318,7 +322,7 @@ function Set-TargetResource {
         $SiteId=1,
 
         [parameter()]
-        [System.String]
+        [System.String[]]
         $ServiceUrls,
 
         [parameter()]
@@ -334,7 +338,7 @@ function Set-TargetResource {
         $BypassDuration,
 
         [parameter()]
-        [System.String]
+        [System.String[]]
         $Zones,
 
         [ValidateSet("Present","Absent")]
@@ -349,7 +353,7 @@ function Set-TargetResource {
     }
     process {
 
-        Import-module Citrix.StoreFront -ErrorAction Stop
+        Import-module Citrix.StoreFront -ErrorAction Stop -Verbose:$false
         $StoreService = Get-STFStoreService | Where-object {$_.friendlyname -eq $StoreName}
         If ($StoreService) {
             $StoreFarm = Get-STFStoreFarm -StoreService $StoreService
@@ -370,11 +374,17 @@ function Set-TargetResource {
                     $expected = $PSBoundParameters[$property];
                     $actual = $targetResource[$property];
                     if ($PSBoundParameters[$property] -is [System.String[]]) {
-                        if (Compare-Object -ReferenceObject $expected -DifferenceObject $actual) {
-                            if (!($ChangedParams.ContainsKey($property))) {
-                                Write-Verbose "Adding $property to FarmParams"
-                                $ChangedParams.Add($property,$PSBoundParameters[$property])
+                        if ($actual) {
+                            if (Compare-Object -ReferenceObject $expected -DifferenceObject $actual) {
+                                if (!($ChangedParams.ContainsKey($property))) {
+                                    Write-Verbose "Adding $property to FarmParams"
+                                    $ChangedParams.Add($property,$PSBoundParameters[$property])
+                                }
                             }
+                        }
+                        Else {
+                            Write-Verbose "Adding $property to FarmParams"
+                            $ChangedParams.Add($property,$PSBoundParameters[$property])
                         }
                     }
                     elseif ($expected -ne $actual) {
@@ -421,14 +431,9 @@ function Set-TargetResource {
             }
             #endregion
 
-            #Region Update Servers value to array
-            $ArrServers = $Servers.Split(",")
-            $AllParams.Servers = $ArrServers
-            If ($ChangedParams.ContainsKey("Servers")) {
-                $ChangedParams.Servers = $ArrServers
-            }
-            Else {
-                $ChangedParams.Add("Servers",$ArrServers)
+            #Region Add Servers value if not exist
+            If (!($ChangedParams.ContainsKey("Servers"))) {
+                $ChangedParams.Add("Servers",$Servers)
             }
             #endregion
 
@@ -459,7 +464,6 @@ function Set-TargetResource {
                 If ($StoreFarm) {
                     #update params
                     $ChangedParams.Add("StoreService",$StoreService)
-                    $ChangedParams | Export-Clixml c:\Temp\changed.xml
 
                     #Update settings
                     Write-Verbose "Running Set-STFStoreFarm"
@@ -469,7 +473,6 @@ function Set-TargetResource {
                     #update params
                     $KeysToRemove = "AuthenticationService","Anonymous"
                     $KeysToRemove | ForEach-Object {$AllParams.Remove($_)}
-                    $AllParams | Export-Clixml c:\Temp\allparams.xml
 
                     #Create farm
                     Write-Verbose "Running New-STFStoreFarm"
@@ -485,7 +488,6 @@ function Set-TargetResource {
                 $AllParams.Add("FriendlyName",$StoreName)
                 $AllParams.Add("VirtualPath",$StoreVirtualPath)
                 $AllParams.Add("SiteId",$SiteId)
-                $AllParams | Export-Clixml c:\Temp\allparams.xml
 
                 #Create
                 Write-Verbose "Running Add-STFStoreService"
@@ -495,8 +497,11 @@ function Set-TargetResource {
         Else {
             #Uninstall
             Write-Verbose "Running Remove-STFStoreService"
+            $AuthVirtPath = $StoreService.AuthenticationServiceVirtualPath
+            $SiteId = $StoreService.SiteId
             $StoreService | Remove-STFStoreService -confirm:$false
-            $Auth = Get-STFAuthenticationService -VirtualPath $StoreService.AuthenticationServiceVirtualPath -SiteID $StoreService.SiteId
+            Write-Verbose "Running Get-STFAuthenticationService -VirtualPath $AuthVirtPath -SiteID $SiteId"
+            $Auth = Get-STFAuthenticationService -VirtualPath $AuthVirtPath -SiteID $SiteId
             If ($Auth) {
                 Write-Verbose "Running Remove-STFAuthenticationService"
                 $Auth | Remove-STFAuthenticationService -confirm:$false

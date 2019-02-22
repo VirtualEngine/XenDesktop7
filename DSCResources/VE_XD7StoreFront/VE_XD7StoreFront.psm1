@@ -40,7 +40,7 @@ function Get-TargetResource {
     }
     process {
 
-        Import-module Citrix.StoreFront -ErrorAction Stop;
+        Import-module Citrix.StoreFront -ErrorAction Stop -Verbose:$false;
         
         try {
             $Deployment = Get-STFDeployment -SiteId $SiteId
@@ -125,7 +125,7 @@ function Set-TargetResource {
 
     }
     process {
-        Import-module Citrix.StoreFront -ErrorAction Stop
+        Import-module Citrix.StoreFront -ErrorAction Stop -Verbose:$false
         $Deployment = Get-STFDeployment -SiteId $SiteId
         If ($Ensure -eq 'Present') {
             If ($Deployment) {
