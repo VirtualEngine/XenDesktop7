@@ -79,7 +79,9 @@ function Get-TargetResource
 			Write-Verbose "Running Get-DSOptimalGatewayForFarms"
 			$Gateway = Get-DSOptimalGatewayForFarms -SiteId $SiteId -ResourcesVirtualPath $ResourcesVirtualPath -ErrorAction SilentlyContinue
 		}
-		catch { }
+		catch {
+			Write-Verbose "Error on Get-DSOptimalGatewayForFarms: $($Error[0].Exception.Message)"
+		}
 
 		$returnValue = @{
 			SiteId = [System.UInt64]$Gateway.SiteId
@@ -164,7 +166,9 @@ function Set-TargetResource
 		Try {
 			$Gateway = Get-DSOptimalGatewayForFarms -SiteId $SiteId -ResourcesVirtualPath $ResourcesVirtualPath -ErrorAction SilentlyContinue
 		}
-		Catch {}
+		Catch {
+			Write-Verbose "Error on Get-DSOptimalGatewayForFarms: $($Error[0].Exception.Message)"
+		}
 
 		If ($Ensure -eq "Present") {
 			#Region Create Params hashtable
@@ -215,7 +219,8 @@ function Set-TargetResource
 		}
 		Else {
 			#Uninstall
-			$Gateway | Remove-DSOptimalGatewayForFarms
+			Write-Verbose "Calling Remove-DSOptimalGatewayForFarms"
+			Remove-DSOptimalGatewayForFarms -SiteId $SiteId -ResourcesVirtualPath $ResourcesVirtualPath
 		}
 
 
@@ -312,7 +317,7 @@ function Test-TargetResource
 			}
 		}
 		Else {
-			If ($targetResource.Name -eq $Name) {
+			If ($targetResource.GatewayName -eq $GatewayName) {
 				$inCompliance = $false
 			}
 			Else {

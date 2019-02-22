@@ -24,6 +24,7 @@
                                 'XD7StoreFrontBaseUrl',
                                 'XD7StoreFront',
                                 'XD7StoreFrontExplicitCommonOptions',
+                                'XD7StoreFrontFarmConfiguration',
                                 'XD7StoreFrontOptimalGateway',
                                 'XD7StoreFrontStore',
                                 'XD7StoreFrontRegisterStoreGateway',
