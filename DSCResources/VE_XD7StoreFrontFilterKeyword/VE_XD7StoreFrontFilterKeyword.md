@@ -25,5 +25,11 @@ XD7StoreFrontFilterKeyword [string]
 ### Configuration
 
 ```
-<Insert Configuration here>
+Configuration XD7Example {
+    Import-DscResource -ModuleName XenDesktop7
+    XD7StoreFrontFilterKeyword XD7Example {
+        StoreName = 'mock'
+        IncludeKeywords = @('mock','support')
+    }
+}
 ```
