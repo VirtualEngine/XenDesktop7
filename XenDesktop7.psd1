@@ -25,6 +25,7 @@
                                 'XD7StoreFront',
                                 'XD7StoreFrontExplicitCommonOptions',
                                 'XD7StoreFrontFarmConfiguration',
+                                'XD7StoreFrontFilterKeyword',
                                 'XD7StoreFrontOptimalGateway',
                                 'XD7StoreFrontStore',
                                 'XD7StoreFrontRegisterStoreGateway',
