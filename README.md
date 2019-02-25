@@ -26,10 +26,23 @@ XD7StoreFront* resources don't have a `Credential` parameter.__
 * [XD7Site](#xd7site)
 * [XD7SiteConfig](#xd7siteconfig)
 * [XD7SiteLicense](#xd7sitelicense)
+* [XD7StoreFront](#xd7storefront)
 * [XD7StoreFrontAuthenticationMethod](#xd7storefrontauthenticationmethod)
 * [XD7StoreFrontBaseUrl](#xd7storefrontbaseurl)
+* [XD7StoreFrontExplicitCommonOptions](#xd7storefrontexplicitcommonoptions)
+* [XD7StoreFrontFarmConfiguration](#xd7storefrontfarmconfiguration)
+* [XD7StoreFrontFilterKeyword](#xd7storefrontfilterkeyword)
+* [XD7StoreFrontOptimalGateway](#xd7storefrontoptimalgateway)
 * [XD7StoreFrontReceiverAuthenticationMethod](#xd7storefrontreceiverauthenticationmethod)
+* [XD7StoreFrontRegisterStoreGateway](#xd7storefrontregisterstoregateway)
+* [XD7StoreFrontRoamingGateway](#xd7storefrontroaminggateway)
+* [XD7StoreFrontSessionStateTimeout](#xd7storefrontsessionstatetimeout)
+* [XD7StoreFrontStore](#xd7storefrontstore)
 * [XD7StoreFrontUnifiedExperience](#xd7storefrontunifiedexperience)
+* [XD7StoreFrontWebReceiverCommunication](#xd7storefrontwebreceivercommunication)
+* [XD7StoreFrontWebReceiverPluginAssistant](#xd7storefrontwebreceiverpluginassistant)
+* [XD7StoreFrontWebReceiverService](#xd7storefrontwebreceiverservice)
+* [XD7StoreFrontWebReceiverUserInterface](#xd7storefrontwebreceiveruserinterface)
 * [XD7VDAController](#xd7vdacontroller)
 * [XD7VDAFeature](#xd7vdafeature)
 * [XD7WaitForSite](#xd7waitforsite)
@@ -726,6 +739,41 @@ Configuration XD7SiteLicenseExample {
 }
 ```
 
+## XD7StoreFront
+
+Creates or updates a StoreFront deployment with the required features installed and configured
+
+### Syntax
+
+```
+XD7StoreFront [string]
+{
+    SiteId = [UInt64]
+    [ HostBaseUrl = [String] ]
+    [ Ensure = [String] { Present | Absent } ]
+}
+```
+
+### Properties
+
+* **SiteId**: Citrix StoreFront base url.
+* **HostBaseUrl**: Citrix StoreFront host base url.
+  * If not specified, this value defaults to http://localhost.
+* **Ensure**: Ensure.
+
+### Configuration
+
+```
+Configuration XD7StoreFrontExample {
+    Import-DscResource -ModuleName XenDesktop7
+    XD7StoreFront XD7StoreFrontExample {
+        SiteId = 1
+        HostBaseUrl = 'http://localhost/'
+        Ensure = 'Present'
+    }
+}
+```
+
 ## XD7StoreFrontAuthenticationMethod
 
 Configures the available authentication providers of a Citrix StoreFront 2.x or 3.x server.
@@ -792,6 +840,195 @@ Configuration XD7StoreFrontBaseUrlExample {
 }
 ```
 
+## XD7StoreFrontExplicitCommonOptions
+
+Set the ExplicitCommon protocol options
+
+### Syntax
+
+```
+XD7StoreFrontExplicitCommonOptions [string]
+{
+    StoreName = [String]
+    [ Domains[] = [String] ]
+    [ DefaultDomain = [String] ]
+    [ HideDomainField = [Boolean] ]
+    [ AllowUserPasswordChange = [String] { Always | ExpiredOnly | Never } ]
+    [ ShowPasswordExpiryWarning = [String] { Custom | Never | Windows } ]
+    [ PasswordExpiryWarningPeriod = [Uint32] ]
+    [ AllowZeroLengthPassword = [Boolean] ]
+}
+```
+
+### Properties
+
+* **StoreName**: StoreFront store name.
+* **Domains[]**: List of trusted domains.
+* **DefaultDomain**: The default domain to use when omitted during login.
+* **HideDomainField**: Hide the domain field on the login form.
+* **AllowUserPasswordChange**: Configure when a user can change a password.
+* **ShowPasswordExpiryWarning**: Show the password expiry warning to the user.
+* **PasswordExpiryWarningPeriod**: The period of time in days before the expiry warning should be shown.
+* **AllowZeroLengthPassword**: Allow a zero length password.
+
+### Configuration
+
+```
+Configuration XD7Example {
+    Import-DscResource -ModuleName XenDesktop7
+    XD7StoreFrontExplicitCommonOptions XD7Example {
+        StoreName = 'mock'
+        Domains = 'ipdev'
+        DefaultDomain = 'ipdev'
+        AllowUserPasswordChange = 'Always'
+    }
+}
+```
+
+## XD7StoreFrontFarmConfiguration
+
+Sets the StoreFront farm configuration settings.
+
+### Syntax
+
+```
+XD7StoreFrontFarmConfiguration [string]
+{
+    StoreName = [String]
+    [ EnableFileTypeAssociation = [Boolean] ]
+    [ CommunicationTimeout = [String] ]
+    [ ConnectionTimeout = [String] ]
+    [ LeasingStatusExpiryFailed = [String] ]
+    [ LeasingStatusExpiryLeasing = [String] ]
+    [ LeasingStatusExpiryPending = [String] ]
+    [ PooledSockets = [Boolean] ]
+    [ ServerCommunicationAttempts = [UInt32] ]
+    [ BackgroundHealthCheckPollingPeriod = [String] ]
+    [ AdvancedHealthCheck = [Boolean] ]
+}
+```
+
+### Properties
+
+* **StoreName**: StoreFront store name.
+* **EnableFileTypeAssociation**: Enable file type association.
+* **CommunicationTimeout**: Communication timeout when using to the Xml service in seconds.
+* **ConnectionTimeout**: Connection timeout when connecting to the Xml service in seconds.
+* **LeasingStatusExpiryFailed**: Period of time before retrying a XenDesktop 7 and greater farm in failed leasing mode in seconds.
+* **LeasingStatusExpiryLeasing**: Period of time before retrying a XenDesktop 7 and greater farm in leasing mode in seconds.
+* **LeasingStatusExpiryPending**: Period of time before retrying a XenDesktop 7 and greater farm pending leasing mode in seconds.
+* **PooledSockets**: Use pooled sockets.
+* **ServerCommunicationAttempts**: Number of server connection attempts before failing.
+* **BackgroundHealthCheckPollingPeriod**: Period of time between polling XenApp or XenDesktop server health in seconds.
+* **AdvancedHealthCheck**: Indicates whether an advanced health-check should be performed.
+
+### Configuration
+
+```
+Configuration XD7Example {
+    Import-DscResource -ModuleName XenDesktop7
+    XD7StoreFrontFarmConfiguration XD7StoreFrontExample {
+        StoreName = 'mock'
+        PooledSockets = $true
+    }
+}
+
+```
+
+## XD7StoreFrontFilterKeyword
+
+Sets up enumeration filtering basing on resource keywords.
+
+### Syntax
+
+```
+XD7StoreFrontFilterKeyword [string]
+{
+    StoreName = [String]
+    [ IncludeKeywords = [String[]] ]
+    [ ExcludeKeywords = [String[]] ]
+}
+```
+
+### Properties
+
+* **StoreName**: StoreFront store name.
+* **IncludeKeywords**:  Whitelist filtering. Only resources having one of the keywords specified are enumerated.
+* **ExcludeKeywords**: Blacklist filtering. Only resources not having any of the keywords specified are enumerated.
+
+    **Note: the filtering can be either by white- or blacklist, not both at the same time.**  
+
+### Configuration
+
+```
+Configuration XD7Example {
+    Import-DscResource -ModuleName XenDesktop7
+    XD7StoreFrontFilterKeyword XD7Example {
+        StoreName = 'mock'
+        IncludeKeywords = @('mock','support')
+    }
+}
+```
+
+## XD7StoreFrontOptimalGateway
+
+Set the farms and the optimal gateway to use for launch.
+
+### Syntax
+
+```
+XD7StoreFrontOptimalGateway [string]
+{
+    GatewayName = [String]
+    ResourcesVirtualPath = [String]
+    Hostnames[] = [String]
+    StaUrls[] = [String]
+    Farms[] = [String]
+    [ SiteId = [UInt64] ]
+    [ StasUseLoadBalancing = [Boolean] ]
+    [ StasBypassDuration = [String] ]
+    [ EnableSessionReliability = [Boolean] ]
+    [ UseTwoTickets = [Boolean] ]
+    [ Zones[] = [String] ]
+    [ EnabledOnDirectAccess = [Boolean] ]
+    [ Ensure = [String] { Present | Absent } ]
+}
+```
+
+### Properties
+
+* **GatewayName**: StoreFront gateway name.
+* **SiteId**: Site Id.
+  * If not specified, this value defaults to 1.
+* **ResourcesVirtualPath**: Resources Virtual Path.
+* **Hostnames[]**: Hostnames.
+* **StaUrls[]**: Secure Ticket Authority server Urls.
+* **StasUseLoadBalancing**: Load balance between the configured STA servers.
+* **StasBypassDuration**: Time before retrying a failed STA server.
+* **EnableSessionReliability**: Enable session reliability.
+* **UseTwoTickets**: Request STA tickets from two STA servers.
+* **Farms[]**: Farms.
+* **Zones[]**: Zones.
+* **EnabledOnDirectAccess**: Enabled On Direct Access.
+* **Ensure**: Ensure.
+
+### Configuration
+
+```
+Configuration XD7Example {
+    Import-DscResource -ModuleName XenDesktop7
+    XD7StoreFrontOptimalGateway XD7StoreFrontExample {
+        ResourcesVirtualPath = '/Citrix/mock'
+        GatewayName = 'ag.netscaler.com'
+        Hostnames = @('ag.netscaler.com:443','ag2.netscaler.com:443')
+        StaUrls = @('http://test/Scripts/CtxSTA.dll','http://test2/Scripts/CtxSTA.dll')
+        Farms = 'mockfarm'
+        StasBypassDuration = '02:00:00'
+	    Ensure = 'Present'
+    }
+}
+```
+
 ## XD7StoreFrontReceiverAuthenticationMethod
 
 Configures the available authentication providers of a Citrix StoreFront 2.x or 3.x server.
@@ -824,6 +1061,212 @@ Configuration XD7StoreFrontReceiverAuthenticationMethodExample {
         VirtualPath = '/Citrix/StoreWeb'
         SiteId = 1
         AuthenticationMethod = 'ExplicitForms','WindowsIntegrated'
+    }
+}
+```
+
+## XD7StoreFrontRegisterStoreGateway
+
+Register an authentication Gateway with a Store.
+
+### Syntax
+
+```
+XD7StoreFrontRegisterStoreGateway [string]
+{
+    StoreName = [String]
+    GatewayName = [String]
+    AuthenticationProtocol[] = [String] { CitrixAGBasic | CitrixAGBasicNoPassword | HttpBasic | Certificate | CitrixFederation | IntegratedWindows | Forms-Saml | ExplicitForms }
+    [ Ensure = [String] { Present | Absent } ]
+}
+```
+
+### Properties
+
+* **StoreName**: Citrix StoreFront name.
+* **GatewayName**: Gateway name.
+* **AuthenticationProtocol[]**: Authentication Protocol.
+* **Ensure**: Ensure.
+
+### Configuration
+
+```
+Configuration XD7StoreFrontRegisterStoreGatewayExample {
+    Import-DscResource -ModuleName XenDesktop7
+    XD7StoreFrontRegisterStoreGateway XD7StoreFrontRegisterStoreGatewayExample {
+        GatewayName = 'Netscaler'
+        StoreName = 'mock'
+        AuthenticationProtocol = @('ExplicitForms','CitrixFederation','CitrixAGBasicNoPassword')
+        Ensure = 'Present'
+    }
+}
+```
+
+## XD7StoreFrontRoamingGateway
+
+Add or update a Gateway that can be used for remote access and authentication.
+
+### Syntax
+
+```
+XD7StoreFrontRoamingGateway [string]
+{
+    Name = [String]
+    LogonType = [String] { UsedForHDXOnly | Domain | RSA | DomainAndRSA | SMS | GatewayKnows | SmartCard | None }
+    GatewayUrl = [String]
+    [ SmartCardFallbackLogonType = [String] ]
+    [ Version = [String] ]
+    [ CallbackUrl = [String] ]
+    [ SessionReliability = [Boolean] ]
+    [ RequestTicketTwoSTAs = [Boolean] ]
+    [ SubnetIPAddress = [String] ]
+    [ SecureTicketAuthorityUrls[] = [String] ]
+    [ StasUseLoadBalancing = [Boolean] ]
+    [ StasBypassDuration = [String] ]
+    [ GslbUrl = [String] ]
+    [ Ensure = [String] { Present | Absent } ]
+}
+```
+
+### Properties
+
+* **Name**: Gateway friendly name.
+* **LogonType**: The login type required and supported by the Gateway.
+* **SmartCardFallbackLogonType**: The login type to use when SmartCard fails.
+* **Version**: The Citrix NetScaler Gateway version.
+* **GatewayUrl**: The Gateway Url.
+* **CallbackUrl**: The Gateway authentication call-back Url.
+* **SessionReliability**: Enable session reliability.
+* **RequestTicketTwoSTAs**: Request STA tickets from two STA servers.
+* **SubnetIPAddress**: IP address.
+* **SecureTicketAuthorityUrls[]**: Secure Ticket Authority server Urls.
+* **StasUseLoadBalancing**: Load balance between the configured STA servers.
+* **StasBypassDuration**: Time before retrying a failed STA server.
+* **GslbUrl**: GSLB domain used by multiple gateways.
+* **Ensure**: Ensure.
+
+### Configuration
+
+```
+Configuration XD7StoreFrontRoamingGatewayExample {
+    Import-DscResource -ModuleName XenDesktop7
+    XD7StoreFrontRoamingGateway XD7StoreFrontRoamingGatewayExample {
+        Name = 'Netscaler'
+        LogonType = 'Domain'
+        GatewayUrl = 'https://accessgateway/netscaler'
+        Version = 'Version10_0_69_4'
+        SecureTicketAuthorityUrls = 'https://staurl/scripts/ctxsta.dll'
+        SessionReliability = $true
+        Ensure = 'Present'
+    }
+}
+```
+
+## XD7StoreFrontSessionStateTimeout
+
+Sets the sessionState time interval for a Web Receiver site
+
+### Syntax
+
+```
+XD7StoreFrontSessionStateTimeout [string]
+{
+    StoreName = [String]
+    [ IntervalInMinutes = [UInt32] ]
+    [ CommunicationAttempts = [UInt32] ]
+    [ CommunicationTimeout = [UInt32] ]
+    [ LoginFormTimeout = [UInt32] ]
+}
+```
+
+### Properties
+
+* **StoreName**: StoreFront store name.
+* **IntervalInMinutes**: Time interval in minutes.
+* **CommunicationAttempts**: Communication attempts.
+* **CommunicationTimeout**: Communication timeout.
+* **LoginFormTimeout**: Login form timeout.
+
+### Configuration
+
+```
+Configuration XD7Example {
+    Import-DscResource -ModuleName XenDesktop7
+    XD7StoreFrontSessionStateTimeout XD7Example {
+        StoreName = 'mock'
+        IntervalInMinutes = 20
+    }
+}
+```
+
+## XD7StoreFrontStore
+
+Creates or sets a StoreFront store and all it's properties.
+
+### Syntax
+
+```
+XD7StoreFrontStore [string]
+{
+    StoreName = [String]
+    AuthType = [String] { Explicit | Anonymous }
+    Servers[] = [String]
+    [ FarmName = [String] ]
+    [ Port = [UInt32] ]
+    [ TransportType = [String] { HTTP | HTTPS | SSL } ]
+    [ LoadBalance = [Boolean] ]
+    [ FarmType = [String] { XenApp | XenDesktop | AppController } ]
+    [ AuthVirtualPath = [String] ]
+    [ StoreVirtualPath = [String] ]
+    [ SiteId = [UInt64] ]
+    [ ServiceUrls[] = [String] ]
+    [ SSLRelayPort = [UInt32] ]
+    [ AllFailedBypassDuration = [UInt32] ]
+    [ BypassDuration = [UInt32] ]
+    [ Zones[] = [String] ]
+    [ LockedDown = [Boolean] ]
+    [ Ensure = [String] { Present | Absent } ]
+}
+```
+
+### Properties
+
+* **StoreName**: Citrix StoreFront name.
+* **AuthType**: Citrix StoreFront Authentication type.
+* **FarmName**: Citrix StoreFront farm name.
+  * If not specified, this value defaults to <StoreName>farm.
+* **Port**: Citrix StoreFront port.
+* **TransportType**: Citrix StoreFront transport type.
+* **Servers[]**: Citrix StoreFront director servers.
+* **LoadBalance**: Citrix StoreFront enable load balancing.
+* **FarmType**: Citrix StoreFront farm type.
+* **AuthVirtualPath**: Citrix StoreFront authenication service virtual path.
+  * If not specified, this value defaults to /Citrix/<StoreName>auth.
+* **StoreVirtualPath**: Citrix StoreFront store virtual path.
+  * If not specified, this value defaults to /Citrix/<StoreName>.
+* **SiteId**: Citrix StoreFront site id.
+  * If not specified, this value defaults to 1.
+* **ServiceUrls[]**: Citrix StoreFront service urls.
+* **SSLRelayPort**: Citrix StoreFront ssl relay port.
+* **AllFailedBypassDuration**: Citrix StoreFront all failed bypass duration.
+* **BypassDuration**: Citrix StoreFront bypass duration.
+* **Zones[]**: Citrix StoreFront zones.
+* **LockedDown**: All the resources delivered by locked-down Store are auto subscribed and do not allow for un-subscription.
+* **Ensure**: Ensure.
+
+### Configuration
+
+```
+Configuration XD7StoreFrontStoreExample {
+    Import-DscResource -ModuleName XenDesktop7
+    XD7StoreFrontStore XD7StoreFrontStoreExample {
+        StoreName = 'mock'
+        port = 8010
+        transportType = 'HTTP'
+        servers = "testserver01,testserver02"
+        farmType = 'XenDesktop'
+        AuthType = 'Explicit'
+        Ensure = "Present"
     }
 }
 ```
@@ -863,6 +1306,214 @@ Configuration XD7StoreFrontUnifiedExperienceExample {
         WebReceiverVirtualPath = '/Citrix/StoreWeb'
         SiteId = 1
         Ensure = 'Present'
+    }
+}
+```
+
+## XD7StoreFrontWebReceiverCommunication
+
+Set the WebReceiver communication settings
+
+### Syntax
+
+```
+XD7StoreFrontWebReceiverCommunication [string]
+{
+    StoreName = [String]
+    [ Attempts = [UInt32] ]
+    [ Timeout = [String] ]
+    [ Loopback = [String] { On | Off | OnUsingHttp } ]
+    [ LoopbackPortUsingHttp = [UInt32] ]
+    [ ProxyEnabled = [Boolean] ]
+    [ ProxyPort = [UInt32] ]
+    [ ProxyProcessName = [String] ]
+}
+```
+
+### Properties
+
+* **StoreName**: StoreFront store name.
+* **Attempts**: How many attempts WebReceiver should make to contact StoreFront before it gives up.
+* **Timeout**: Timeout value for communicating with StoreFront.
+* **Loopback**: Whether to use the loopback address for communications with the store service, rather than the actual StoreFront server URL.
+* **LoopbackPortUsingHttp**: When loopback is set to OnUsingHttp, the port number to use for loopback communications.
+* **ProxyEnabled**: Is the communications proxy enabled.
+* **ProxyPort**: The port to use for the communications proxy.
+* **ProxyProcessName**: The name of the process acting as proxy.
+
+### Configuration
+
+```
+Configuration XD7Example {
+    Import-DscResource -ModuleName XenDesktop7
+    XD7StoreFrontWebReceiverCommunication XD7Example {
+        StoreName = 'mock'
+        Loopback = 'OnUsingHttp'
+    }
+}
+```
+
+## XD7StoreFrontWebReceiverPluginAssistant
+
+Set the WebReceiver Plug-in Assistant options.
+
+### Syntax
+
+```
+XD7StoreFrontWebReceiverPluginAssistant [string]
+{
+    StoreName = [String]
+    [ Enabled = [Boolean] ]
+    [ UpgradeAtLogin = [Boolean] ]
+    [ ShowAfterLogin = [Boolean] ]
+    [ Win32Path = [String] ]
+    [ MacOSPath = [String] ]
+    [ MacOSMinimumSupportedVersion = [String] ]
+    [ Html5Enabled = [String] { Always | Fallback | Off } ]
+    [ Html5Platforms = [String] ]
+    [ Html5Preferences = [String] ]
+    [ Html5SingleTabLaunch = [Boolean] ]
+    [ Html5ChromeAppOrigins = [String] ]
+    [ Html5ChromeAppPreferences = [String] ]
+    [ ProtocolHandlerEnabled = [Boolean] ]
+    [ ProtocolHandlerPlatforms = [String] ]
+    [ ProtocolHandlerSkipDoubleHopCheckWhenDisabled = [Boolean] ]
+}
+```
+
+### Properties
+
+* **StoreName**: StoreFront store name.
+* **Enabled**: Enable Receiver client detection.
+* **UpgradeAtLogin**: Prompt to upgrade older clients.
+* **ShowAfterLogin**: Show Receiver client detection after the user logs in.
+* **Win32Path**: Path to the Windows Receiver.
+* **MacOSPath**: Path to the MacOS Receiver.
+* **MacOSMinimumSupportedVersion**: Minimum version of the MacOS supported.
+* **Html5Enabled**: Method of deploying and using the Html5 Receiver.
+* **Html5Platforms**: The supported Html5 platforms.
+* **Html5Preferences**: Html5 Receiver preferences.
+* **Html5SingleTabLaunch**: Launch Html5 Receiver in the same browser tab.
+* **Html5ChromeAppOrigins**: The Html5 Chrome Application Origins settings.
+* **Html5ChromeAppPreferences**: The Html5 Chrome Application preferences.
+* **ProtocolHandlerEnabled**: Enable the Receiver Protocol Handler.
+* **ProtocolHandlerPlatforms**: The supported Protocol Handler platforms.
+* **ProtocolHandlerSkipDoubleHopCheckWhenDisabled**: Skip the Protocol Handle double hop check.
+
+### Configuration
+
+```
+Configuration XD7Example {
+    Import-DscResource -ModuleName XenDesktop7
+    XD7StoreFrontWebReceiverPluginAssistant XD7Example {
+        StoreName = 'mock'
+        Enabled = $false
+    }
+}
+```
+
+## XD7StoreFrontWebReceiverService
+
+Configure Receiver for Web service options
+
+### Syntax
+
+```
+XD7StoreFrontWebReceiverService [string]
+{
+    StoreName = [String]
+    VirtualPath = [String]
+    SiteId = [UInt64]
+    [ ClassicReceiverExperience = [Boolean] ]
+    [ FriendlyName = [String] ]
+    [ Ensure = [String] { Present | Absent } ]
+}
+```
+
+### Properties
+
+* **StoreName**: StoreFront store name.
+* **VirtualPath**: Site virtual path.
+* **SiteId**: IIS site id.
+  * If not specified, this value defaults to 1.
+* **ClassicReceiverExperience**: Enable the classic Receiver experience.
+* **FriendlyName**: Friendly name to identify the Receiver for Web service.
+* **Ensure**: Whether the Storefront Web Receiver Service should be added or removed.
+
+### Configuration
+
+```
+Configuration XD7Example {
+    Import-DscResource -ModuleName XenDesktop7
+    XD7StoreFrontWebReceiverService XD7StoreFrontExample {
+        StoreName = 'mock'
+        VirtualPath = '/Citrix/mockweb'
+        ClassicReceiverExperience = $false
+        Ensure = 'Present'
+    }
+}
+```
+
+## XD7StoreFrontWebReceiverUserInterface
+
+Set the WebReceiver User Interface options.
+
+### Syntax
+
+```
+XD7StoreFrontWebReceiverUserInterface [string]
+{
+    StoreName = [String]
+    [ AutoLaunchDesktop = [Boolean] ]
+    [ MultiClickTimeout = [UInt32] ]
+    [ EnableAppsFolderView = [Boolean] ]
+    [ ShowAppsView = [Boolean] ]
+    [ ShowDesktopsView = [Boolean] ]
+    [ DefaultView = [String] { Apps | Auto | Desktops } ]
+    [ WorkspaceControlEnabled = [Boolean] ]
+    [ WorkspaceControlAutoReconnectAtLogon = [Boolean] ]
+    [ WorkspaceControlLogoffAction = [String] { Disconnect | None | Terminate } ]
+    [ WorkspaceControlShowReconnectButton = [Boolean] ]
+    [ WorkspaceControlShowDisconnectButton = [Boolean] ]
+    [ ReceiverConfigurationEnabled = [Boolean] ]
+    [ AppShortcutsEnabled = [Boolean] ]
+    [ AppShortcutsAllowSessionReconnect = [Boolean] ]
+}
+```
+
+### Properties
+
+* **StoreName**: StoreFront store name.
+* **AutoLaunchDesktop**: Whether to auto-launch desktop at login if there is only one desktop available for the user.
+* **MultiClickTimeout**: The time period for which the spinner control is displayed, after the user clicks on the App or Desktop icon within Receiver for Web.
+* **EnableAppsFolderView**: Allows the user to turn off folder view when in a locked-down store or unauthenticated store.
+* **ShowAppsView**: Whether to show the apps view tab.
+* **ShowDesktopsView**: Whether to show the desktops tab.
+* **DefaultView**: The view to show after logon.
+* **WorkspaceControlEnabled**: Whether to enable workspace control.
+* **WorkspaceControlAutoReconnectAtLogon**: Whether to perform auto-reconnect at login.
+* **WorkspaceControlLogoffAction**: Whether to disconnect or terminate HDX sessions when actively logging off Receiver for Web.
+* **WorkspaceControlShowReconnectButton**: Whether to show the reconnect button or link.
+* **WorkspaceControlShowDisconnectButton**: Whether to show the disconnect button or link.
+* **ReceiverConfigurationEnabled**: Enable the Receiver Configuration .CR download file.
+* **AppShortcutsEnabled**: Enable App Shortcuts.
+* **AppShortcutsAllowSessionReconnect**: Enable App Shortcuts to support session reconnect.
+
+### Configuration
+
+```
+Configuration XD7Example {
+    Import-DscResource -ModuleName XenDesktop7
+    XD7StoreFrontWebReceiverUserInterface XD7Example {
+        StoreName = 'mock'
+        WorkspaceControlLogoffAction = 'Disconnect'
+        WorkspaceControlEnabled = $True
+        WorkspaceControlAutoReconnectAtLogon = $True
+        AutoLaunchDesktop = $True
+        ShowDesktopsView = $False
+        ReceiverConfigurationEnabled = $False
+        MultiClickTimeout = 3
+        DefaultView = 'Apps'
     }
 }
 ```

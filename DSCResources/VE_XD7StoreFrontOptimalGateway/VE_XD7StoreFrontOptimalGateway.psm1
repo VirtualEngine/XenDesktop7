@@ -213,7 +213,6 @@ function Set-TargetResource
 
 			#Create gateway
 			Write-Verbose "Calling Set-DSOptimalGatewayForFarms"
-			$ChangedParams | Export-Clixml c:\Temp\changedparams.xml
 			Set-DSOptimalGatewayForFarms @ChangedParams
 
 		}

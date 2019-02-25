@@ -1,3 +1,9 @@
+## XD7StoreFrontWebReceiverPluginAssistant
+
+Set the WebReceiver Plug-in Assistant options.
+
+### Syntax
+
 ```
 XD7StoreFrontWebReceiverPluginAssistant [string]
 {

@@ -1,5 +1,5 @@
 ﻿
-## XD7StoreFrontWebReceiverService
+## XD7StoreFrontExplicitCommonOptions
 
 Set the ExplicitCommon protocol options
 

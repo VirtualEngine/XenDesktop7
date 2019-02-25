@@ -1,3 +1,10 @@
+
+## XD7StoreFrontWebReceiverUserInterface
+
+Set the WebReceiver User Interface options.
+
+### Syntax
+
 ```
 XD7StoreFrontWebReceiverUserInterface [string]
 {
