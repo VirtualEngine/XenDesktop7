@@ -29,6 +29,7 @@
                                 'XD7StoreFrontStore',
                                 'XD7StoreFrontRegisterStoreGateway',
                                 'XD7StoreFrontRoamingGateway',
+                                'XD7StoreFrontSessionStateTimeout',
                                 'XD7StoreFrontWebReceiverCommunication',
                                 'XD7StoreFrontFarmConfiguration',
                                 'XD7StoreFrontWebReceiverService',
