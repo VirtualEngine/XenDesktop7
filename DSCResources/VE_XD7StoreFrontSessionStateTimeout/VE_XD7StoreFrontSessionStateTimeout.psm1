@@ -35,26 +35,34 @@ function Get-TargetResource
         $LoginFormTimeout
     )
 
-        . 'C:\Program Files\Citrix\Receiver StoreFront\Scripts\ImportModulesGlobally.ps1' -Verbose:$false >$null *>&1
+    begin {
+        AssertXDModule -Name 'UtilsModule','WebReceiverModule' -Path "$env:ProgramFiles\Citrix\Receiver StoreFront\Management"
+    }
+    process {
+        $storefrontCmdletSearchPath = "$env:ProgramFiles\Citrix\Receiver StoreFront\Management"
+        Import-Module (FindXDModule -Name 'UtilsModule' -Path $storefrontCmdletSearchPath) -Scope Global -Verbose:$false
+        Import-Module (FindXDModule -Name 'WebReceiverModule' -Path $storefrontCmdletSearchPath) -Scope Global -Verbose:$false
+        Import-module Citrix.StoreFront -ErrorAction Stop -Verbose:$false
 
-    try {
-        Write-Verbose "Calling Get-STFStoreService for $StoreName"
-        $StoreService = Get-STFStoreService | Where-object {$_.friendlyname -eq $StoreName};
-        Write-Verbose "Calling Get-DSWebReceiversSummary"
-        $Configuration = Get-DSWebReceiversSummary | Where-object {$_.StoreVirtualPath -eq ($StoreService.VirtualPath)}
-    }
-    catch {
-        Write-Verbose "Trapped error getting web receiver communication. Error: $($Error[0].Exception.Message)"
-    }
-    $returnValue = @{
-        StoreName = [System.String]$StoreName
-        IntervalInMinutes = [System.UInt32]$Configuration.SessionStateTimeout
-        CommunicationAttempts = [System.UInt32]$Configuration.CommunicationAttempts
-        CommunicationTimeout = [System.UInt32]$Configuration.CommunicationTimeout.TotalMinutes
-        LoginFormTimeout = [System.UInt32]$Configuration.LoginFormTimeout
-    }
+        try {
+            Write-Verbose "Calling Get-STFStoreService for $StoreName"
+            $StoreService = Get-STFStoreService | Where-object {$_.friendlyname -eq $StoreName};
+            Write-Verbose "Calling Get-DSWebReceiversSummary"
+            $Configuration = Get-DSWebReceiversSummary | Where-object {$_.StoreVirtualPath -eq ($StoreService.VirtualPath)}
+        }
+        catch {
+            Write-Verbose "Trapped error getting web receiver communication. Error: $($Error[0].Exception.Message)"
+        }
+        $returnValue = @{
+            StoreName = [System.String]$StoreName
+            IntervalInMinutes = [System.UInt32]$Configuration.SessionStateTimeout
+            CommunicationAttempts = [System.UInt32]$Configuration.CommunicationAttempts
+            CommunicationTimeout = [System.UInt32]$Configuration.CommunicationTimeout.TotalMinutes
+            LoginFormTimeout = [System.UInt32]$Configuration.LoginFormTimeout
+        }
 
-    $returnValue
+        $returnValue
+    }
 }
 
 
@@ -80,68 +88,75 @@ function Set-TargetResource
         $LoginFormTimeout
     )
 
-        . 'C:\Program Files\Citrix\Receiver StoreFront\Scripts\ImportModulesGlobally.ps1' -Verbose:$false >$null *>&1
+    begin {
+        AssertXDModule -Name 'UtilsModule','WebReceiverModule' -Path "$env:ProgramFiles\Citrix\Receiver StoreFront\Management"
+    }
+    process {
+        $storefrontCmdletSearchPath = "$env:ProgramFiles\Citrix\Receiver StoreFront\Management"
+        Import-Module (FindXDModule -Name 'UtilsModule' -Path $storefrontCmdletSearchPath) -Scope Global -Verbose:$false
+        Import-Module (FindXDModule -Name 'WebReceiverModule' -Path $storefrontCmdletSearchPath) -Scope Global -Verbose:$false
+        Import-module Citrix.StoreFront -ErrorAction Stop -Verbose:$false
 
-    try {
-        Write-Verbose "Calling Get-STFStoreService for $StoreName"
-        $StoreService = Get-STFStoreService | Where-object {$_.friendlyname -eq $StoreName};
-        Write-Verbose "Calling Get-STFWebReceiverService"
-        $webreceiverservice = Get-STFWebReceiverService -StoreService $Storeservice
-        Write-Verbose "Calling Get-DSWebReceiversSummary"
-        $Configuration = Get-DSWebReceiversSummary | Where-object {$_.StoreVirtualPath -eq ($StoreService.VirtualPath)}
-    }
-    catch {
-        Write-Verbose "Trapped error getting web receiver user interface. Error: $($Error[0].Exception.Message)"
-    }
+        try {
+            Write-Verbose "Calling Get-STFStoreService for $StoreName"
+            $StoreService = Get-STFStoreService | Where-object {$_.friendlyname -eq $StoreName};
+            Write-Verbose "Calling Get-STFWebReceiverService"
+            $webreceiverservice = Get-STFWebReceiverService -StoreService $Storeservice
+            Write-Verbose "Calling Get-DSWebReceiversSummary"
+            $Configuration = Get-DSWebReceiversSummary | Where-object {$_.StoreVirtualPath -eq ($StoreService.VirtualPath)}
+        }
+        catch {
+            Write-Verbose "Trapped error getting web receiver user interface. Error: $($Error[0].Exception.Message)"
+        }
 
-    $ChangedParams = @{
-        SiteId = $StoreService.SiteId
-        VirtualPath = $webreceiverservice.VirtualPath
-    }
-    $targetResource = Get-TargetResource @PSBoundParameters;
-    foreach ($property in $PSBoundParameters.Keys) {
-        if ($targetResource.ContainsKey($property)) {
-            $expected = $PSBoundParameters[$property];
-            $actual = $targetResource[$property];
-            if ($PSBoundParameters[$property] -is [System.String[]]) {
-                if (Compare-Object -ReferenceObject $expected -DifferenceObject $actual) {
+        $ChangedParams = @{
+            SiteId = $StoreService.SiteId
+            VirtualPath = $webreceiverservice.VirtualPath
+        }
+        $targetResource = Get-TargetResource @PSBoundParameters;
+        foreach ($property in $PSBoundParameters.Keys) {
+            if ($targetResource.ContainsKey($property)) {
+                $expected = $PSBoundParameters[$property];
+                $actual = $targetResource[$property];
+                if ($PSBoundParameters[$property] -is [System.String[]]) {
+                    if (Compare-Object -ReferenceObject $expected -DifferenceObject $actual) {
+                        if (!($ChangedParams.ContainsKey($property))) {
+                            Write-Verbose "Adding $property to ChangedParams"
+                            $ChangedParams.Add($property,$PSBoundParameters[$property])
+                        }
+                    }
+                }
+                elseif ($expected -ne $actual) {
                     if (!($ChangedParams.ContainsKey($property))) {
                         Write-Verbose "Adding $property to ChangedParams"
                         $ChangedParams.Add($property,$PSBoundParameters[$property])
                     }
                 }
             }
-            elseif ($expected -ne $actual) {
-                if (!($ChangedParams.ContainsKey($property))) {
-                    Write-Verbose "Adding $property to ChangedParams"
-                    $ChangedParams.Add($property,$PSBoundParameters[$property])
-                }
-            }
         }
-    }
 
-    #Add in parameters that aren't changed with their current values
-    If (!($ChangedParams.ContainsKey("IntervalInMinutes"))) {
-        Write-Verbose "Adding IntervalInMinutes to ChangedParams with current value"
-        $ChangedParams.Add("IntervalInMinutes",[System.UInt32]$Configuration.SessionStateTimeout)
+        #Add in parameters that aren't changed with their current values
+        If (!($ChangedParams.ContainsKey("IntervalInMinutes"))) {
+            Write-Verbose "Adding IntervalInMinutes to ChangedParams with current value"
+            $ChangedParams.Add("IntervalInMinutes",[System.UInt32]$Configuration.SessionStateTimeout)
+        }
+        If (!($ChangedParams.ContainsKey("CommunicationAttempts"))) {
+            Write-Verbose "Adding CommunicationAttempts to ChangedParams with current value"
+            $ChangedParams.Add("CommunicationAttempts",[System.UInt32]$Configuration.CommunicationAttempts)
+        }
+        If (!($ChangedParams.ContainsKey("CommunicationTimeout"))) {
+            Write-Verbose "Adding CommunicationTimeout to ChangedParams with current value"
+            $ChangedParams.Add("CommunicationTimeout",[System.UInt32]$Configuration.CommunicationTimeout.TotalMinutes)
+        }
+        If (!($ChangedParams.ContainsKey("LoginFormTimeout"))) {
+            Write-Verbose "Adding LoginFormTimeout to ChangedParams with current value"
+            $ChangedParams.Add("LoginFormTimeout",[System.UInt32]$Configuration.LoginFormTimeout)
+        }
+        
+        $ChangedParams.Remove('StoreName')
+        Write-Verbose "Calling Set-DSSessionStateTimeout"
+        Set-DSSessionStateTimeout @ChangedParams
     }
-    If (!($ChangedParams.ContainsKey("CommunicationAttempts"))) {
-        Write-Verbose "Adding CommunicationAttempts to ChangedParams with current value"
-        $ChangedParams.Add("CommunicationAttempts",[System.UInt32]$Configuration.CommunicationAttempts)
-    }
-    If (!($ChangedParams.ContainsKey("CommunicationTimeout"))) {
-        Write-Verbose "Adding CommunicationTimeout to ChangedParams with current value"
-        $ChangedParams.Add("CommunicationTimeout",[System.UInt32]$Configuration.CommunicationTimeout.TotalMinutes)
-    }
-    If (!($ChangedParams.ContainsKey("LoginFormTimeout"))) {
-        Write-Verbose "Adding LoginFormTimeout to ChangedParams with current value"
-        $ChangedParams.Add("LoginFormTimeout",[System.UInt32]$Configuration.LoginFormTimeout)
-    }
-    
-    $ChangedParams.Remove('StoreName')
-    Write-Verbose "Calling Set-DSSessionStateTimeout"
-    Set-DSSessionStateTimeout @ChangedParams
-
 }
 
 

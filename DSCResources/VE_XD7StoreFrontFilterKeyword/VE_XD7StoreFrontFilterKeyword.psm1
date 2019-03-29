@@ -31,25 +31,33 @@ function Get-TargetResource
         $ExcludeKeywords
     )
 
-    . 'C:\Program Files\Citrix\Receiver StoreFront\Scripts\ImportModulesGlobally.ps1' -Verbose:$false >$null *>&1
-
-    try {
-        Write-Verbose "Calling Get-STFStoreService for $StoreName"
-        $StoreService = Get-STFStoreService | Where-object {$_.friendlyname -eq $StoreName};
-        Write-Verbose "Calling Get-DSWebReceiversSummary"
-        $Configuration = get-dsresourcefilterkeyword -SiteId ($StoreService.SiteId) -VirtualPath ($StoreService.VirtualPath)
+    begin {
+        AssertXDModule -Name 'StoresModule','UtilsModule' -Path "$env:ProgramFiles\Citrix\Receiver StoreFront\Management"
     }
-    catch {
-        Write-Verbose "Trapped error getting web receiver communication. Error: $($Error[0].Exception.Message)"
-    }
+    process {
+        Import-module Citrix.StoreFront -ErrorAction Stop -Verbose:$false
+        $storefrontCmdletSearchPath = "$env:ProgramFiles\Citrix\Receiver StoreFront\Management"
+        Import-Module (FindXDModule -Name 'UtilsModule' -Path $storefrontCmdletSearchPath) -Scope Global -Verbose:$false
+        Import-Module (FindXDModule -Name 'StoresModule' -Path $storefrontCmdletSearchPath) -Scope Global -Verbose:$false
 
-    $returnValue = @{
-        StoreName = [System.String]$StoreName
-        IncludeKeywords = [System.String[]]$Configuration.Include
-        ExcludeKeywords = [System.String[]]$Configuration.Exclude
-    }
+        try {
+            Write-Verbose "Calling Get-STFStoreService for $StoreName"
+            $StoreService = Get-STFStoreService | Where-object {$_.friendlyname -eq $StoreName};
+            Write-Verbose "Calling Get-DSWebReceiversSummary"
+            $Configuration = get-dsresourcefilterkeyword -SiteId ($StoreService.SiteId) -VirtualPath ($StoreService.VirtualPath)
+        }
+        catch {
+            Write-Verbose "Trapped error getting web receiver communication. Error: $($Error[0].Exception.Message)"
+        }
 
-    $returnValue
+        $returnValue = @{
+            StoreName = [System.String]$StoreName
+            IncludeKeywords = [System.String[]]$Configuration.Include
+            ExcludeKeywords = [System.String[]]$Configuration.Exclude
+        }
+
+        $returnValue
+    }
 }
 
 
@@ -71,54 +79,61 @@ function Set-TargetResource
         $ExcludeKeywords
     )
 
-    . 'C:\Program Files\Citrix\Receiver StoreFront\Scripts\ImportModulesGlobally.ps1' -Verbose:$false >$null *>&1
+    begin {
+        AssertXDModule -Name 'StoresModule','UtilsModule' -Path "$env:ProgramFiles\Citrix\Receiver StoreFront\Management"
+    }
+    process {
+        Import-module Citrix.StoreFront -ErrorAction Stop -Verbose:$false
+        $storefrontCmdletSearchPath = "$env:ProgramFiles\Citrix\Receiver StoreFront\Management"
+        Import-Module (FindXDModule -Name 'UtilsModule' -Path $storefrontCmdletSearchPath) -Scope Global -Verbose:$false
+        Import-Module (FindXDModule -Name 'StoresModule' -Path $storefrontCmdletSearchPath) -Scope Global -Verbose:$false
 
-    try {
-        Write-Verbose "Calling Get-STFStoreService for $StoreName"
-        $StoreService = Get-STFStoreService | Where-object {$_.friendlyname -eq $StoreName};
-    }
-    catch {
-        Write-Verbose "Trapped error getting web receiver user interface. Error: $($Error[0].Exception.Message)"
-    }
+        try {
+            Write-Verbose "Calling Get-STFStoreService for $StoreName"
+            $StoreService = Get-STFStoreService | Where-object {$_.friendlyname -eq $StoreName};
+        }
+        catch {
+            Write-Verbose "Trapped error getting web receiver user interface. Error: $($Error[0].Exception.Message)"
+        }
 
-    $ChangedParams = @{
-        SiteId = $StoreService.SiteId
-        VirtualPath = $StoreService.VirtualPath
-    }
-    $targetResource = Get-TargetResource @PSBoundParameters;
-    foreach ($property in $PSBoundParameters.Keys) {
-        if ($targetResource.ContainsKey($property)) {
-            $expected = $PSBoundParameters[$property];
-            $actual = $targetResource[$property];
-            if ($actual) {
-                if ($PSBoundParameters[$property] -is [System.String[]]) {
-                    if (Compare-Object -ReferenceObject $expected -DifferenceObject $actual) {
+        $ChangedParams = @{
+            SiteId = $StoreService.SiteId
+            VirtualPath = $StoreService.VirtualPath
+        }
+        $targetResource = Get-TargetResource @PSBoundParameters;
+        foreach ($property in $PSBoundParameters.Keys) {
+            if ($targetResource.ContainsKey($property)) {
+                $expected = $PSBoundParameters[$property];
+                $actual = $targetResource[$property];
+                if ($actual) {
+                    if ($PSBoundParameters[$property] -is [System.String[]]) {
+                        if (Compare-Object -ReferenceObject $expected -DifferenceObject $actual) {
+                            if (!($ChangedParams.ContainsKey($property))) {
+                                Write-Verbose "Adding $property to ChangedParams"
+                                $ChangedParams.Add($property,$PSBoundParameters[$property])
+                            }
+                        }
+                    }
+                    elseif ($expected -ne $actual) {
                         if (!($ChangedParams.ContainsKey($property))) {
                             Write-Verbose "Adding $property to ChangedParams"
                             $ChangedParams.Add($property,$PSBoundParameters[$property])
                         }
                     }
                 }
-                elseif ($expected -ne $actual) {
+                else {
                     if (!($ChangedParams.ContainsKey($property))) {
                         Write-Verbose "Adding $property to ChangedParams"
                         $ChangedParams.Add($property,$PSBoundParameters[$property])
                     }
                 }
             }
-            else {
-                if (!($ChangedParams.ContainsKey($property))) {
-                    Write-Verbose "Adding $property to ChangedParams"
-                    $ChangedParams.Add($property,$PSBoundParameters[$property])
-                }
-            }
         }
+
+        $ChangedParams.Remove('StoreName')
+        Write-Verbose "Calling Set-DSResourceFilterKeyword"
+        Set-DSResourceFilterKeyword @ChangedParams
     }
-
-    $ChangedParams.Remove('StoreName')
-    Write-Verbose "Calling Set-DSResourceFilterKeyword"
-    Set-DSResourceFilterKeyword @ChangedParams
-
 }
 
 
@@ -174,6 +189,12 @@ function Test-TargetResource
     return $inCompliance;
 }
 
+
+$moduleRoot = Split-Path -Path $MyInvocation.MyCommand.Path -Parent;
+
+## Import the XD7Common library functions
+$moduleParent = Split-Path -Path $moduleRoot -Parent;
+Import-Module (Join-Path -Path $moduleParent -ChildPath 'VE_XD7Common');
 
 Export-ModuleMember -Function *-TargetResource
 
