@@ -78,10 +78,10 @@ function Get-TargetResource
     }
     process {
         $storefrontCmdletSearchPath = "$env:ProgramFiles\Citrix\Receiver StoreFront\Management"
-        Import-Module (FindXDModule -Name 'UtilsModule' -Path $storefrontCmdletSearchPath) -Scope Global -Verbose:$false
-        Import-Module (FindXDModule -Name 'StoresModule' -Path $storefrontCmdletSearchPath) -Scope Global -Verbose:$false
-        Import-Module (FindXDModule -Name 'FarmsModule' -Path $storefrontCmdletSearchPath) -Scope Global -Verbose:$false
-        Import-Module (FindXDModule -Name 'RoamingRecordsModule' -Path $storefrontCmdletSearchPath) -Scope Global -Verbose:$false
+        Import-Module (FindXDModule -Name 'UtilsModule' -Path $storefrontCmdletSearchPath) -Scope Global -Verbose:$false >$null *>&1
+        Import-Module (FindXDModule -Name 'StoresModule' -Path $storefrontCmdletSearchPath) -Scope Global -Verbose:$false >$null *>&1
+        Import-Module (FindXDModule -Name 'FarmsModule' -Path $storefrontCmdletSearchPath) -Scope Global -Verbose:$false >$null *>&1
+        Import-Module (FindXDModule -Name 'RoamingRecordsModule' -Path $storefrontCmdletSearchPath) -Scope Global -Verbose:$false >$null *>&1
 
         try {
             Write-Verbose "Running Get-DSOptimalGatewayForFarms"
@@ -173,10 +173,10 @@ function Set-TargetResource
     }
     process {
         $storefrontCmdletSearchPath = "$env:ProgramFiles\Citrix\Receiver StoreFront\Management"
-        Import-Module (FindXDModule -Name 'UtilsModule' -Path $storefrontCmdletSearchPath) -Scope Global -Verbose:$false
-        Import-Module (FindXDModule -Name 'StoresModule' -Path $storefrontCmdletSearchPath) -Scope Global -Verbose:$false
-        Import-Module (FindXDModule -Name 'FarmsModule' -Path $storefrontCmdletSearchPath) -Scope Global -Verbose:$false
-        Import-Module (FindXDModule -Name 'RoamingRecordsModule' -Path $storefrontCmdletSearchPath) -Scope Global -Verbose:$false
+        Import-Module (FindXDModule -Name 'UtilsModule' -Path $storefrontCmdletSearchPath) -Scope Global -Verbose:$false >$null *>&1
+        Import-Module (FindXDModule -Name 'StoresModule' -Path $storefrontCmdletSearchPath) -Scope Global -Verbose:$false >$null *>&1
+        Import-Module (FindXDModule -Name 'FarmsModule' -Path $storefrontCmdletSearchPath) -Scope Global -Verbose:$false >$null *>&1
+        Import-Module (FindXDModule -Name 'RoamingRecordsModule' -Path $storefrontCmdletSearchPath) -Scope Global -Verbose:$false >$null *>&1
 
         Write-Verbose "Running Get-DSOptimalGatewayForFarms"
         Try {

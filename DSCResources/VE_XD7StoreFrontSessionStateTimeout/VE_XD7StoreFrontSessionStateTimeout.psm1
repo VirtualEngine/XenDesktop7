@@ -36,12 +36,14 @@ function Get-TargetResource
     )
 
     begin {
-        AssertXDModule -Name 'UtilsModule','WebReceiverModule' -Path "$env:ProgramFiles\Citrix\Receiver StoreFront\Management"
+        AssertXDModule -Name 'UtilsModule','StoresModule','WebReceiverModule','AuthenticationModule' -Path "$env:ProgramFiles\Citrix\Receiver StoreFront\Management"
     }
     process {
         $storefrontCmdletSearchPath = "$env:ProgramFiles\Citrix\Receiver StoreFront\Management"
-        Import-Module (FindXDModule -Name 'UtilsModule' -Path $storefrontCmdletSearchPath) -Scope Global -Verbose:$false
-        Import-Module (FindXDModule -Name 'WebReceiverModule' -Path $storefrontCmdletSearchPath) -Scope Global -Verbose:$false
+        Import-Module (FindXDModule -Name 'UtilsModule' -Path $storefrontCmdletSearchPath) -Scope Global -Verbose:$false >$null *>&1
+        Import-Module (FindXDModule -Name 'StoresModule' -Path $storefrontCmdletSearchPath) -Scope Global -Verbose:$false >$null *>&1
+        Import-Module (FindXDModule -Name 'WebReceiverModule' -Path $storefrontCmdletSearchPath) -Scope Global -Verbose:$false >$null *>&1
+        Import-Module (FindXDModule -Name 'AuthenticationModule' -Path $storefrontCmdletSearchPath) -Scope Global -Verbose:$false >$null *>&1
         Import-module Citrix.StoreFront -ErrorAction Stop -Verbose:$false
 
         try {
@@ -89,12 +91,14 @@ function Set-TargetResource
     )
 
     begin {
-        AssertXDModule -Name 'UtilsModule','WebReceiverModule' -Path "$env:ProgramFiles\Citrix\Receiver StoreFront\Management"
+        AssertXDModule -Name 'UtilsModule','StoresModule','WebReceiverModule','AuthenticationModule' -Path "$env:ProgramFiles\Citrix\Receiver StoreFront\Management"
     }
     process {
         $storefrontCmdletSearchPath = "$env:ProgramFiles\Citrix\Receiver StoreFront\Management"
-        Import-Module (FindXDModule -Name 'UtilsModule' -Path $storefrontCmdletSearchPath) -Scope Global -Verbose:$false
-        Import-Module (FindXDModule -Name 'WebReceiverModule' -Path $storefrontCmdletSearchPath) -Scope Global -Verbose:$false
+        Import-Module (FindXDModule -Name 'UtilsModule' -Path $storefrontCmdletSearchPath) -Scope Global -Verbose:$false >$null *>&1
+        Import-Module (FindXDModule -Name 'StoresModule' -Path $storefrontCmdletSearchPath) -Scope Global -Verbose:$false >$null *>&1
+        Import-Module (FindXDModule -Name 'WebReceiverModule' -Path $storefrontCmdletSearchPath) -Scope Global -Verbose:$false >$null *>&1
+        Import-Module (FindXDModule -Name 'AuthenticationModule' -Path $storefrontCmdletSearchPath) -Scope Global -Verbose:$false >$null *>&1
         Import-module Citrix.StoreFront -ErrorAction Stop -Verbose:$false
 
         try {
