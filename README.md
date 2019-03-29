@@ -983,7 +983,7 @@ XD7StoreFrontOptimalGateway [string]
     ResourcesVirtualPath = [String]
     Hostnames[] = [String]
     StaUrls[] = [String]
-    Farms[] = [String]
+    [ Farms[] = [String] ]
     [ SiteId = [UInt64] ]
     [ StasUseLoadBalancing = [Boolean] ]
     [ StasBypassDuration = [String] ]
@@ -1008,6 +1008,7 @@ XD7StoreFrontOptimalGateway [string]
 * **EnableSessionReliability**: Enable session reliability.
 * **UseTwoTickets**: Request STA tickets from two STA servers.
 * **Farms[]**: Farms.
+  * If not specified, it will be set to all farms.
 * **Zones[]**: Zones.
 * **EnabledOnDirectAccess**: Enabled On Direct Access.
 * **Ensure**: Ensure.
@@ -1022,7 +1023,6 @@ Configuration XD7Example {
         GatewayName = 'ag.netscaler.com'
         Hostnames = @('ag.netscaler.com:443','ag2.netscaler.com:443')
         StaUrls = @('http://test/Scripts/CtxSTA.dll','http://test2/Scripts/CtxSTA.dll')
-        Farms = 'mockfarm'
         StasBypassDuration = '02:00:00'
 	    Ensure = 'Present'
     }
