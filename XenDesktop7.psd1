@@ -1,5 +1,5 @@
 @{
-    ModuleVersion        = '2.6.1';
+    ModuleVersion        = '2.6.3';
     GUID                 = '3bacd95f-494b-4ea2-989b-09cb5e324940';
     Author               = 'Iain Brighton';
     CompanyName          = 'Virtual Engine';
@@ -22,6 +22,19 @@
                                 'XD7Site',
                                 'XD7SiteLicense',
                                 'XD7StoreFrontBaseUrl',
+                                'XD7StoreFront',
+                                'XD7StoreFrontExplicitCommonOptions',
+                                'XD7StoreFrontFarmConfiguration',
+                                'XD7StoreFrontFilterKeyword',
+                                'XD7StoreFrontOptimalGateway',
+                                'XD7StoreFrontStore',
+                                'XD7StoreFrontRegisterStoreGateway',
+                                'XD7StoreFrontRoamingGateway',
+                                'XD7StoreFrontSessionStateTimeout',
+                                'XD7StoreFrontWebReceiverCommunication',
+                                'XD7StoreFrontFarmConfiguration',
+                                'XD7StoreFrontWebReceiverService',
+                                'XD7StoreFrontWebReceiverUserInterface',
                                 'XD7VDAController',
                                 'XD7VDAFeature',
                                 'XD7WaitForSite'

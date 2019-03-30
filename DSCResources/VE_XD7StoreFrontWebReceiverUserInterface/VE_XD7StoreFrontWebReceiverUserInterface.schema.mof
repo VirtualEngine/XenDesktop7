@@ -1,0 +1,21 @@
+
+[ClassVersion("1.0.0.0"), FriendlyName("XD7StoreFrontWebReceiverUserInterface")]
+class VE_XD7StoreFrontWebReceiverUserInterface : OMI_BaseResource
+{
+	[Key, Description("StoreFront store name")] String StoreName;
+	[Write, Description("Whether to auto-launch desktop at login if there is only one desktop available for the user")] Boolean AutoLaunchDesktop;
+	[Write, Description("The time period for which the spinner control is displayed, after the user clicks on the App or Desktop icon within Receiver for Web")] UInt32 MultiClickTimeout;
+	[Write, Description("Allows the user to turn off folder view when in a locked-down store or unauthenticated store")] Boolean EnableAppsFolderView;
+	[Write, Description("Whether to show the apps view tab")] Boolean ShowAppsView;
+	[Write, Description("Whether to show the desktops tab")] Boolean ShowDesktopsView;
+	[Write, Description("The view to show after logon"), ValueMap{"Apps","Auto","Desktops"}, Values{"Apps","Auto","Desktops"}] String DefaultView;
+	[Write, Description("Whether to enable workspace control")] Boolean WorkspaceControlEnabled;
+	[Write, Description("Whether to perform auto-reconnect at login")] Boolean WorkspaceControlAutoReconnectAtLogon;
+	[Write, Description("Whether to disconnect or terminate HDX sessions when actively logging off Receiver for Web"), ValueMap{"Disconnect","None","Terminate"}, Values{"Disconnect","None","Terminate"}] String WorkspaceControlLogoffAction;
+	[Write, Description("Whether to show the reconnect button or link")] Boolean WorkspaceControlShowReconnectButton;
+	[Write, Description("Whether to show the disconnect button or link")] Boolean WorkspaceControlShowDisconnectButton;
+	[Write, Description("Enable the Receiver Configuration .CR download file")] Boolean ReceiverConfigurationEnabled;
+	[Write, Description("Enable App Shortcuts")] Boolean AppShortcutsEnabled;
+	[Write, Description("Enable App Shortcuts to support session reconnect")] Boolean AppShortcutsAllowSessionReconnect;
+};
+

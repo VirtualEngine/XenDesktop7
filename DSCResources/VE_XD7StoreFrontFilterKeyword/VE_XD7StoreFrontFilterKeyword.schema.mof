@@ -1,0 +1,9 @@
+
+[ClassVersion("1.0.0.0"), FriendlyName("XD7StoreFrontFilterKeyword")]
+class VE_XD7StoreFrontFilterKeyword : OMI_BaseResource
+{
+	[Key, Description("StoreFront store name")] String StoreName;
+	[Write, Description(" Whitelist filtering. Only resources having one of the keywords specified are enumerated")] String IncludeKeywords[];
+	[Write, Description("Blacklist filtering. Only resources not having any of the keywords specified are enumerated")] String ExcludeKeywords[];
+};
+

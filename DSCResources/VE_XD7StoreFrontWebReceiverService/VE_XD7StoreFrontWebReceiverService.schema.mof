@@ -1,0 +1,12 @@
+
+[ClassVersion("1.0.0.0"), FriendlyName("XD7StoreFrontWebReceiverService")]
+class VE_XD7StoreFrontWebReceiverService : OMI_BaseResource
+{
+	[Key, Description("StoreFront store name")] String StoreName;
+	[Required, Description("Site virtual path")] String VirtualPath;
+	[Read, Description("IIS site id")] UInt64 SiteId;
+	[Write, Description("Enable the classic Receiver experience")] Boolean ClassicReceiverExperience;
+	[Write, Description("Friendly name to identify the Receiver for Web service")] String FriendlyName;
+	[Write, ValueMap{"Present","Absent"}, Values{"Present","Absent"}] String Ensure;
+};
+
