@@ -11,7 +11,6 @@
 #>
 
 
-
 Import-LocalizedData -BindingVariable localizedData -FileName VE_XD7StoreFrontRoamingGateway.Resources.psd1;
 
 function Get-TargetResource
@@ -21,57 +20,25 @@ function Get-TargetResource
 	[OutputType([System.Collections.Hashtable])]
 	param
 	(
-		[parameter(Mandatory = $true)]
+		[Parameter(Mandatory = $true)]
 		[System.String]
 		$Name,
 
-		[parameter(Mandatory = $true)]
-		[ValidateSet("UsedForHDXOnly","Domain","RSA","DomainAndRSA","SMS","GatewayKnows","SmartCard","None")]
+		[Parameter(Mandatory = $true)]
+		[ValidateSet('UsedForHDXOnly','Domain','RSA','DomainAndRSA','SMS','GatewayKnows','SmartCard','None')]
 		[System.String]
 		$LogonType,
 
-		[System.String]
-		$SmartCardFallbackLogonType,
-
-		[System.String]
-		$Version,
-
+		[Parameter()]
 		[parameter(Mandatory = $true)]
 		[System.String]
-		$GatewayUrl,
-
-		[System.String]
-		$CallbackUrl,
-
-		[System.Boolean]
-		$SessionReliability,
-
-		[System.Boolean]
-		$RequestTicketTwoSTAs,
-
-		[System.String]
-		$SubnetIPAddress,
-
-		[System.String[]]
-		$SecureTicketAuthorityUrls,
-
-		[System.Boolean]
-		$StasUseLoadBalancing,
-
-		[System.String]
-		$StasBypassDuration,
-
-		[System.String]
-		$GslbUrl,
-
-		[ValidateSet("Present","Absent")]
-		[System.String]
-		$Ensure
+		$GatewayUrl
 	)
 
 		Import-module Citrix.StoreFront -ErrorAction Stop -Verbose:$false;
 
 		try {
+
 			Write-Verbose "Running Get-STFRoamingGateway -Name $Name"
 			$Gateway = Get-STFRoamingGateway -Name $Name -ErrorAction SilentlyContinue
 		}
@@ -103,118 +70,127 @@ function Set-TargetResource
 	[Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseShouldProcessForStateChangingFunctions', '')]
 	param
 	(
-		[parameter(Mandatory = $true)]
+		[Parameter(Mandatory = $true)]
 		[System.String]
 		$Name,
 
-		[parameter(Mandatory = $true)]
-		[ValidateSet("UsedForHDXOnly","Domain","RSA","DomainAndRSA","SMS","GatewayKnows","SmartCard","None")]
+		[Parameter(Mandatory = $true)]
+		[ValidateSet('UsedForHDXOnly','Domain','RSA','DomainAndRSA','SMS','GatewayKnows','SmartCard','None')]
 		[System.String]
 		$LogonType,
 
+		[Parameter()]
 		[System.String]
 		$SmartCardFallbackLogonType,
 
+		[Parameter()]
 		[System.String]
 		$Version,
 
-		[parameter(Mandatory = $true)]
+		[Parameter(Mandatory = $true)]
 		[System.String]
 		$GatewayUrl,
 
+		[Parameter()]
 		[System.String]
 		$CallbackUrl,
 
+		[Parameter()]
 		[System.Boolean]
 		$SessionReliability,
 
+		[Parameter()]
 		[System.Boolean]
 		$RequestTicketTwoSTAs,
 
+		[Parameter()]
 		[System.String]
 		$SubnetIPAddress,
 
+		[Parameter()]
 		[System.String[]]
 		$SecureTicketAuthorityUrls,
 
+		[Parameter()]
 		[System.Boolean]
 		$StasUseLoadBalancing,
 
+		[Parameter()]
 		[System.String]
 		$StasBypassDuration,
 
+		[Parameter()]
 		[System.String]
 		$GslbUrl,
 
-		[ValidateSet("Present","Absent")]
+		[Parameter()]
+		[ValidateSet('Present','Absent')]
 		[System.String]
-		$Ensure
-)
+		$Ensure = 'Present'
+	)
 
-		Import-module Citrix.StoreFront -ErrorAction Stop -Verbose:$false;
-		$Gateway = Get-STFRoamingGateway
+	Import-module Citrix.StoreFront -ErrorAction Stop -Verbose:$false;
+	$Gateway = Get-STFRoamingGateway
 
-		If ($Ensure -eq "Present") {
-			#Region Create Params hashtable
-			$AllParams = @{}
-			$ChangedParams = @{
-				Name = $Name
-				LogonType = $LogonType
-				GatewayUrl = $GatewayUrl
-			}
-			$targetResource = Get-TargetResource @PSBoundParameters;
-			foreach ($property in $PSBoundParameters.Keys) {
-				if ($targetResource.ContainsKey($property)) {
-					if (!($AllParams.ContainsKey($property))) {
-						$AllParams.Add($property,$PSBoundParameters[$property])
-					}
-					$expected = $PSBoundParameters[$property];
-					$actual = $targetResource[$property];
-					if ($PSBoundParameters[$property] -is [System.String[]]) {
-						if ($actual) {
-							if (Compare-Object -ReferenceObject $expected -DifferenceObject $actual) {
-								if (!($ChangedParams.ContainsKey($property))) {
-									Write-Verbose "Adding $property to ChangedParams"
-									$ChangedParams.Add($property,$PSBoundParameters[$property])
-								}
+	if ($Ensure -eq 'Present') {
+		#Region Create Params hashtable
+		$AllParams = @{}
+		$ChangedParams = @{
+			Name = $Name
+			LogonType = $LogonType
+			GatewayUrl = $GatewayUrl
+		}
+		$targetResource = Get-TargetResource @PSBoundParameters;
+		foreach ($property in $PSBoundParameters.Keys) {
+			if ($targetResource.ContainsKey($property)) {
+				if (!($AllParams.ContainsKey($property))) {
+					$AllParams.Add($property,$PSBoundParameters[$property])
+				}
+				$expected = $PSBoundParameters[$property];
+				$actual = $targetResource[$property];
+				if ($PSBoundParameters[$property] -is [System.String[]]) {
+					if ($actual) {
+						if (Compare-Object -ReferenceObject $expected -DifferenceObject $actual) {
+							if (!($ChangedParams.ContainsKey($property))) {
+								Write-Verbose -Message ($localized.SettingResourceProperty -f $property)
+								$ChangedParams.Add($property,$PSBoundParameters[$property])
 							}
 						}
-						else {
-							Write-Verbose "Adding $property to ChangedParams"
-							$ChangedParams.Add($property,$PSBoundParameters[$property])
-						}
 					}
-					elseif ($expected -ne $actual) {
-						if (!($ChangedParams.ContainsKey($property))) {
-							Write-Verbose "Adding $property to ChangedParams"
-							$ChangedParams.Add($property,$PSBoundParameters[$property])
-						}
+					else {
+						Write-Verbose -Message ($localized.SettingResourceProperty -f $property)
+						$ChangedParams.Add($property,$PSBoundParameters[$property])
+					}
+				}
+				elseif ($expected -ne $actual) {
+					if (!($ChangedParams.ContainsKey($property))) {
+						Write-Verbose -Message ($localized.SettingResourceProperty -f $property)
+						$ChangedParams.Add($property,$PSBoundParameters[$property])
 					}
 				}
 			}
-			#endregion
-
-			If ($Gateway) {
-				#Set changed parameters
-				Write-Verbose "Calling Set-STFRoamingGateway"
-				Set-STFRoamingGateway @ChangedParams -confirm:$false
-			}
-			Else {
-				#Create gateway
-				Write-Verbose "Calling Add-STFRoamingGateway"
-				Add-STFRoamingGateway @AllParams -confirm:$false
-			}
-
 		}
-		Else {
-			#Uninstall
-			$Gateway | Remove-STFRoamingGateway -confirm:$false
+		#endregion
+
+		if ($Gateway) {
+			#Set changed parameters
+			Write-Verbose -Message $localized.CallingSetSTFRoamingGateway
+			Set-STFRoamingGateway @ChangedParams -confirm:$false
+		}
+		else {
+			#Create gateway
+			Write-Verbose -Message $localized.CallingAddSTFRoamingGateway
+			Add-STFRoamingGateway @AllParams -confirm:$false
 		}
 
+	}
+	else {
+		#Uninstall
+		$Gateway | Remove-STFRoamingGateway -confirm:$false
+	}
 
 	#Include this line if the resource requires a system reboot.
 	#$global:DSCMachineStatus = 1
-
 
 }
 
@@ -225,56 +201,67 @@ function Test-TargetResource
 	[OutputType([System.Boolean])]
 	param
 	(
-		[parameter(Mandatory = $true)]
+		[Parameter(Mandatory = $true)]
 		[System.String]
 		$Name,
 
-		[parameter(Mandatory = $true)]
-		[ValidateSet("UsedForHDXOnly","Domain","RSA","DomainAndRSA","SMS","GatewayKnows","SmartCard","None")]
+		[Parameter(Mandatory = $true)]
+		[ValidateSet('UsedForHDXOnly','Domain','RSA','DomainAndRSA','SMS','GatewayKnows','SmartCard','None')]
 		[System.String]
 		$LogonType,
 
+		[Parameter()]
 		[System.String]
 		$SmartCardFallbackLogonType,
 
+		[Parameter()]
 		[System.String]
 		$Version,
 
-		[parameter(Mandatory = $true)]
+		[Parameter(Mandatory = $true)]
 		[System.String]
 		$GatewayUrl,
 
+		[Parameter()]
 		[System.String]
 		$CallbackUrl,
 
+		[Parameter()]
 		[System.Boolean]
 		$SessionReliability,
 
+		[Parameter()]
 		[System.Boolean]
 		$RequestTicketTwoSTAs,
 
+		[Parameter()]
 		[System.String]
 		$SubnetIPAddress,
 
+		[Parameter()]
 		[System.String[]]
 		$SecureTicketAuthorityUrls,
 
+		[Parameter()]
 		[System.Boolean]
 		$StasUseLoadBalancing,
 
+		[Parameter()]
 		[System.String]
 		$StasBypassDuration,
 
+		[Parameter()]
 		[System.String]
 		$GslbUrl,
 
-		[ValidateSet("Present","Absent")]
+		[Parameter()]
+		[ValidateSet('Present','Absent')]
 		[System.String]
-		$Ensure
+		$Ensure = 'Present'
 	)
 
 		$targetResource = Get-TargetResource @PSBoundParameters;
-		If ($Ensure -eq 'Present') {
+		if ($Ensure -eq 'Present') {
 			$inCompliance = $true;
 			foreach ($property in $PSBoundParameters.Keys) {
 				if ($targetResource.ContainsKey($property)) {
@@ -299,11 +286,11 @@ function Test-TargetResource
 				}
 			}
 		}
-		Else {
-			If ($targetResource.Name -eq $Name) {
+		else {
+			if ($targetResource.Name -eq $Name) {
 				$inCompliance = $false
 			}
-			Else {
+			else {
 				$inCompliance = $true
 			}
 		}
@@ -320,4 +307,3 @@ function Test-TargetResource
 
 
 Export-ModuleMember -Function *-TargetResource
-

@@ -16,7 +16,7 @@ XD7StoreFrontRoamingGateway [string]
     [ SessionReliability = [Boolean] ]
     [ RequestTicketTwoSTAs = [Boolean] ]
     [ SubnetIPAddress = [String] ]
-    [ SecureTicketAuthorityUrls[] = [String] ]
+    [ SecureTicketAuthorityUrls = [String[]] ]
     [ StasUseLoadBalancing = [Boolean] ]
     [ StasBypassDuration = [String] ]
     [ GslbUrl = [String] ]
@@ -45,7 +45,7 @@ XD7StoreFrontRoamingGateway [string]
 ### Configuration
 
 ```
-Configuration XD7StoreFrontRoamingGatewayExample {
+Configuration XD7Example {
     Import-DscResource -ModuleName XenDesktop7
     XD7StoreFrontRoamingGateway XD7StoreFrontRoamingGatewayExample {
         Name = 'Netscaler'

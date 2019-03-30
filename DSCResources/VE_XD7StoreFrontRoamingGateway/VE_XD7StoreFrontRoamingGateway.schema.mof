@@ -17,4 +17,3 @@ class VE_XD7StoreFrontRoamingGateway : OMI_BaseResource
 	[Write, Description(" GSLB domain used by multiple gateways")] String GslbUrl;
 	[Write, Description("Ensure"), ValueMap{"Present","Absent"}, Values{"Present","Absent"}] String Ensure;
 };
-
