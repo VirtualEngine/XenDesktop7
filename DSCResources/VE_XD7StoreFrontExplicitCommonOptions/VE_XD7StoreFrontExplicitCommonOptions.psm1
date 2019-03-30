@@ -18,41 +18,18 @@ function Get-TargetResource
     [OutputType([System.Collections.Hashtable])]
     param
     (
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [System.String]
-        $StoreName,
-
-        [System.String[]]
-        $Domains,
-
-        [System.String]
-        $DefaultDomain,
-
-        [System.Boolean]
-        $HideDomainField,
-
-        [ValidateSet("Always","ExpiredOnly","Never")]
-        [System.String]
-        $AllowUserPasswordChange,
-
-        [ValidateSet("Custom","Never","Windows")]
-        [System.String]
-        $ShowPasswordExpiryWarning,
-
-        [System.UInt32]
-        $PasswordExpiryWarningPeriod,
-
-        [System.Boolean]
-        $AllowZeroLengthPassword
+        $StoreName
     )
 
-    Import-module Citrix.StoreFront -ErrorAction Stop -Verbose:$false;
-    Write-Verbose "Calling Get-STFStoreService for store: $StoreName"
-    $StoreService = Get-STFStoreService | Where-object {$_.friendlyname -eq $StoreName};
-    Write-Verbose "Calling Get-STFAuthenticationService"
+    Import-Module Citrix.StoreFront -ErrorAction Stop -Verbose:$false
+    Write-Verbose -Message ($localized.CallingGetSTFStoreService -f $StoreName)
+    $StoreService = Get-STFStoreService | Where-Object { $_.friendlyname -eq $StoreName }
+    Write-Verbose -Message ($localized.CallingGetSTFAuthenticationService)
     $Auth = Get-STFAuthenticationService -VirtualPath ($StoreService.AuthenticationServiceVirtualPath) -SiteID ($StoreService.SiteId)
     If ($Auth) {
-        Write-Verbose "Calling Get-STFExplicitCommonOptions for authenticationservice: $($Auth.FriendlyName)"
+        Write-Verbose -Message ($localized.CallingGetSTFExplicitCommonOptions -f $Auth.FriendlyName)
         $AuthOptions = Get-STFExplicitCommonOptions -AuthenticationService $Auth
     }
 
@@ -61,7 +38,7 @@ function Get-TargetResource
     $DefaultDomain = $WebConfig.configuration.'citrix.deliveryservices'.explicitBL.domainselection.default
 
     $returnValue = @{
-        StoreName = [System.String]$StoreService.FriendlyName
+        StoreName = $StoreName
         Domains = [System.String[]]$AuthOptions.DomainSelection
         DefaultDomain = [System.String]$DefaultDomain
         HideDomainField = [System.Boolean]$AuthOptions.HideDomainField
@@ -78,40 +55,49 @@ function Get-TargetResource
 function Set-TargetResource
 {
     [CmdletBinding()]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingUserNameAndPassWordParams', '')]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingPlainTextForPassword', '')]
     param
     (
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [System.String]
         $StoreName,
 
+        [Parameter()]
         [System.String[]]
         $Domains,
 
+        [Parameter()]
         [System.String]
         $DefaultDomain,
 
+        [Parameter()]
         [System.Boolean]
         $HideDomainField,
 
-        [ValidateSet("Always","ExpiredOnly","Never")]
+        [Parameter()]
+        [ValidateSet('Always','ExpiredOnly','Never')]
         [System.String]
         $AllowUserPasswordChange,
 
-        [ValidateSet("Custom","Never","Windows")]
+        [Parameter()]
+        [ValidateSet('Custom','Never','Windows')]
         [System.String]
         $ShowPasswordExpiryWarning,
 
+        [Parameter()]
         [System.UInt32]
         $PasswordExpiryWarningPeriod,
 
+        [Parameter()]
         [System.Boolean]
         $AllowZeroLengthPassword
     )
 
-    Import-module Citrix.StoreFront -ErrorAction Stop -Verbose:$false;
-    Write-Verbose "Calling Get-STFStoreService for store: $StoreName"
+    Import-Module Citrix.StoreFront -ErrorAction Stop -Verbose:$false;
+    Write-Verbose -Message ($localized.CallingGetSTFStoreService -f $StoreName)
     $StoreService = Get-STFStoreService | Where-object {$_.friendlyname -eq $StoreName};
-    Write-Verbose "Calling Get-STFAuthenticationService"
+    Write-Verbose -Message ($localized.CallingGetSTFAuthenticationService)
     $Auth = Get-STFAuthenticationService -VirtualPath $StoreService.AuthenticationServiceVirtualPath -SiteID $StoreService.SiteId
 
     $ChangedParams = @{
@@ -125,21 +111,21 @@ function Set-TargetResource
             if ($PSBoundParameters[$property] -is [System.String[]]) {
                 if (Compare-Object -ReferenceObject $expected -DifferenceObject $actual) {
                     if (!($ChangedParams.ContainsKey($property))) {
-                        Write-Verbose "Adding $property to ChangedParams"
+                        Write-Verbose -Message ($localized.SettingResourceProperty -f $property)
                         $ChangedParams.Add($property,$PSBoundParameters[$property])
                     }
                 }
             }
             elseif ($expected -ne $actual) {
                 if (!($ChangedParams.ContainsKey($property))) {
-                    Write-Verbose "Adding $property to ChangedParams"
+                    Write-Verbose -Message ($localized.SettingResourceProperty -f $property)
                     $ChangedParams.Add($property,$PSBoundParameters[$property])
                 }
             }
         }
     }
 
-    Write-Verbose "Calling Set-STFExplicitCommonOptions"
+    Write-Verbose -Message $localized.CallingSetSTFExplicitCommonOptions
     Set-STFExplicitCommonOptions @ChangedParams
 
 }
@@ -148,67 +134,75 @@ function Set-TargetResource
 function Test-TargetResource
 {
     [CmdletBinding()]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingUserNameAndPassWordParams', '')]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingPlainTextForPassword', '')]
     [OutputType([System.Boolean])]
     param
     (
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [System.String]
         $StoreName,
 
+        [Parameter()]
         [System.String[]]
         $Domains,
 
+        [Parameter()]
         [System.String]
         $DefaultDomain,
 
+        [Parameter()]
         [System.Boolean]
         $HideDomainField,
 
-        [ValidateSet("Always","ExpiredOnly","Never")]
+        [Parameter()]
+        [ValidateSet('Always','ExpiredOnly','Never')]
         [System.String]
         $AllowUserPasswordChange,
 
-        [ValidateSet("Custom","Never","Windows")]
+        [Parameter()]
+        [ValidateSet('Custom','Never','Windows')]
         [System.String]
         $ShowPasswordExpiryWarning,
 
+        [Parameter()]
         [System.UInt32]
         $PasswordExpiryWarningPeriod,
 
+        [Parameter()]
         [System.Boolean]
         $AllowZeroLengthPassword
     )
 
-        $targetResource = Get-TargetResource @PSBoundParameters;
-        $inCompliance = $true;
-        foreach ($property in $PSBoundParameters.Keys) {
-            if ($targetResource.ContainsKey($property)) {
-                $expected = $PSBoundParameters[$property];
-                $actual = $targetResource[$property];
-                if ($PSBoundParameters[$property] -is [System.String[]]) {
-                    if (Compare-Object -ReferenceObject $expected -DifferenceObject $actual) {
-                        Write-Verbose ($localizedData.ResourcePropertyMismatch -f $property, ($expected -join ','), ($actual -join ','));
-                        $inCompliance = $false;
-                    }
-                }
-                elseif ($expected -ne $actual) {
-                    Write-Verbose ($localizedData.ResourcePropertyMismatch -f $property, $expected, $actual);
+    $targetResource = Get-TargetResource @PSBoundParameters;
+    $inCompliance = $true;
+    foreach ($property in $PSBoundParameters.Keys) {
+        if ($targetResource.ContainsKey($property)) {
+            $expected = $PSBoundParameters[$property];
+            $actual = $targetResource[$property];
+            if ($PSBoundParameters[$property] -is [System.String[]]) {
+                if (Compare-Object -ReferenceObject $expected -DifferenceObject $actual) {
+                    Write-Verbose ($localizedData.ResourcePropertyMismatch -f $property, ($expected -join ','), ($actual -join ','));
                     $inCompliance = $false;
                 }
             }
+            elseif ($expected -ne $actual) {
+                Write-Verbose ($localizedData.ResourcePropertyMismatch -f $property, $expected, $actual);
+                $inCompliance = $false;
+            }
         }
+    }
 
-        if ($inCompliance) {
-            Write-Verbose ($localizedData.ResourceInDesiredState -f $DeliveryGroup);
-        }
-        else {
-            Write-Verbose ($localizedData.ResourceNotInDesiredState -f $DeliveryGroup);
-        }
+    if ($inCompliance) {
+        Write-Verbose ($localizedData.ResourceInDesiredState -f $DeliveryGroup);
+    }
+    else {
+        Write-Verbose ($localizedData.ResourceNotInDesiredState -f $DeliveryGroup);
+    }
 
-        return $inCompliance;
+    return $inCompliance;
 
 }
 
 
 Export-ModuleMember -Function *-TargetResource
-

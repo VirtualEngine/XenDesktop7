@@ -842,7 +842,7 @@ Configuration XD7StoreFrontBaseUrlExample {
 
 ## XD7StoreFrontExplicitCommonOptions
 
-Set the ExplicitCommon protocol options
+Set the ExplicitCommon Authentication service protocol options.
 
 ### Syntax
 
@@ -850,7 +850,7 @@ Set the ExplicitCommon protocol options
 XD7StoreFrontExplicitCommonOptions [string]
 {
     StoreName = [String]
-    [ Domains[] = [String] ]
+    [ Domains = [String[]] ]
     [ DefaultDomain = [String] ]
     [ HideDomainField = [Boolean] ]
     [ AllowUserPasswordChange = [String] { Always | ExpiredOnly | Never } ]
@@ -863,7 +863,7 @@ XD7StoreFrontExplicitCommonOptions [string]
 ### Properties
 
 * **StoreName**: StoreFront store name.
-* **Domains[]**: List of trusted domains.
+* **Domains**: List of trusted domains.
 * **DefaultDomain**: The default domain to use when omitted during login.
 * **HideDomainField**: Hide the domain field on the login form.
 * **AllowUserPasswordChange**: Configure when a user can change a password.
@@ -874,9 +874,9 @@ XD7StoreFrontExplicitCommonOptions [string]
 ### Configuration
 
 ```
-Configuration XD7Example {
+Configuration XD7StoreFrontExplicitCommonOptionsExample {
     Import-DscResource -ModuleName XenDesktop7
-    XD7StoreFrontExplicitCommonOptions XD7Example {
+    XD7StoreFrontExplicitCommonOptions XD7StoreFrontExplicitCommonOptionsExample {
         StoreName = 'mock'
         Domains = 'ipdev'
         DefaultDomain = 'ipdev'
