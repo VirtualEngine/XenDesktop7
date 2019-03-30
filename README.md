@@ -1346,7 +1346,7 @@ XD7StoreFrontWebReceiverCommunication [string]
 ```
 Configuration XD7Example {
     Import-DscResource -ModuleName XenDesktop7
-    XD7StoreFrontWebReceiverCommunication XD7Example {
+    XD7StoreFrontWebReceiverCommunication XD7StoreFrontWebReceiverCommunicationExample {
         StoreName = 'mock'
         Loopback = 'OnUsingHttp'
     }
