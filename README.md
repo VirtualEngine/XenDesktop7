@@ -1405,7 +1405,7 @@ XD7StoreFrontWebReceiverPluginAssistant [string]
 ```
 Configuration XD7Example {
     Import-DscResource -ModuleName XenDesktop7
-    XD7StoreFrontWebReceiverPluginAssistant XD7Example {
+    XD7StoreFrontWebReceiverPluginAssistant XD7StoreFrontWebReceiverPluginAssistantExample {
         StoreName = 'mock'
         Enabled = $false
     }

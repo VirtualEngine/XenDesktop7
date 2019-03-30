@@ -19,4 +19,3 @@ class VE_XD7StoreFrontWebReceiverPluginAssistant : OMI_BaseResource
 	[Write, Description("The supported Protocol Handler platforms")] String ProtocolHandlerPlatforms;
 	[Write, Description("Skip the Protocol Handle double hop check")] Boolean ProtocolHandlerSkipDoubleHopCheckWhenDisabled;
 };
-

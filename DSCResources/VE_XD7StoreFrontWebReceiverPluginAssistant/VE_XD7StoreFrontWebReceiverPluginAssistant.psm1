@@ -1,4 +1,4 @@
-<#	
+<#
 	===========================================================================
 	 Created with: 	SAPIEN Technologies, Inc., PowerShell Studio 2019 v5.6.157
 	 Created on:   	2/8/2019 12:12 PM
@@ -18,69 +18,25 @@ function Get-TargetResource
     [OutputType([System.Collections.Hashtable])]
     param
     (
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [System.String]
-        $StoreName,
-
-        [System.Boolean]
-        $Enabled,
-
-        [System.Boolean]
-        $UpgradeAtLogin,
-
-        [System.Boolean]
-        $ShowAfterLogin,
-
-        [System.String]
-        $Win32Path,
-
-        [System.String]
-        $MacOSPath,
-
-        [System.String]
-        $MacOSMinimumSupportedVersion,
-
-        [ValidateSet("Always","Fallback","Off")]
-        [System.String]
-        $Html5Enabled,
-
-        [System.String]
-        $Html5Platforms,
-
-        [System.String]
-        $Html5Preferences,
-
-        [System.Boolean]
-        $Html5SingleTabLaunch,
-
-        [System.String]
-        $Html5ChromeAppOrigins,
-
-        [System.String]
-        $Html5ChromeAppPreferences,
-
-        [System.Boolean]
-        $ProtocolHandlerEnabled,
-
-        [System.String]
-        $ProtocolHandlerPlatforms,
-
-        [System.Boolean]
-        $ProtocolHandlerSkipDoubleHopCheckWhenDisabled
+        $StoreName
     )
 
     Import-module Citrix.StoreFront -ErrorAction Stop -Verbose:$false;
 
     try {
-        Write-Verbose "Calling Get-STFStoreService for $StoreName"
-        $StoreService = Get-STFStoreService | Where-object {$_.friendlyname -eq $StoreName};
-        Write-Verbose "Calling Get-STFWebReceiverService"
+
+        Write-Verbose -Message ($localizedData.CallingGetSTFStoreService -f $StoreName)
+        $StoreService = Get-STFStoreService | Where-Object { $_.friendlyname -eq $StoreName }
+        Write-Verbose -Message $localizedData.CallingGetSTFWebReceiverService
         $webreceiverservice = Get-STFWebReceiverService -StoreService $Storeservice
-        Write-Verbose "Calling Get-STFWebReceiverPluginAssistant"
+        Write-Verbose -Message $localizedData.CallingGetSTFWebReceiverPluginAssistant
         $Configuration = Get-STFWebReceiverPluginAssistant -WebReceiverService $webreceiverservice
     }
     catch {
-        Write-Verbose "Trapped error getting web receiver plugin configuration. Error: $($Error[0].Exception.Message)"
+
+        Write-Verbose -Message ($localizedData.TrappedError -f $Error[0].Exception.Message)
     }
 
     $returnValue = @{
@@ -109,55 +65,71 @@ function Get-TargetResource
 function Set-TargetResource
 {
     [CmdletBinding()]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseShouldProcessForStateChangingFunctions', '')]
     param
     (
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [System.String]
         $StoreName,
 
+        [Parameter()]
         [System.Boolean]
         $Enabled,
 
+        [Parameter()]
         [System.Boolean]
         $UpgradeAtLogin,
 
+        [Parameter()]
         [System.Boolean]
         $ShowAfterLogin,
 
+        [Parameter()]
         [System.String]
         $Win32Path,
 
+        [Parameter()]
         [System.String]
         $MacOSPath,
 
+        [Parameter()]
         [System.String]
         $MacOSMinimumSupportedVersion,
 
-        [ValidateSet("Always","Fallback","Off")]
+        [Parameter()]
+        [ValidateSet('Always','Fallback','Off')]
         [System.String]
         $Html5Enabled,
 
+        [Parameter()]
         [System.String]
         $Html5Platforms,
 
+        [Parameter()]
         [System.String]
         $Html5Preferences,
 
+        [Parameter()]
         [System.Boolean]
         $Html5SingleTabLaunch,
 
+        [Parameter()]
         [System.String]
         $Html5ChromeAppOrigins,
 
+        [Parameter()]
         [System.String]
         $Html5ChromeAppPreferences,
 
+        [Parameter()]
         [System.Boolean]
         $ProtocolHandlerEnabled,
 
+        [Parameter()]
         [System.String]
         $ProtocolHandlerPlatforms,
 
+        [Parameter()]
         [System.Boolean]
         $ProtocolHandlerSkipDoubleHopCheckWhenDisabled
     )
@@ -165,15 +137,14 @@ function Set-TargetResource
     Import-module Citrix.StoreFront -ErrorAction Stop -Verbose:$false;
 
     try {
-        Write-Verbose "Calling Get-STFStoreService for $StoreName"
+        Write-Verbose -Message ($localizedData.CallingGetSTFStoreService -f $StoreName)
         $StoreService = Get-STFStoreService | Where-object {$_.friendlyname -eq $StoreName};
-        Write-Verbose "Calling Get-STFWebReceiverService"
+        Write-Verbose -Message $localizedData.CallingGetSTFWebReceiverService
         $webreceiverservice = Get-STFWebReceiverService -StoreService $Storeservice
-        Write-Verbose "Calling Get-STFWebReceiverPluginAssistant"
-        $Configuration = Get-STFWebReceiverPluginAssistant -WebReceiverService $webreceiverservice
     }
     catch {
-        Write-Verbose "Trapped error getting web receiver plugin configuration. Error: $($Error[0].Exception.Message)"
+
+        Write-Verbose -Message ($localizedData.TrappedError -f $Error[0].Exception.Message)
     }
 
     $ChangedParams = @{
@@ -187,14 +158,14 @@ function Set-TargetResource
             if ($PSBoundParameters[$property] -is [System.String[]]) {
                 if (Compare-Object -ReferenceObject $expected -DifferenceObject $actual) {
                     if (!($ChangedParams.ContainsKey($property))) {
-                        Write-Verbose "Adding $property to ChangedParams"
+                        Write-Verbose -Message ($localizedData.SettingResourceProperty -f $property)
                         $ChangedParams.Add($property,$PSBoundParameters[$property])
                     }
                 }
             }
             elseif ($expected -ne $actual) {
                 if (!($ChangedParams.ContainsKey($property))) {
-                    Write-Verbose "Adding $property to ChangedParams"
+                    Write-Verbose -Message ($localizedData.SettingResourceProperty -f $property)
                     $ChangedParams.Add($property,$PSBoundParameters[$property])
                 }
             }
@@ -202,7 +173,7 @@ function Set-TargetResource
     }
 
     $ChangedParams.Remove('StoreName')
-    Write-Verbose "Calling Set-STFWebReceiverPluginAssistant"
+    Write-Verbose -Message $localizedData.CallingSetSTFWebReceiverPluginAssistant
     Set-STFWebReceiverPluginAssistant @ChangedParams
 
 }
@@ -214,53 +185,68 @@ function Test-TargetResource
     [OutputType([System.Boolean])]
     param
     (
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [System.String]
         $StoreName,
 
+        [Parameter()]
         [System.Boolean]
         $Enabled,
 
+        [Parameter()]
         [System.Boolean]
         $UpgradeAtLogin,
 
+        [Parameter()]
         [System.Boolean]
         $ShowAfterLogin,
 
+        [Parameter()]
         [System.String]
         $Win32Path,
 
+        [Parameter()]
         [System.String]
         $MacOSPath,
 
+        [Parameter()]
         [System.String]
         $MacOSMinimumSupportedVersion,
 
-        [ValidateSet("Always","Fallback","Off")]
+        [Parameter()]
+        [ValidateSet('Always','Fallback','Off')]
         [System.String]
         $Html5Enabled,
 
+        [Parameter()]
         [System.String]
         $Html5Platforms,
 
+        [Parameter()]
         [System.String]
         $Html5Preferences,
 
+        [Parameter()]
         [System.Boolean]
         $Html5SingleTabLaunch,
 
+        [Parameter()]
         [System.String]
         $Html5ChromeAppOrigins,
 
+        [Parameter()]
         [System.String]
         $Html5ChromeAppPreferences,
 
+        [Parameter()]
         [System.Boolean]
         $ProtocolHandlerEnabled,
 
+        [Parameter()]
         [System.String]
         $ProtocolHandlerPlatforms,
 
+        [Parameter()]
         [System.Boolean]
         $ProtocolHandlerSkipDoubleHopCheckWhenDisabled
     )

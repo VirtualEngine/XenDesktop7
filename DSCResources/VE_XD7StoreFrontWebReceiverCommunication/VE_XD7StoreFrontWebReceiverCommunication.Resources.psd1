@@ -1,7 +1,7 @@
 <# VE_XD7StoreFrontWebReceiverCommunication\VE_XD7StoreFrontWebReceiverCommunication.Resources.psd1 #>
 ConvertFrom-StringData @'
     TrappedError                          = Trapped error getting web receiver user interface. Error: '{0}'.
-CallingGetSTFStoreService                 = Calling GetSTFStoreService for store '{0}'.
+    CallingGetSTFStoreService             = Calling GetSTFStoreService for store '{0}'.
     CallingGetSTFWebReceiverService       = Calling Get-STFWebReceiverService.
     CallingGetSTFWebReceiverUserInterface = Calling Get-STFWebReceiverUserInterface.
     CallingSetSTFWebReceiverCommunication = Calling Set-STFWebReceiverCommunication.

@@ -15,3 +15,4 @@
 * Added new XD7StoreFrontSessionStateTimeout resource
 * Added new XD7StoreFrontStore resource
 * Added new XD7StoreFrontWebReceiverCommunication
+* Added new XD7StoreFrontWebReceiverPluginAssistant resource

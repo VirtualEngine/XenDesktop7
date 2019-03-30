@@ -45,13 +45,12 @@ XD7StoreFrontWebReceiverPluginAssistant [string]
 * **ProtocolHandlerPlatforms**: The supported Protocol Handler platforms.
 * **ProtocolHandlerSkipDoubleHopCheckWhenDisabled**: Skip the Protocol Handle double hop check.
 
-
 ### Configuration
 
 ```
 Configuration XD7Example {
     Import-DscResource -ModuleName XenDesktop7
-    XD7StoreFrontWebReceiverPluginAssistant XD7Example {
+    XD7StoreFrontWebReceiverPluginAssistant XD7StoreFrontWebReceiverPluginAssistantExample {
         StoreName = 'mock'
         Enabled = $false
     }
