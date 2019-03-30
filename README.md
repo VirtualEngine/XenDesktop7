@@ -981,15 +981,15 @@ XD7StoreFrontOptimalGateway [string]
 {
     GatewayName = [String]
     ResourcesVirtualPath = [String]
-    Hostnames[] = [String]
-    StaUrls[] = [String]
-    [ Farms[] = [String] ]
+    Hostnames = [String[]]
+    StaUrls = [String[]]
+    [ Farms = [String[]] ]
     [ SiteId = [UInt64] ]
     [ StasUseLoadBalancing = [Boolean] ]
     [ StasBypassDuration = [String] ]
     [ EnableSessionReliability = [Boolean] ]
     [ UseTwoTickets = [Boolean] ]
-    [ Zones[] = [String] ]
+    [ Zones = [String[]] ]
     [ EnabledOnDirectAccess = [Boolean] ]
     [ Ensure = [String] { Present | Absent } ]
 }
@@ -1008,8 +1008,8 @@ XD7StoreFrontOptimalGateway [string]
 * **EnableSessionReliability**: Enable session reliability.
 * **UseTwoTickets**: Request STA tickets from two STA servers.
 * **Farms[]**: Farms.
-  * If not specified, it will be set to all farms.
 * **Zones[]**: Zones.
+  * If not specified, it will be set to all farms.
 * **EnabledOnDirectAccess**: Enabled On Direct Access.
 * **Ensure**: Ensure.
 
@@ -1018,13 +1018,13 @@ XD7StoreFrontOptimalGateway [string]
 ```
 Configuration XD7Example {
     Import-DscResource -ModuleName XenDesktop7
-    XD7StoreFrontOptimalGateway XD7StoreFrontExample {
+    XD7StoreFrontOptimalGateway XD7StoreFrontOptimalGatewayExample {
         ResourcesVirtualPath = '/Citrix/mock'
         GatewayName = 'ag.netscaler.com'
         Hostnames = @('ag.netscaler.com:443','ag2.netscaler.com:443')
         StaUrls = @('http://test/Scripts/CtxSTA.dll','http://test2/Scripts/CtxSTA.dll')
         StasBypassDuration = '02:00:00'
-	    Ensure = 'Present'
+        Ensure = 'Present'
     }
 }
 ```

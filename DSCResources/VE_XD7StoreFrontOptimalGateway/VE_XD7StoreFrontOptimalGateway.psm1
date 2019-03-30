@@ -10,7 +10,7 @@
     ===========================================================================
 #>
 
-#   Set-DSOptimalGatewayForFarms 
+#   Set-DSOptimalGatewayForFarms
 
 Import-LocalizedData -BindingVariable localizedData -FileName VE_XD7StoreFrontOptimalGateway.Resources.psd1;
 
@@ -20,60 +20,28 @@ function Get-TargetResource
     [OutputType([System.Collections.Hashtable])]
     param
     (
-        [parameter()]
+        [Parameter()]
         [System.UInt64]
-        $SiteId=1,
+        $SiteId = 1,
 
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [System.String]
         $ResourcesVirtualPath,
 
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [System.String]
         $GatewayName,
 
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [System.String[]]
         $Hostnames,
 
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [System.String[]]
-        $StaUrls,
-
-        [parameter()]
-        [System.Boolean]
-        $StasUseLoadBalancing,
-
-        [parameter()]
-        [System.String]
-        $StasBypassDuration,
-
-        [parameter()]
-        [System.Boolean]
-        $EnableSessionReliability,
-
-        [parameter()]
-        [System.Boolean]
-        $UseTwoTickets,
-
-        [parameter()]
-        [System.String[]]
-        $Farms,
-
-        [parameter()]
-        [System.String[]]
-        $Zones,
-
-        [parameter()]
-        [System.Boolean]
-        $EnabledOnDirectAccess,
-
-        [ValidateSet("Present","Absent")]
-        [System.String]
-        $Ensure
+        $StaUrls
     )
-
     begin {
+
         AssertXDModule -Name 'StoresModule','UtilsModule','FarmsModule','RoamingRecordsModule' -Path "$env:ProgramFiles\Citrix\Receiver StoreFront\Management"
     }
     process {
@@ -84,11 +52,13 @@ function Get-TargetResource
         Import-Module (FindXDModule -Name 'RoamingRecordsModule' -Path $storefrontCmdletSearchPath) -Scope Global -Verbose:$false >$null *>&1
 
         try {
-            Write-Verbose "Running Get-DSOptimalGatewayForFarms"
+
+            Write-Verbose -Message $localized.CallingGetDSOptimalGatewayForFarms
             $Gateway = Get-DSOptimalGatewayForFarms -SiteId $SiteId -ResourcesVirtualPath $ResourcesVirtualPath -ErrorAction SilentlyContinue
         }
         catch {
-            Write-Verbose "Error on Get-DSOptimalGatewayForFarms: $($Error[0].Exception.Message)"
+
+            Write-Verbose -Message ($localized.TrappedError -f 'getting gateways', $Error[0].Exception.Message)
         }
 
         $returnValue = @{
@@ -113,140 +83,147 @@ function Get-TargetResource
 function Set-TargetResource
 {
     [CmdletBinding()]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsPSUseShouldProcessForStateChangingFunctions', '')]
     param
     (
-        [parameter()]
+        [Parameter()]
         [System.UInt64]
-        $SiteId=1,
+        $SiteId = 1,
 
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [System.String]
         $ResourcesVirtualPath,
 
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [System.String]
         $GatewayName,
 
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [System.String[]]
         $Hostnames,
 
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [System.String[]]
         $StaUrls,
 
-        [parameter()]
+        [Parameter()]
         [System.Boolean]
         $StasUseLoadBalancing,
 
-        [parameter()]
+        [Parameter()]
         [System.String]
         $StasBypassDuration,
 
-        [parameter()]
+        [Parameter()]
         [System.Boolean]
         $EnableSessionReliability,
 
-        [parameter()]
+        [Parameter()]
         [System.Boolean]
         $UseTwoTickets,
 
-        [parameter()]
+        [Parameter()]
         [System.String[]]
         $Farms,
 
-        [parameter()]
+        [Parameter()]
         [System.String[]]
         $Zones,
 
-        [parameter()]
+        [Parameter()]
         [System.Boolean]
         $EnabledOnDirectAccess,
 
-        [ValidateSet("Present","Absent")]
+        [Parameter()]
+        [ValidateSet('Present','Absent')]
         [System.String]
-        $Ensure
-)
-
+        $Ensure = 'Present'
+    )
     begin {
+
         AssertXDModule -Name 'UtilsModule','StoresModule','FarmsModule','RoamingRecordsModule' -Path "$env:ProgramFiles\Citrix\Receiver StoreFront\Management"
     }
     process {
+
         $storefrontCmdletSearchPath = "$env:ProgramFiles\Citrix\Receiver StoreFront\Management"
         Import-Module (FindXDModule -Name 'UtilsModule' -Path $storefrontCmdletSearchPath) -Scope Global -Verbose:$false >$null *>&1
         Import-Module (FindXDModule -Name 'StoresModule' -Path $storefrontCmdletSearchPath) -Scope Global -Verbose:$false >$null *>&1
         Import-Module (FindXDModule -Name 'FarmsModule' -Path $storefrontCmdletSearchPath) -Scope Global -Verbose:$false >$null *>&1
         Import-Module (FindXDModule -Name 'RoamingRecordsModule' -Path $storefrontCmdletSearchPath) -Scope Global -Verbose:$false >$null *>&1
 
-        Write-Verbose "Running Get-DSOptimalGatewayForFarms"
-        Try {
+        Write-Verbose -Message $localized.CallingGetDSOptimalGatewayForFarms
+        try {
+
             $Gateway = Get-DSOptimalGatewayForFarms -SiteId $SiteId -ResourcesVirtualPath $ResourcesVirtualPath -ErrorAction SilentlyContinue
         }
-        Catch {
-            Write-Verbose "Error on Get-DSOptimalGatewayForFarms: $($Error[0].Exception.Message)"
+        catch {
+
+            Write-Verbose -Message ($localized.TrappedError -f 'Get-DSOptimalGatewayForFarms', $Error[0].Exception.Message)
         }
 
         If (!($Farms)) {
             try {
-                Write-Verbose "Running Get-DSFarmSets"
-                $Farms = get-dsfarmsets -IISSiteId $siteid -virtualpath $resourcesVirtualPath | Select-Object -expandproperty Farms | Select-Object -expandproperty FarmName
+
+                Write-Verbose -Message $localized.CallingGetDSFarmSets
+                $Farms = Get-DSFarmSets -IISSiteId $siteid -virtualpath $resourcesVirtualPath | Select-Object -expandproperty Farms | Select-Object -expandproperty FarmName
             }
             catch {
-                Write-Verbose "Error on Get-DSFarmSets: $($Error[0].Exception.Message)"
+
+                Write-Verbose -Message ($localized.TrappedError -f 'Get-DSFarmSets', $Error[0].Exception.Message)
             }
         }
 
-        If ($Ensure -eq "Present") {
+        If ($Ensure -eq 'Present') {
             #Region Create Params hashtable
             #  Added all params since powershell command replaces all current values if you set anything
-            If (!($PSBoundParameters.ContainsKey("StaUrls"))) {
+            If (!($PSBoundParameters.ContainsKey('StaUrls'))) {
                 $StaUrls = [System.String[]]$Gateway.StaUrls
-                Write-Verbose "Setting StaUrls to current value: $StaUrls"
+                Write-Verbose -Message ($localized.SettingStaUrls -f $StaUrls)
             }
             Else {
-                Write-Verbose "StaUrls changed to: $StaUrls"
+                Write-Verbose -Message ($localized.UpdatingStaUrls -f $StaUrls)
             }
-            If (!($PSBoundParameters.ContainsKey("StasUseLoadBalancing"))) {
+            If (!($PSBoundParameters.ContainsKey('StasUseLoadBalancing'))) {
                 $StasUseLoadBalancing = [System.Boolean]$Gateway.StasUseLoadBalancing
-                Write-Verbose "Setting StasUseLoadBalancing to current value: $StasUseLoadBalancing"
+                Write-Verbose -Message ($localized.SettingStaLoadBalancing -f $StasUseLoadBalancing)
             }
             Else {
-                Write-Verbose "StasUseLoadBalancing changed to: $StasUseLoadBalancing"
+                Write-Verbose -Message ($localized.UpdatingStaLoadBalancing -f $StasUseLoadBalancing)
             }
-            If (!($PSBoundParameters.ContainsKey("StasBypassDuration"))) {
+            If (!($PSBoundParameters.ContainsKey('StasBypassDuration'))) {
                 $StasBypassDuration = [System.String]$Gateway.StasBypassDuration
-                Write-Verbose "Setting StasBypassDuration to current value: $StasBypassDuration"
+                Write-Verbose -Message ($localized.SettingStaBypassDuration -f $StasBypassDuration)
             }
             Else {
-                Write-Verbose "StasBypassDuration changed to: $StasBypassDuration"
+                Write-Verbose -Message ($localized.UpdatingStaBypassDuration -f $StasBypassDuration)
             }
-            If (!($PSBoundParameters.ContainsKey("EnableSessionReliability"))) {
+            If (!($PSBoundParameters.ContainsKey('EnableSessionReliability'))) {
                 $EnableSessionReliability = [System.Boolean]$Gateway.EnableSessionReliability
-                Write-Verbose "Setting EnableSessionReliability to current value: $EnableSessionReliability"
+                Write-Verbose -Message ($localized.SettingSessionReliability -f $EnableSessionReliability)
             }
             Else {
-                Write-Verbose "EnableSessionReliability changed to: $EnableSessionReliability"
+                Write-Verbose -Message ($localized.UpdatingSessionReliability -f $EnableSessionReliability)
             }
-            If (!($PSBoundParameters.ContainsKey("UseTwoTickets"))) {
+            If (!($PSBoundParameters.ContainsKey('UseTwoTickets'))) {
                 $UseTwoTickets = [System.Boolean]$Gateway.UseTwoTickets
-                Write-Verbose "Setting UseTwoTickets to current value: $UseTwoTickets"
+                Write-Verbose -Message ($localized.SettingRequireTwoTickets -f $UseTwoTickets)
             }
             Else {
-                Write-Verbose "UseTwoTickets changed to: $UseTwoTickets"
+                Write-Verbose -Message ($localized.UpdatingRequireTwoTickets -f $UseTwoTickets)
             }
-            If (!($PSBoundParameters.ContainsKey("Zones"))) {
+            If (!($PSBoundParameters.ContainsKey('Zones'))) {
                 $Zones = [System.String[]]$Gateway.Zones
-                Write-Verbose "Setting Zones to current value: $Zones"
+                Write-Verbose -Message ($localized.SettingZones -f $Zones)
             }
             Else {
-                Write-Verbose "Zones changed to: $Zones"
+                Write-Verbose -Message ($localized.UpdatingZones -f $Zones)
             }
-            If (!($PSBoundParameters.ContainsKey("EnabledOnDirectAccess"))) {
+            If (!($PSBoundParameters.ContainsKey('EnabledOnDirectAccess'))) {
                 $EnabledOnDirectAccess = [System.Boolean]$Gateway.EnabledOnDirectAccess
-                Write-Verbose "Setting EnabledOnDirectAccess to current value: $EnabledOnDirectAccess"
+                Write-Verbose -Message ($localized.SettingEnabledOnDirectAccess -f $EnabledOnDirectAccess)
             }
             Else {
-                Write-Verbose "EnabledOnDirectAccess changed to: $EnabledOnDirectAccess"
+                Write-Verbose -Message ($localized.UpdaingEnabledOnDirectAccess -f $EnabledOnDirectAccess)
             }
 
             $ChangedParams = @{
@@ -266,19 +243,18 @@ function Set-TargetResource
             #endregion
 
             #Create gateway
-            Write-Verbose "Calling Set-DSOptimalGatewayForFarms"
+            Write-Verbose -Message $localized.CallingSetDSOptimalGatewayForFarms
             Set-DSOptimalGatewayForFarms @ChangedParams
 
         }
         Else {
             #Uninstall
-            Write-Verbose "Calling Remove-DSOptimalGatewayForFarms"
+            Write-Verbose -Message $localized.CallingRemoveDSOptimalGatewayForFarms
             Remove-DSOptimalGatewayForFarms -SiteId $SiteId -ResourcesVirtualPath $ResourcesVirtualPath
         }
         #Include this line if the resource requires a system reboot.
         #$global:DSCMachineStatus = 1
     }
-
 }
 
 
@@ -288,57 +264,58 @@ function Test-TargetResource
     [OutputType([System.Boolean])]
     param
     (
-        [parameter()]
+        [Parameter()]
         [System.UInt64]
         $SiteId=1,
 
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [System.String]
         $ResourcesVirtualPath,
 
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [System.String]
         $GatewayName,
 
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [System.String[]]
         $Hostnames,
 
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [System.String[]]
         $StaUrls,
 
-        [parameter()]
+        [Parameter()]
         [System.Boolean]
         $StasUseLoadBalancing,
 
-        [parameter()]
+        [Parameter()]
         [System.String]
         $StasBypassDuration,
 
-        [parameter()]
+        [Parameter()]
         [System.Boolean]
         $EnableSessionReliability,
 
-        [parameter()]
+        [Parameter()]
         [System.Boolean]
         $UseTwoTickets,
 
-        [parameter()]
+        [Parameter()]
         [System.String[]]
         $Farms,
 
-        [parameter()]
+        [Parameter()]
         [System.String[]]
         $Zones,
 
-        [parameter()]
+        [Parameter()]
         [System.Boolean]
         $EnabledOnDirectAccess,
 
-        [ValidateSet("Present","Absent")]
+        [Parameter()]
+        [ValidateSet('Present','Absent')]
         [System.String]
-        $Ensure
+        $Ensure = 'Present'
     )
 
         $targetResource = Get-TargetResource @PSBoundParameters;
