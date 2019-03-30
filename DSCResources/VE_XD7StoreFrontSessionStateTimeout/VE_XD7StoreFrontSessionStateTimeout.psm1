@@ -1,4 +1,4 @@
-<#	
+<#
     ===========================================================================
      Created with: 	SAPIEN Technologies, Inc., PowerShell Studio 2019 v5.6.157
      Created on:   	2/8/2019 12:12 PM
@@ -18,42 +18,32 @@ function Get-TargetResource
     [OutputType([System.Collections.Hashtable])]
     param
     (
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [System.String]
-        $StoreName,
-
-        [System.UInt32]
-        $IntervalInMinutes,
-
-        [System.UInt32]
-        $CommunicationAttempts,
-
-        [System.UInt32]
-        $CommunicationTimeout,
-
-        [System.UInt32]
-        $LoginFormTimeout
+        $StoreName
     )
-
     begin {
+
         AssertXDModule -Name 'UtilsModule','StoresModule','WebReceiverModule','AuthenticationModule' -Path "$env:ProgramFiles\Citrix\Receiver StoreFront\Management"
     }
     process {
+
         $storefrontCmdletSearchPath = "$env:ProgramFiles\Citrix\Receiver StoreFront\Management"
         Import-Module (FindXDModule -Name 'UtilsModule' -Path $storefrontCmdletSearchPath) -Scope Global -Verbose:$false >$null *>&1
         Import-Module (FindXDModule -Name 'StoresModule' -Path $storefrontCmdletSearchPath) -Scope Global -Verbose:$false >$null *>&1
         Import-Module (FindXDModule -Name 'WebReceiverModule' -Path $storefrontCmdletSearchPath) -Scope Global -Verbose:$false >$null *>&1
         Import-Module (FindXDModule -Name 'AuthenticationModule' -Path $storefrontCmdletSearchPath) -Scope Global -Verbose:$false >$null *>&1
-        Import-module Citrix.StoreFront -ErrorAction Stop -Verbose:$false
+        Import-Module Citrix.StoreFront -ErrorAction Stop -Verbose:$false
 
         try {
-            Write-Verbose "Calling Get-STFStoreService for $StoreName"
-            $StoreService = Get-STFStoreService | Where-object {$_.friendlyname -eq $StoreName};
-            Write-Verbose "Calling Get-DSWebReceiversSummary"
-            $Configuration = Get-DSWebReceiversSummary | Where-object {$_.StoreVirtualPath -eq ($StoreService.VirtualPath)}
+
+            Write-Verbose -Message ($localized.CallingGetSTFStoreService -f $StoreName)
+            $StoreService = Get-STFStoreService | Where-object { $_.friendlyname -eq $StoreName };
+            $Configuration = Get-DSWebReceiversSummary | Where-Object { $_.StoreVirtualPath -eq ($StoreService.VirtualPath) }
         }
         catch {
-            Write-Verbose "Trapped error getting web receiver communication. Error: $($Error[0].Exception.Message)"
+
+            Write-Verbose -Message ($localized.TrappedError -f $Error[0].Exception.Message)
         }
         $returnValue = @{
             StoreName = [System.String]$StoreName
@@ -73,19 +63,23 @@ function Set-TargetResource
     [CmdletBinding()]
     param
     (
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [System.String]
         $StoreName,
 
+        [Parameter()]
         [System.UInt32]
         $IntervalInMinutes,
 
+        [Parameter()]
         [System.UInt32]
         $CommunicationAttempts,
 
+        [Parameter()]
         [System.UInt32]
         $CommunicationTimeout,
 
+        [Parameter()]
         [System.UInt32]
         $LoginFormTimeout
     )
@@ -99,18 +93,20 @@ function Set-TargetResource
         Import-Module (FindXDModule -Name 'StoresModule' -Path $storefrontCmdletSearchPath) -Scope Global -Verbose:$false >$null *>&1
         Import-Module (FindXDModule -Name 'WebReceiverModule' -Path $storefrontCmdletSearchPath) -Scope Global -Verbose:$false >$null *>&1
         Import-Module (FindXDModule -Name 'AuthenticationModule' -Path $storefrontCmdletSearchPath) -Scope Global -Verbose:$false >$null *>&1
-        Import-module Citrix.StoreFront -ErrorAction Stop -Verbose:$false
+        Import-Module Citrix.StoreFront -ErrorAction Stop -Verbose:$false
 
         try {
-            Write-Verbose "Calling Get-STFStoreService for $StoreName"
+
+            Write-Verbose -Message ($localized.CallingGetSTFStoreService -f $StoreName)
             $StoreService = Get-STFStoreService | Where-object {$_.friendlyname -eq $StoreName};
-            Write-Verbose "Calling Get-STFWebReceiverService"
+            Write-Verbose -Message $localized.CallingGetSTFWebReceiverService
             $webreceiverservice = Get-STFWebReceiverService -StoreService $Storeservice
-            Write-Verbose "Calling Get-DSWebReceiversSummary"
+            Write-Verbose -Message $localized.CallingGetDSWebReceiversSummary
             $Configuration = Get-DSWebReceiversSummary | Where-object {$_.StoreVirtualPath -eq ($StoreService.VirtualPath)}
         }
         catch {
-            Write-Verbose "Trapped error getting web receiver user interface. Error: $($Error[0].Exception.Message)"
+
+            Write-Verbose -Message ($localized.TrappedError -f $Error[0].Exception.Message)
         }
 
         $ChangedParams = @{
@@ -125,14 +121,14 @@ function Set-TargetResource
                 if ($PSBoundParameters[$property] -is [System.String[]]) {
                     if (Compare-Object -ReferenceObject $expected -DifferenceObject $actual) {
                         if (!($ChangedParams.ContainsKey($property))) {
-                            Write-Verbose "Adding $property to ChangedParams"
+                            Write-Verbose -Message ($localized.SettingResourceProperty -f $property)
                             $ChangedParams.Add($property,$PSBoundParameters[$property])
                         }
                     }
                 }
                 elseif ($expected -ne $actual) {
                     if (!($ChangedParams.ContainsKey($property))) {
-                        Write-Verbose "Adding $property to ChangedParams"
+                        Write-Verbose -Message ($localized.SettingResourceProperty -f $property)
                         $ChangedParams.Add($property,$PSBoundParameters[$property])
                     }
                 }
@@ -140,25 +136,25 @@ function Set-TargetResource
         }
 
         #Add in parameters that aren't changed with their current values
-        If (!($ChangedParams.ContainsKey("IntervalInMinutes"))) {
-            Write-Verbose "Adding IntervalInMinutes to ChangedParams with current value"
-            $ChangedParams.Add("IntervalInMinutes",[System.UInt32]$Configuration.SessionStateTimeout)
+        if (!($ChangedParams.ContainsKey('IntervalInMinutes'))) {
+            Write-Verbose -Message ($localized.SettingResourceProperty -f 'IntervalInMinutes')
+            $ChangedParams.Add('IntervalInMinutes', [System.UInt32]$Configuration.SessionStateTimeout)
         }
-        If (!($ChangedParams.ContainsKey("CommunicationAttempts"))) {
-            Write-Verbose "Adding CommunicationAttempts to ChangedParams with current value"
-            $ChangedParams.Add("CommunicationAttempts",[System.UInt32]$Configuration.CommunicationAttempts)
+        if (!($ChangedParams.ContainsKey('CommunicationAttempts'))) {
+            Write-Verbose -Message ($localized.SettingResourceProperty -f 'CommunicationAttempts')
+            $ChangedParams.Add('CommunicationAttempts', [System.UInt32]$Configuration.CommunicationAttempts)
         }
-        If (!($ChangedParams.ContainsKey("CommunicationTimeout"))) {
-            Write-Verbose "Adding CommunicationTimeout to ChangedParams with current value"
-            $ChangedParams.Add("CommunicationTimeout",[System.UInt32]$Configuration.CommunicationTimeout.TotalMinutes)
+        if (!($ChangedParams.ContainsKey('CommunicationTimeout'))) {
+            Write-Verbose -Message ($localized.SettingResourceProperty -f 'CommunicationTimeout')
+            $ChangedParams.Add('CommunicationTimeout', [System.UInt32]$Configuration.CommunicationTimeout.TotalMinutes)
         }
-        If (!($ChangedParams.ContainsKey("LoginFormTimeout"))) {
-            Write-Verbose "Adding LoginFormTimeout to ChangedParams with current value"
-            $ChangedParams.Add("LoginFormTimeout",[System.UInt32]$Configuration.LoginFormTimeout)
+        if (!($ChangedParams.ContainsKey('LoginFormTimeout'))) {
+            Write-Verbose -Message ($localized.SettingResourceProperty -f 'LoginFormTimeout')
+            $ChangedParams.Add('LoginFormTimeout', [System.UInt32]$Configuration.LoginFormTimeout)
         }
-        
+
         $ChangedParams.Remove('StoreName')
-        Write-Verbose "Calling Set-DSSessionStateTimeout"
+        Write-Verbose -Message $localized.CallingSetDSSessionStateTimeout
         Set-DSSessionStateTimeout @ChangedParams
     }
 }
@@ -170,19 +166,23 @@ function Test-TargetResource
     [OutputType([System.Boolean])]
     param
     (
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [System.String]
         $StoreName,
 
+        [Parameter()]
         [System.UInt32]
         $IntervalInMinutes,
 
+        [Parameter()]
         [System.UInt32]
         $CommunicationAttempts,
 
+        [Parameter()]
         [System.UInt32]
         $CommunicationTimeout,
 
+        [Parameter()]
         [System.UInt32]
         $LoginFormTimeout
     )
@@ -195,7 +195,7 @@ function Test-TargetResource
             $actual = $targetResource[$property];
             if ($PSBoundParameters[$property] -is [System.String[]]) {
                 if ($actual) {
-                    if (Compare-Object -ReferenceObject $expected -DifferenceObject $actual -ErrorAction silentlycontinue) {
+                    if (Compare-Object -ReferenceObject $expected -DifferenceObject $actual -ErrorAction SilentlyContinue) {
                         Write-Verbose ($localizedData.ResourcePropertyMismatch -f $property, ($expected -join ','), ($actual -join ','));
                         $inCompliance = $false;
                     }

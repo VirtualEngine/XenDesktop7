@@ -1192,7 +1192,7 @@ XD7StoreFrontSessionStateTimeout [string]
 ```
 Configuration XD7Example {
     Import-DscResource -ModuleName XenDesktop7
-    XD7StoreFrontSessionStateTimeout XD7Example {
+    XD7StoreFrontSessionStateTimeout XD7StoreFrontSessionStateTimeoutExample {
         StoreName = 'mock'
         IntervalInMinutes = 20
     }
