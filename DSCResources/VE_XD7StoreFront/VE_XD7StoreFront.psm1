@@ -1,9 +1,9 @@
-﻿<#	
+<#
 	===========================================================================
 	 Created with: 	SAPIEN Technologies, Inc., PowerShell Studio 2019 v5.6.157
 	 Created on:   	2/8/2019 12:12 PM
 	 Created by:   	CERBDM
-	 Organization: 	
+	 Organization:
 	 Filename:     	VE_XD7StoreFront.psm1
 	-------------------------------------------------------------------------
 	 Module Name: VE_XD7StoreFront
@@ -16,6 +16,7 @@ Import-LocalizedData -BindingVariable localizedData -FileName VE_XD7StoreFront.R
 function Get-TargetResource {
     [CmdletBinding()]
     [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSDSCUseVerboseMessageInDSCResource', '')]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingEmptyCatchBlock', '')]
     [OutputType([System.Collections.Hashtable])]
     param (
 
@@ -25,23 +26,17 @@ function Get-TargetResource {
 
         [parameter()]
         [System.String]
-        $HostBaseUrl="http://localhost",
+        $HostBaseUrl = 'http://localhost',
 
         [Parameter()]
         [ValidateSet('Present','Absent')]
         [System.String]
         $Ensure = 'Present'
     )
-
-    begin {
-
-        #AssertXDModule -Name 'Citrix.StoreFront';
-
-    }
     process {
 
         Import-module Citrix.StoreFront -ErrorAction Stop -Verbose:$false;
-        
+
         try {
             $Deployment = Get-STFDeployment -SiteId $SiteId
         }
@@ -50,6 +45,7 @@ function Get-TargetResource {
         $targetResource = @{
             SiteId = $Deployment.SiteId
             HostBaseUrl = $Deployment.HostBaseUrl
+            Ensure = $null -ne $Deployment
         };
 
         return $targetResource;
@@ -62,13 +58,13 @@ function Test-TargetResource {
     [CmdletBinding()]
     [OutputType([System.Boolean])]
     param (
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [System.UInt64]
         $SiteId,
 
-        [parameter()]
+        [Parameter()]
         [System.String]
-        $HostBaseUrl="http://localhost",
+        $HostBaseUrl = 'http://localhost',
 
         [Parameter()]
         [ValidateSet('Present','Absent')]
@@ -79,18 +75,24 @@ function Test-TargetResource {
 
         $targetResource = Get-TargetResource @PSBoundParameters;
         If ($Ensure -eq 'Present') {
+
             If (($targetResource.SiteId -eq $SiteId) -and ($targetResource.HostBaseUrl -eq $HostBaseUrl)) {
+                Write-Verbose -Message ($localized.ResourceInDesiredState -f $SiteId)
                 return $true
             }
             Else {
+                Write-Verbose -Message ($localized.ResourceNotInDesiredState -f $SiteId)
                 return $false
             }
         }
         Else {
+
             If ($targetResource.SiteId) {
+                Write-Verbose -Message ($localized.ResourceNotInDesiredState -f $SiteId)
                 return $false
             }
             Else {
+                Write-Verbose -Message ($localized.ResourceInDesiredState -f $SiteId)
                 return $true
             }
         }
@@ -109,9 +111,9 @@ function Set-TargetResource {
         [System.UInt64]
         $SiteId,
 
-        [parameter(Mandatory = $true)]
+        [parameter()]
         [System.String]
-        $HostBaseUrl="http://localhost",
+        $HostBaseUrl = 'http://localhost',
 
         [Parameter()]
         [ValidateSet('Present','Absent')]
@@ -119,12 +121,8 @@ function Set-TargetResource {
         $Ensure = 'Present'
 
     )
-    begin {
-
-        #AssertXDModule -Name 'Citrix.StoreFront';
-
-    }
     process {
+
         Import-module Citrix.StoreFront -ErrorAction Stop -Verbose:$false
         $Deployment = Get-STFDeployment -SiteId $SiteId
         If ($Ensure -eq 'Present') {
@@ -143,11 +141,4 @@ function Set-TargetResource {
     } #end process
 } #end function Set-TargetResource
 
-$moduleRoot = Split-Path -Path $MyInvocation.MyCommand.Path -Parent;
-
-## Import the XD7Common library functions
-$moduleParent = Split-Path -Path $moduleRoot -Parent;
-#Import-Module (Join-Path -Path $moduleParent -ChildPath 'VE_XD7Common');
-
 Export-ModuleMember -Function *-TargetResource;
-

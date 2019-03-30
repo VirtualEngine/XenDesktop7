@@ -759,7 +759,7 @@ XD7StoreFront [string]
 * **SiteId**: Citrix StoreFront base url.
 * **HostBaseUrl**: Citrix StoreFront host base url.
   * If not specified, this value defaults to http://localhost.
-* **Ensure**: Ensure.
+* **Ensure**: Whether the Storefront deployment should be added or removed.
 
 ### Configuration
 
@@ -956,7 +956,7 @@ XD7StoreFrontFilterKeyword [string]
 * **IncludeKeywords**:  Whitelist filtering. Only resources having one of the keywords specified are enumerated.
 * **ExcludeKeywords**: Blacklist filtering. Only resources not having any of the keywords specified are enumerated.
 
-    **Note: the filtering can be either by white- or blacklist, not both at the same time.**  
+    **Note: the filtering can be either by white- or blacklist, not both at the same time.**
 
 ### Configuration
 
