@@ -8,3 +8,4 @@
 * Added new XD7StoreFront resource
 * Added new XD7StoreFrontExplicitCommonOptions resource
 * Added new XD7StoreFrontFarmConfiguration resource
+* Added new XD7StoreFrontFilterKeyword resource
