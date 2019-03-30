@@ -7,3 +7,4 @@
 * Updates XD7WaitForSite to use common InvokeScriptBlock function
 * Added new XD7StoreFront resource
 * Added new XD7StoreFrontExplicitCommonOptions resource
+* Added new XD7StoreFrontFarmConfiguration resource

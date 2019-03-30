@@ -927,7 +927,7 @@ XD7StoreFrontFarmConfiguration [string]
 ```
 Configuration XD7Example {
     Import-DscResource -ModuleName XenDesktop7
-    XD7StoreFrontFarmConfiguration XD7StoreFrontExample {
+    XD7StoreFrontFarmConfiguration XD7StoreFrontFarmConfigurationExample {
         StoreName = 'mock'
         PooledSockets = $true
     }

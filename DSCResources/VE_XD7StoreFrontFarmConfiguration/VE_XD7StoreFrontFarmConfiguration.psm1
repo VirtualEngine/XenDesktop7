@@ -1,4 +1,4 @@
-<#	
+<#
 	===========================================================================
 	 Created with: 	SAPIEN Technologies, Inc., PowerShell Studio 2019 v5.6.157
 	 Created on:   	2/8/2019 12:12 PM
@@ -18,52 +18,24 @@ function Get-TargetResource
     [OutputType([System.Collections.Hashtable])]
     param
     (
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [System.String]
-        $StoreName,
-
-        [System.Boolean]
-        $EnableFileTypeAssociation,
-
-        [System.String]
-        $CommunicationTimeout,
-
-        [System.String]
-        $ConnectionTimeout,
-
-        [System.String]
-        $LeasingStatusExpiryFailed,
-
-        [System.String]
-        $LeasingStatusExpiryLeasing,
-
-        [System.String]
-        $LeasingStatusExpiryPending,
-
-        [System.Boolean]
-        $PooledSockets,
-
-        [System.UInt32]
-        $ServerCommunicationAttempts,
-
-        [System.String]
-        $BackgroundHealthCheckPollingPeriod,
-
-        [System.Boolean]
-        $AdvancedHealthCheck
+        $StoreName
     )
 
-        Import-module Citrix.StoreFront -ErrorAction Stop -Verbose:$false;
+    Import-module Citrix.StoreFront -ErrorAction Stop -Verbose:$false
 
-        try {
-            Write-Verbose "Calling Get-STFStoreService for $StoreName"
-            $StoreService = Get-STFStoreService | Where-object {$_.friendlyname -eq $StoreName};
-            Write-Verbose "Calling Get-STFStoreFarmConfiguration"
-            $Configuration = Get-STFStoreFarmConfiguration -StoreService $StoreService
-        }
-        catch {
-            Write-Verbose "Trapped error getting store farm configuration. Error: $($Error[0].Exception.Message)"
-        }
+    try {
+
+        Write-Verbose -Message ($localized.CallingGetSTFStoreService -f $StoreName)
+        $StoreService = Get-STFStoreService | Where-object {$_.friendlyname -eq $StoreName}
+        Write-Verbose -Message $localized.CallingGetSTFStoreFarmConfiguration
+        $Configuration = Get-STFStoreFarmConfiguration -StoreService $StoreService
+    }
+    catch {
+
+        Write-Verbose -Message ($localized.TrappedError -f $Error[0].Exception.Message)
+    }
 
     $returnValue = @{
         StoreName = [System.String]$StoreName
@@ -86,39 +58,50 @@ function Get-TargetResource
 function Set-TargetResource
 {
     [CmdletBinding()]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsPSUseShouldProcessForStateChangingFunctions', '')]
     param
     (
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [System.String]
         $StoreName,
 
+        [Parameter()]
         [System.Boolean]
         $EnableFileTypeAssociation,
 
+        [Parameter()]
         [System.String]
         $CommunicationTimeout,
 
+        [Parameter()]
         [System.String]
         $ConnectionTimeout,
 
+        [Parameter()]
         [System.String]
         $LeasingStatusExpiryFailed,
 
+        [Parameter()]
         [System.String]
         $LeasingStatusExpiryLeasing,
 
+        [Parameter()]
         [System.String]
         $LeasingStatusExpiryPending,
 
+        [Parameter()]
         [System.Boolean]
         $PooledSockets,
 
+        [Parameter()]
         [System.UInt32]
         $ServerCommunicationAttempts,
 
+        [Parameter()]
         [System.String]
         $BackgroundHealthCheckPollingPeriod,
 
+        [Parameter()]
         [System.Boolean]
         $AdvancedHealthCheck
     )
@@ -126,13 +109,13 @@ function Set-TargetResource
     Import-module Citrix.StoreFront -ErrorAction Stop -Verbose:$false;
 
     try {
-        Write-Verbose "Calling Get-STFStoreService for $StoreName"
-        $StoreService = Get-STFStoreService | Where-object {$_.friendlyname -eq $StoreName};
-        Write-Verbose "Calling Get-STFStoreFarmConfiguration"
-        $Configuration = Get-STFStoreFarmConfiguration -StoreService $StoreService
+
+        Write-Verbose -Message ($localized.CallingGetSTFStoreService -f $StoreName)
+        $StoreService = Get-STFStoreService | Where-object {$_.friendlyname -eq $StoreName}
     }
     catch {
-        Write-Verbose "Trapped error getting store farm configuration. Error: $($Error[0].Exception.Message)"
+
+        Write-Verbose -Message ($localized.TrappedError -f $Error[0].Exception.Message)
     }
 
     $ChangedParams = @{
@@ -146,14 +129,14 @@ function Set-TargetResource
             if ($PSBoundParameters[$property] -is [System.String[]]) {
                 if (Compare-Object -ReferenceObject $expected -DifferenceObject $actual) {
                     if (!($ChangedParams.ContainsKey($property))) {
-                        Write-Verbose "Adding $property to ChangedParams"
+                        Write-Verbose -Message ($localized.SettingResourceProperty -f $property)
                         $ChangedParams.Add($property,$PSBoundParameters[$property])
                     }
                 }
             }
             elseif ($expected -ne $actual) {
                 if (!($ChangedParams.ContainsKey($property))) {
-                    Write-Verbose "Adding $property to ChangedParams"
+                    Write-Verbose -Message ($localized.SettingResourceProperty -f $property)
                     $ChangedParams.Add($property,$PSBoundParameters[$property])
                 }
             }
@@ -161,7 +144,8 @@ function Set-TargetResource
     }
 
     $ChangedParams.Remove('StoreName')
-    Write-Verbose "Calling Set-STFStoreFarmConfiguration"
+    Write-Verbose -Message $localized.CallingSetSTFStoreFarmConfiguration
+
     Set-STFStoreFarmConfiguration @ChangedParams
 
 }
@@ -173,37 +157,47 @@ function Test-TargetResource
     [OutputType([System.Boolean])]
     param
     (
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [System.String]
         $StoreName,
 
+        [Parameter()]
         [System.Boolean]
         $EnableFileTypeAssociation,
 
+        [Parameter()]
         [System.String]
         $CommunicationTimeout,
 
+        [Parameter()]
         [System.String]
         $ConnectionTimeout,
 
+        [Parameter()]
         [System.String]
         $LeasingStatusExpiryFailed,
 
+        [Parameter()]
         [System.String]
         $LeasingStatusExpiryLeasing,
 
+        [Parameter()]
         [System.String]
         $LeasingStatusExpiryPending,
 
+        [Parameter()]
         [System.Boolean]
         $PooledSockets,
 
+        [Parameter()]
         [System.UInt32]
         $ServerCommunicationAttempts,
 
+        [Parameter()]
         [System.String]
         $BackgroundHealthCheckPollingPeriod,
 
+        [Parameter()]
         [System.Boolean]
         $AdvancedHealthCheck
     )
@@ -250,4 +244,3 @@ function Test-TargetResource
 
 
 Export-ModuleMember -Function *-TargetResource
-
