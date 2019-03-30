@@ -77,22 +77,22 @@ function Test-TargetResource {
         If ($Ensure -eq 'Present') {
 
             If (($targetResource.SiteId -eq $SiteId) -and ($targetResource.HostBaseUrl -eq $HostBaseUrl)) {
-                Write-Verbose -Message ($localized.ResourceInDesiredState -f $SiteId)
+                Write-Verbose -Message ($localizedData.ResourceInDesiredState -f $SiteId)
                 return $true
             }
             Else {
-                Write-Verbose -Message ($localized.ResourceNotInDesiredState -f $SiteId)
+                Write-Verbose -Message ($localizedData.ResourceNotInDesiredState -f $SiteId)
                 return $false
             }
         }
         Else {
 
             If ($targetResource.SiteId) {
-                Write-Verbose -Message ($localized.ResourceNotInDesiredState -f $SiteId)
+                Write-Verbose -Message ($localizedData.ResourceNotInDesiredState -f $SiteId)
                 return $false
             }
             Else {
-                Write-Verbose -Message ($localized.ResourceInDesiredState -f $SiteId)
+                Write-Verbose -Message ($localizedData.ResourceInDesiredState -f $SiteId)
                 return $true
             }
         }

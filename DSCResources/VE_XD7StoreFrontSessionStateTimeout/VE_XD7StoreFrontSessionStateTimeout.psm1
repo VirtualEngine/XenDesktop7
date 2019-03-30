@@ -37,13 +37,13 @@ function Get-TargetResource
 
         try {
 
-            Write-Verbose -Message ($localized.CallingGetSTFStoreService -f $StoreName)
+            Write-Verbose -Message ($localizedData.CallingGetSTFStoreService -f $StoreName)
             $StoreService = Get-STFStoreService | Where-object { $_.friendlyname -eq $StoreName };
             $Configuration = Get-DSWebReceiversSummary | Where-Object { $_.StoreVirtualPath -eq ($StoreService.VirtualPath) }
         }
         catch {
 
-            Write-Verbose -Message ($localized.TrappedError -f $Error[0].Exception.Message)
+            Write-Verbose -Message ($localizedData.TrappedError -f $Error[0].Exception.Message)
         }
         $returnValue = @{
             StoreName = [System.String]$StoreName
@@ -98,16 +98,16 @@ function Set-TargetResource
 
         try {
 
-            Write-Verbose -Message ($localized.CallingGetSTFStoreService -f $StoreName)
+            Write-Verbose -Message ($localizedData.CallingGetSTFStoreService -f $StoreName)
             $StoreService = Get-STFStoreService | Where-object {$_.friendlyname -eq $StoreName};
-            Write-Verbose -Message $localized.CallingGetSTFWebReceiverService
+            Write-Verbose -Message $localizedData.CallingGetSTFWebReceiverService
             $webreceiverservice = Get-STFWebReceiverService -StoreService $Storeservice
-            Write-Verbose -Message $localized.CallingGetDSWebReceiversSummary
+            Write-Verbose -Message $localizedData.CallingGetDSWebReceiversSummary
             $Configuration = Get-DSWebReceiversSummary | Where-object {$_.StoreVirtualPath -eq ($StoreService.VirtualPath)}
         }
         catch {
 
-            Write-Verbose -Message ($localized.TrappedError -f $Error[0].Exception.Message)
+            Write-Verbose -Message ($localizedData.TrappedError -f $Error[0].Exception.Message)
         }
 
         $ChangedParams = @{
@@ -122,14 +122,14 @@ function Set-TargetResource
                 if ($PSBoundParameters[$property] -is [System.String[]]) {
                     if (Compare-Object -ReferenceObject $expected -DifferenceObject $actual) {
                         if (!($ChangedParams.ContainsKey($property))) {
-                            Write-Verbose -Message ($localized.SettingResourceProperty -f $property)
+                            Write-Verbose -Message ($localizedData.SettingResourceProperty -f $property)
                             $ChangedParams.Add($property,$PSBoundParameters[$property])
                         }
                     }
                 }
                 elseif ($expected -ne $actual) {
                     if (!($ChangedParams.ContainsKey($property))) {
-                        Write-Verbose -Message ($localized.SettingResourceProperty -f $property)
+                        Write-Verbose -Message ($localizedData.SettingResourceProperty -f $property)
                         $ChangedParams.Add($property,$PSBoundParameters[$property])
                     }
                 }
@@ -138,24 +138,24 @@ function Set-TargetResource
 
         #Add in parameters that aren't changed with their current values
         if (!($ChangedParams.ContainsKey('IntervalInMinutes'))) {
-            Write-Verbose -Message ($localized.SettingResourceProperty -f 'IntervalInMinutes')
+            Write-Verbose -Message ($localizedData.SettingResourceProperty -f 'IntervalInMinutes')
             $ChangedParams.Add('IntervalInMinutes', [System.UInt32]$Configuration.SessionStateTimeout)
         }
         if (!($ChangedParams.ContainsKey('CommunicationAttempts'))) {
-            Write-Verbose -Message ($localized.SettingResourceProperty -f 'CommunicationAttempts')
+            Write-Verbose -Message ($localizedData.SettingResourceProperty -f 'CommunicationAttempts')
             $ChangedParams.Add('CommunicationAttempts', [System.UInt32]$Configuration.CommunicationAttempts)
         }
         if (!($ChangedParams.ContainsKey('CommunicationTimeout'))) {
-            Write-Verbose -Message ($localized.SettingResourceProperty -f 'CommunicationTimeout')
+            Write-Verbose -Message ($localizedData.SettingResourceProperty -f 'CommunicationTimeout')
             $ChangedParams.Add('CommunicationTimeout', [System.UInt32]$Configuration.CommunicationTimeout.TotalMinutes)
         }
         if (!($ChangedParams.ContainsKey('LoginFormTimeout'))) {
-            Write-Verbose -Message ($localized.SettingResourceProperty -f 'LoginFormTimeout')
+            Write-Verbose -Message ($localizedData.SettingResourceProperty -f 'LoginFormTimeout')
             $ChangedParams.Add('LoginFormTimeout', [System.UInt32]$Configuration.LoginFormTimeout)
         }
 
         $ChangedParams.Remove('StoreName')
-        Write-Verbose -Message $localized.CallingSetDSSessionStateTimeout
+        Write-Verbose -Message $localizedData.CallingSetDSSessionStateTimeout
         Set-DSSessionStateTimeout @ChangedParams
     }
 }

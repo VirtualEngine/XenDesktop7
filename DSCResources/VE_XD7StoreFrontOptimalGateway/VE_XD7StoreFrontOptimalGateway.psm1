@@ -4,9 +4,9 @@
      Created on:   	2/8/2019 12:12 PM
      Created by:   	CERBDM
      Organization: 	Cerner Corporation
-     Filename:     	VE_VE_XD7StoreFrontOptimalGateway.psm1
+     Filename:     	VE_XD7StoreFrontOptimalGateway.psm1
     -------------------------------------------------------------------------
-     Module Name: VE_VE_XD7StoreFrontOptimalGateway
+     Module Name: VE_XD7StoreFrontOptimalGateway
     ===========================================================================
 #>
 
@@ -53,12 +53,12 @@ function Get-TargetResource
 
         try {
 
-            Write-Verbose -Message $localized.CallingGetDSOptimalGatewayForFarms
+            Write-Verbose -Message $localizedData.CallingGetDSOptimalGatewayForFarms
             $Gateway = Get-DSOptimalGatewayForFarms -SiteId $SiteId -ResourcesVirtualPath $ResourcesVirtualPath -ErrorAction SilentlyContinue
         }
         catch {
 
-            Write-Verbose -Message ($localized.TrappedError -f 'getting gateways', $Error[0].Exception.Message)
+            Write-Verbose -Message ($localizedData.TrappedError -f 'getting gateways', $Error[0].Exception.Message)
         }
 
         $returnValue = @{
@@ -151,25 +151,25 @@ function Set-TargetResource
         Import-Module (FindXDModule -Name 'FarmsModule' -Path $storefrontCmdletSearchPath) -Scope Global -Verbose:$false >$null *>&1
         Import-Module (FindXDModule -Name 'RoamingRecordsModule' -Path $storefrontCmdletSearchPath) -Scope Global -Verbose:$false >$null *>&1
 
-        Write-Verbose -Message $localized.CallingGetDSOptimalGatewayForFarms
+        Write-Verbose -Message $localizedData.CallingGetDSOptimalGatewayForFarms
         try {
 
             $Gateway = Get-DSOptimalGatewayForFarms -SiteId $SiteId -ResourcesVirtualPath $ResourcesVirtualPath -ErrorAction SilentlyContinue
         }
         catch {
 
-            Write-Verbose -Message ($localized.TrappedError -f 'Get-DSOptimalGatewayForFarms', $Error[0].Exception.Message)
+            Write-Verbose -Message ($localizedData.TrappedError -f 'Get-DSOptimalGatewayForFarms', $Error[0].Exception.Message)
         }
 
         If (!($Farms)) {
             try {
 
-                Write-Verbose -Message $localized.CallingGetDSFarmSets
+                Write-Verbose -Message $localizedData.CallingGetDSFarmSets
                 $Farms = Get-DSFarmSets -IISSiteId $siteid -virtualpath $resourcesVirtualPath | Select-Object -expandproperty Farms | Select-Object -expandproperty FarmName
             }
             catch {
 
-                Write-Verbose -Message ($localized.TrappedError -f 'Get-DSFarmSets', $Error[0].Exception.Message)
+                Write-Verbose -Message ($localizedData.TrappedError -f 'Get-DSFarmSets', $Error[0].Exception.Message)
             }
         }
 
@@ -178,52 +178,52 @@ function Set-TargetResource
             #  Added all params since powershell command replaces all current values if you set anything
             If (!($PSBoundParameters.ContainsKey('StaUrls'))) {
                 $StaUrls = [System.String[]]$Gateway.StaUrls
-                Write-Verbose -Message ($localized.SettingStaUrls -f $StaUrls)
+                Write-Verbose -Message ($localizedData.SettingStaUrls -f $StaUrls)
             }
             Else {
-                Write-Verbose -Message ($localized.UpdatingStaUrls -f $StaUrls)
+                Write-Verbose -Message ($localizedData.UpdatingStaUrls -f $StaUrls)
             }
             If (!($PSBoundParameters.ContainsKey('StasUseLoadBalancing'))) {
                 $StasUseLoadBalancing = [System.Boolean]$Gateway.StasUseLoadBalancing
-                Write-Verbose -Message ($localized.SettingStaLoadBalancing -f $StasUseLoadBalancing)
+                Write-Verbose -Message ($localizedData.SettingStaLoadBalancing -f $StasUseLoadBalancing)
             }
             Else {
-                Write-Verbose -Message ($localized.UpdatingStaLoadBalancing -f $StasUseLoadBalancing)
+                Write-Verbose -Message ($localizedData.UpdatingStaLoadBalancing -f $StasUseLoadBalancing)
             }
             If (!($PSBoundParameters.ContainsKey('StasBypassDuration'))) {
                 $StasBypassDuration = [System.String]$Gateway.StasBypassDuration
-                Write-Verbose -Message ($localized.SettingStaBypassDuration -f $StasBypassDuration)
+                Write-Verbose -Message ($localizedData.SettingStaBypassDuration -f $StasBypassDuration)
             }
             Else {
-                Write-Verbose -Message ($localized.UpdatingStaBypassDuration -f $StasBypassDuration)
+                Write-Verbose -Message ($localizedData.UpdatingStaBypassDuration -f $StasBypassDuration)
             }
             If (!($PSBoundParameters.ContainsKey('EnableSessionReliability'))) {
                 $EnableSessionReliability = [System.Boolean]$Gateway.EnableSessionReliability
-                Write-Verbose -Message ($localized.SettingSessionReliability -f $EnableSessionReliability)
+                Write-Verbose -Message ($localizedData.SettingSessionReliability -f $EnableSessionReliability)
             }
             Else {
-                Write-Verbose -Message ($localized.UpdatingSessionReliability -f $EnableSessionReliability)
+                Write-Verbose -Message ($localizedData.UpdatingSessionReliability -f $EnableSessionReliability)
             }
             If (!($PSBoundParameters.ContainsKey('UseTwoTickets'))) {
                 $UseTwoTickets = [System.Boolean]$Gateway.UseTwoTickets
-                Write-Verbose -Message ($localized.SettingRequireTwoTickets -f $UseTwoTickets)
+                Write-Verbose -Message ($localizedData.SettingRequireTwoTickets -f $UseTwoTickets)
             }
             Else {
-                Write-Verbose -Message ($localized.UpdatingRequireTwoTickets -f $UseTwoTickets)
+                Write-Verbose -Message ($localizedData.UpdatingRequireTwoTickets -f $UseTwoTickets)
             }
             If (!($PSBoundParameters.ContainsKey('Zones'))) {
                 $Zones = [System.String[]]$Gateway.Zones
-                Write-Verbose -Message ($localized.SettingZones -f $Zones)
+                Write-Verbose -Message ($localizedData.SettingZones -f $Zones)
             }
             Else {
-                Write-Verbose -Message ($localized.UpdatingZones -f $Zones)
+                Write-Verbose -Message ($localizedData.UpdatingZones -f $Zones)
             }
             If (!($PSBoundParameters.ContainsKey('EnabledOnDirectAccess'))) {
                 $EnabledOnDirectAccess = [System.Boolean]$Gateway.EnabledOnDirectAccess
-                Write-Verbose -Message ($localized.SettingEnabledOnDirectAccess -f $EnabledOnDirectAccess)
+                Write-Verbose -Message ($localizedData.SettingEnabledOnDirectAccess -f $EnabledOnDirectAccess)
             }
             Else {
-                Write-Verbose -Message ($localized.UpdaingEnabledOnDirectAccess -f $EnabledOnDirectAccess)
+                Write-Verbose -Message ($localizedData.UpdaingEnabledOnDirectAccess -f $EnabledOnDirectAccess)
             }
 
             $ChangedParams = @{
@@ -243,13 +243,13 @@ function Set-TargetResource
             #endregion
 
             #Create gateway
-            Write-Verbose -Message $localized.CallingSetDSOptimalGatewayForFarms
+            Write-Verbose -Message $localizedData.CallingSetDSOptimalGatewayForFarms
             Set-DSOptimalGatewayForFarms @ChangedParams
 
         }
         Else {
             #Uninstall
-            Write-Verbose -Message $localized.CallingRemoveDSOptimalGatewayForFarms
+            Write-Verbose -Message $localizedData.CallingRemoveDSOptimalGatewayForFarms
             Remove-DSOptimalGatewayForFarms -SiteId $SiteId -ResourcesVirtualPath $ResourcesVirtualPath
         }
         #Include this line if the resource requires a system reboot.

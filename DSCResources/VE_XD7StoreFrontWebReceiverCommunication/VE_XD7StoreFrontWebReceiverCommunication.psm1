@@ -97,14 +97,14 @@ function Set-TargetResource
 
     try {
 
-        Write-Verbose -Message ($localized.CallingGetSTFStoreService -f $StoreName)
+        Write-Verbose -Message ($localizedData.CallingGetSTFStoreService -f $StoreName)
         $StoreService = Get-STFStoreService | Where-object {$_.friendlyname -eq $StoreName};
-        Write-Verbose -Message $localized.CallingGetSTFWebReceiverService
+        Write-Verbose -Message $localizedData.CallingGetSTFWebReceiverService
         $webreceiverservice = Get-STFWebReceiverService -StoreService $Storeservice
     }
     catch {
 
-        Write-Verbose -Message ($localized.TrappedError -f $Error[0].Exception.Message)
+        Write-Verbose -Message ($localizedData.TrappedError -f $Error[0].Exception.Message)
     }
 
     $ChangedParams = @{
@@ -118,14 +118,14 @@ function Set-TargetResource
             if ($PSBoundParameters[$property] -is [System.String[]]) {
                 if (Compare-Object -ReferenceObject $expected -DifferenceObject $actual) {
                     if (!($ChangedParams.ContainsKey($property))) {
-                        Write-Verbose -Message ($localized.SettingResourceProperty -f $property)
+                        Write-Verbose -Message ($localizedData.SettingResourceProperty -f $property)
                         $ChangedParams.Add($property,$PSBoundParameters[$property])
                     }
                 }
             }
             elseif ($expected -ne $actual) {
                 if (!($ChangedParams.ContainsKey($property))) {
-                    Write-Verbose -Message ($localized.SettingResourceProperty -f $property)
+                    Write-Verbose -Message ($localizedData.SettingResourceProperty -f $property)
                     $ChangedParams.Add($property,$PSBoundParameters[$property])
                 }
             }
@@ -133,7 +133,7 @@ function Set-TargetResource
     }
 
     $ChangedParams.Remove('StoreName')
-    Write-Verbose -Message $localized.CallingSetSTFWebReceiverCommunication
+    Write-Verbose -Message $localizedData.CallingSetSTFWebReceiverCommunication
     Set-STFWebReceiverCommunication @ChangedParams
 
 }

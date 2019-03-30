@@ -45,10 +45,10 @@ function Get-TargetResource
 	)
 
 	Import-module Citrix.StoreFront -ErrorAction Stop -Verbose:$false
-	Write-Verbose -Message ($localized.CallingGetSTFStoreService -f $StoreName)
+	Write-Verbose -Message ($localizedData.CallingGetSTFStoreService -f $StoreName)
 	$StoreService = Get-STFStoreService | Where-object {$_.friendlyname -eq $StoreName};
 	if ($StoreService) {
-		Write-Verbose -Message $localized.CallingGetSTFAuthenticationService
+		Write-Verbose -Message $localizedData.CallingGetSTFAuthenticationService
 		$Auth = Get-STFAuthenticationService -VirtualPath ($StoreService.AuthenticationServiceVirtualPath) -SiteID ($StoreService.SiteId)
 		$EnabledProtocols = $auth.authentication.ProtocolChoices | Where-Object { $_.Enabled } | Select-object -ExpandProperty Name
 	}
@@ -89,39 +89,39 @@ function Set-TargetResource
 	)
 
 	Import-module Citrix.StoreFront -ErrorAction Stop -Verbose:$false;
-	Write-Verbose -Message ($localized.CallingGetSTFStoreService -f $StoreName)
+	Write-Verbose -Message ($localizedData.CallingGetSTFStoreService -f $StoreName)
 	$StoreService = Get-STFStoreService | Where-object {$_.friendlyname -eq $StoreName};
-	Write-Verbose -Message ($localized.CallingGetSTFRoamingGateway -f $GatewayName)
+	Write-Verbose -Message ($localizedData.CallingGetSTFRoamingGateway -f $GatewayName)
 	$GatewayService = Get-STFRoamingGateway -Name $GatewayName
-	Write-Verbose -Message ($localized.CallingGetSTFAuthenticationService)
+	Write-Verbose -Message ($localizedData.CallingGetSTFAuthenticationService)
 	$Auth = Get-STFAuthenticationService -VirtualPath ($StoreService.AuthenticationServiceVirtualPath) -SiteID ($StoreService.SiteId)
 
 	if ($Ensure -eq 'Present') {
-		Write-Verbose -Message ($localized.CallingRegisterSTFStoreGateway)
+		Write-Verbose -Message ($localizedData.CallingRegisterSTFStoreGateway)
 		Register-STFStoreGateway -Gateway $GatewayService -StoreService $StoreService -DefaultGateway
 		foreach ($Protocol in $Auth.Authentication.ProtocolChoices) {
 			if ($AuthenticationProtocol -contains $Protocol.Name) {
 				if ($Protocol.Enabled) {
-					Write-Verbose -Message ($localized.ProtocolEnabled -f $Protocol)
+					Write-Verbose -Message ($localizedData.ProtocolEnabled -f $Protocol)
 				}
 				else {
-					Write-Verbose -Message ($localized.EnablingProtocol -f $Protocol)
+					Write-Verbose -Message ($localizedData.EnablingProtocol -f $Protocol)
 					Enable-STFAuthenticationServiceProtocol -Name $Protocol.Name -AuthenticationService $Auth
 				}
 			}
 			else {
 				if ($Protocol.Enabled) {
-					Write-Verbose -Message ($localized.DisablingProtocol -f $Protocol)
+					Write-Verbose -Message ($localizedData.DisablingProtocol -f $Protocol)
 					Disable-STFAuthenticationServiceProtocol -Name $Protocol.Name -AuthenticationService $Auth
 				}
 				else {
-					Write-Verbose -Message ($localized.ProtocolDisabled -f $Protocol)
+					Write-Verbose -Message ($localizedData.ProtocolDisabled -f $Protocol)
 				}
 			}
 		}
 	}
 	else {
-		Write-Verbose -Message $localized.CallingUnegisterSTFStoreGateway
+		Write-Verbose -Message $localizedData.CallingUnegisterSTFStoreGateway
 		UnRegister-STFStoreGateway -Gateway $GatewayService -StoreService $StoreService
 	}
 }

@@ -24,12 +24,12 @@ function Get-TargetResource
     )
 
     Import-Module Citrix.StoreFront -ErrorAction Stop -Verbose:$false
-    Write-Verbose -Message ($localized.CallingGetSTFStoreService -f $StoreName)
+    Write-Verbose -Message ($localizedData.CallingGetSTFStoreService -f $StoreName)
     $StoreService = Get-STFStoreService | Where-Object { $_.friendlyname -eq $StoreName }
-    Write-Verbose -Message ($localized.CallingGetSTFAuthenticationService)
+    Write-Verbose -Message ($localizedData.CallingGetSTFAuthenticationService)
     $Auth = Get-STFAuthenticationService -VirtualPath ($StoreService.AuthenticationServiceVirtualPath) -SiteID ($StoreService.SiteId)
     If ($Auth) {
-        Write-Verbose -Message ($localized.CallingGetSTFExplicitCommonOptions -f $Auth.FriendlyName)
+        Write-Verbose -Message ($localizedData.CallingGetSTFExplicitCommonOptions -f $Auth.FriendlyName)
         $AuthOptions = Get-STFExplicitCommonOptions -AuthenticationService $Auth
     }
 
@@ -96,9 +96,9 @@ function Set-TargetResource
     )
 
     Import-Module Citrix.StoreFront -ErrorAction Stop -Verbose:$false;
-    Write-Verbose -Message ($localized.CallingGetSTFStoreService -f $StoreName)
+    Write-Verbose -Message ($localizedData.CallingGetSTFStoreService -f $StoreName)
     $StoreService = Get-STFStoreService | Where-object {$_.friendlyname -eq $StoreName};
-    Write-Verbose -Message ($localized.CallingGetSTFAuthenticationService)
+    Write-Verbose -Message ($localizedData.CallingGetSTFAuthenticationService)
     $Auth = Get-STFAuthenticationService -VirtualPath $StoreService.AuthenticationServiceVirtualPath -SiteID $StoreService.SiteId
 
     $ChangedParams = @{
@@ -112,21 +112,21 @@ function Set-TargetResource
             if ($PSBoundParameters[$property] -is [System.String[]]) {
                 if (Compare-Object -ReferenceObject $expected -DifferenceObject $actual) {
                     if (!($ChangedParams.ContainsKey($property))) {
-                        Write-Verbose -Message ($localized.SettingResourceProperty -f $property)
+                        Write-Verbose -Message ($localizedData.SettingResourceProperty -f $property)
                         $ChangedParams.Add($property,$PSBoundParameters[$property])
                     }
                 }
             }
             elseif ($expected -ne $actual) {
                 if (!($ChangedParams.ContainsKey($property))) {
-                    Write-Verbose -Message ($localized.SettingResourceProperty -f $property)
+                    Write-Verbose -Message ($localizedData.SettingResourceProperty -f $property)
                     $ChangedParams.Add($property,$PSBoundParameters[$property])
                 }
             }
         }
     }
 
-    Write-Verbose -Message $localized.CallingSetSTFExplicitCommonOptions
+    Write-Verbose -Message $localizedData.CallingSetSTFExplicitCommonOptions
     Set-STFExplicitCommonOptions @ChangedParams
 
 }

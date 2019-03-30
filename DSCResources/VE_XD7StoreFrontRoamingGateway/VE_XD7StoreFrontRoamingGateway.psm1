@@ -152,19 +152,19 @@ function Set-TargetResource
 					if ($actual) {
 						if (Compare-Object -ReferenceObject $expected -DifferenceObject $actual) {
 							if (!($ChangedParams.ContainsKey($property))) {
-								Write-Verbose -Message ($localized.SettingResourceProperty -f $property)
+								Write-Verbose -Message ($localizedData.SettingResourceProperty -f $property)
 								$ChangedParams.Add($property,$PSBoundParameters[$property])
 							}
 						}
 					}
 					else {
-						Write-Verbose -Message ($localized.SettingResourceProperty -f $property)
+						Write-Verbose -Message ($localizedData.SettingResourceProperty -f $property)
 						$ChangedParams.Add($property,$PSBoundParameters[$property])
 					}
 				}
 				elseif ($expected -ne $actual) {
 					if (!($ChangedParams.ContainsKey($property))) {
-						Write-Verbose -Message ($localized.SettingResourceProperty -f $property)
+						Write-Verbose -Message ($localizedData.SettingResourceProperty -f $property)
 						$ChangedParams.Add($property,$PSBoundParameters[$property])
 					}
 				}
@@ -174,12 +174,12 @@ function Set-TargetResource
 
 		if ($Gateway) {
 			#Set changed parameters
-			Write-Verbose -Message $localized.CallingSetSTFRoamingGateway
+			Write-Verbose -Message $localizedData.CallingSetSTFRoamingGateway
 			Set-STFRoamingGateway @ChangedParams -confirm:$false
 		}
 		else {
 			#Create gateway
-			Write-Verbose -Message $localized.CallingAddSTFRoamingGateway
+			Write-Verbose -Message $localizedData.CallingAddSTFRoamingGateway
 			Add-STFRoamingGateway @AllParams -confirm:$false
 		}
 

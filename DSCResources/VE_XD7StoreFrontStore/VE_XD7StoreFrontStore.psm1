@@ -318,13 +318,13 @@ function Set-TargetResource {
                         if ($actual) {
                             if (Compare-Object -ReferenceObject $expected -DifferenceObject $actual) {
                                 if (!($ChangedParams.ContainsKey($property))) {
-                                    Write-Verbose -Message ($localized.SettingResourceProperty -f $property)
+                                    Write-Verbose -Message ($localizedData.SettingResourceProperty -f $property)
                                     $ChangedParams.Add($property,$PSBoundParameters[$property])
                                 }
                             }
                         }
                         Else {
-                            Write-Verbose -Message ($localized.SettingResourceProperty -f $property)
+                            Write-Verbose -Message ($localizedData.SettingResourceProperty -f $property)
                             $ChangedParams.Add($property,$PSBoundParameters[$property])
                         }
                     }
@@ -370,7 +370,7 @@ function Set-TargetResource {
                 $Auth = Get-STFAuthenticationService -VirtualPath $AuthVirtualPath -SiteID $SiteId
                 if ($Auth.VirtualPath -ne $AuthVirtualPath) {
 
-                    Write-Verbose -Message $localized.RunningAddSTFAuthenicationService
+                    Write-Verbose -Message $localizedData.RunningAddSTFAuthenicationService
                     $Auth = Add-STFAuthenticationService -VirtualPath $AuthVirtualPath -SiteID $SiteId -confirm:$false
                 }
                 $AllParams.Add('AuthenticationService', $Auth)
@@ -408,7 +408,7 @@ function Set-TargetResource {
                     }
                 }
                 if ($ChangedParams.ContainsKey('LockedDown')) {
-                    Write-Verbose -Message $localized.RunningSetSTFStoreService
+                    Write-Verbose -Message $localizedData.RunningSetSTFStoreService
                     Set-STFStoreService -StoreService $StoreService -LockedDown $LockedDown -confirm:$false
                     $ChangedParams.Remove('LockedDown')
                 }
@@ -418,7 +418,7 @@ function Set-TargetResource {
                     $ChangedParams.Add('StoreService', $StoreService)
 
                     #Update settings
-                    Write-Verbose -Message $localized.RunningSetSTFStoreFarm
+                    Write-Verbose -Message $localizedData.RunningSetSTFStoreFarm
                     Set-STFStoreFarm @ChangedParams -confirm:$false
                 }
                 else {
@@ -427,10 +427,10 @@ function Set-TargetResource {
                     $KeysToRemove | ForEach-Object { $AllParams.Remove($_) }
 
                     #Create farm
-                    Write-Verbose -Message $localized.RunningNewSTFStoreFarm
+                    Write-Verbose -Message $localizedData.RunningNewSTFStoreFarm
                     New-STFStoreFarm @AllParams -confirm:$false
                     #Add farm to storeservice
-                    Write-Verbose -Message $localized.RunningAddSTFStoreFarm
+                    Write-Verbose -Message $localizedData.RunningAddSTFStoreFarm
                     $StoreService = Get-STFStoreService | Where-Object { $_.friendlyname -eq $StoreName }
                     Add-STFStoreFarm -Farm $AllParams.FarmName -StoreService $StoreService
                 }
@@ -442,12 +442,12 @@ function Set-TargetResource {
                 $AllParams.Add('SiteId', $SiteId)
 
                 #Create
-                Write-Verbose -Message $localized.RunningAddSTFStoreService
+                Write-Verbose -Message $localizedData.RunningAddSTFStoreService
                 Add-STFStoreService @AllParams -confirm:$false
 
                 if ($ChangedParams.ContainsKey('LockedDown')) {
                     #This setting isn't available to be set via the Add-STFStoreService
-                    Write-Verbose -Message $localized.RunningSetSTFStoreFarmLockedDown
+                    Write-Verbose -Message $localizedData.RunningSetSTFStoreFarmLockedDown
                     $StoreService = Get-STFStoreService | Where-Object { $_.friendlyname -eq $StoreName }
                     Set-STFStoreService -StoreService $StoreService -LockedDown $LockedDown -confirm:$false
                 }
@@ -456,14 +456,14 @@ function Set-TargetResource {
         }
         else {
             #Uninstall
-            Write-Verbose -Message $localized.RunningRemoveSTFStoreService
+            Write-Verbose -Message $localizedData.RunningRemoveSTFStoreService
             $AuthVirtPath = $StoreService.AuthenticationServiceVirtualPath
             $SiteId = $StoreService.SiteId
             $StoreService | Remove-STFStoreService -confirm:$false
-            Write-Verbose -Message ($localized.RunningGetSTFAuthenticationService -f $AuthVirtPath)
+            Write-Verbose -Message ($localizedData.RunningGetSTFAuthenticationService -f $AuthVirtPath)
             $Auth = Get-STFAuthenticationService -VirtualPath $AuthVirtPath -SiteID $SiteId
             if ($Auth) {
-                Write-Verbose -Message $localized.RunningRemoveSTFAuthenicationService
+                Write-Verbose -Message $localizedData.RunningRemoveSTFAuthenicationService
                 $Auth | Remove-STFAuthenticationService -confirm:$false
             }
         }

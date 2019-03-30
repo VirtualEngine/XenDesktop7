@@ -35,14 +35,14 @@ function Get-TargetResource
 
         try {
 
-            Write-Verbose -Message ($localized.CallingGetSTFStoreService -f $StoreName)
+            Write-Verbose -Message ($localizedData.CallingGetSTFStoreService -f $StoreName)
             $StoreService = Get-STFStoreService | Where-Object { $_.friendlyname -eq $StoreName }
-            Write-Verbose -Message $localized.CallingGetDSResourceFilterKeyword
+            Write-Verbose -Message $localizedData.CallingGetDSResourceFilterKeyword
             $Configuration = Get-DSResourceFilterKeyword -SiteId ($StoreService.SiteId) -VirtualPath ($StoreService.VirtualPath)
         }
         catch {
 
-            Write-Verbose -Message ($localized.TrappedError -f $Error[0].Exception.Message)
+            Write-Verbose -Message ($localizedData.TrappedError -f $Error[0].Exception.Message)
         }
 
         $returnValue = @{
@@ -88,12 +88,12 @@ function Set-TargetResource
 
         try {
 
-            Write-Verbose -Message ($localized.CallingGetSTFStoreService -f $StoreName)
+            Write-Verbose -Message ($localizedData.CallingGetSTFStoreService -f $StoreName)
             $StoreService = Get-STFStoreService | Where-Object { $_.friendlyname -eq $StoreName }
         }
         catch {
 
-            Write-Verbose -Message ($localized.TrappedError -f $Error[0].Exception.Message)
+            Write-Verbose -Message ($localizedData.TrappedError -f $Error[0].Exception.Message)
         }
 
         $ChangedParams = @{
@@ -109,21 +109,21 @@ function Set-TargetResource
                     if ($PSBoundParameters[$property] -is [System.String[]]) {
                         if (Compare-Object -ReferenceObject $expected -DifferenceObject $actual) {
                             if (!($ChangedParams.ContainsKey($property))) {
-                                Write-Verbose -Message ($localized.SettingResourceProperty -f $property)
+                                Write-Verbose -Message ($localizedData.SettingResourceProperty -f $property)
                                 $ChangedParams.Add($property,$PSBoundParameters[$property])
                             }
                         }
                     }
                     elseif ($expected -ne $actual) {
                         if (!($ChangedParams.ContainsKey($property))) {
-                            Write-Verbose -Message ($localized.SettingResourceProperty -f $property)
+                            Write-Verbose -Message ($localizedData.SettingResourceProperty -f $property)
                             $ChangedParams.Add($property,$PSBoundParameters[$property])
                         }
                     }
                 }
                 else {
                     if (!($ChangedParams.ContainsKey($property))) {
-                        Write-Verbose -Message ($localized.SettingResourceProperty -f $property)
+                        Write-Verbose -Message ($localizedData.SettingResourceProperty -f $property)
                         $ChangedParams.Add($property,$PSBoundParameters[$property])
                     }
                 }
@@ -131,7 +131,7 @@ function Set-TargetResource
         }
 
         $ChangedParams.Remove('StoreName')
-        Write-Verbose -Message $localized.CallingSetDSResourceFilterKeyword
+        Write-Verbose -Message $localizedData.CallingSetDSResourceFilterKeyword
         Set-DSResourceFilterKeyword @ChangedParams
     }
 }
