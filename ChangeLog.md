@@ -10,3 +10,4 @@
 * Added new XD7StoreFrontFarmConfiguration resource
 * Added new XD7StoreFrontFilterKeyword resource
 * Added new XD7StoreFrontOptimalGateway resource
+* Added new XD7StoreFrontRegisterStoreGateway resource

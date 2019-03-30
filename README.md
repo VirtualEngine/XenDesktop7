@@ -1091,7 +1091,7 @@ XD7StoreFrontRegisterStoreGateway [string]
 ### Configuration
 
 ```
-Configuration XD7StoreFrontRegisterStoreGatewayExample {
+Configuration XD7Example {
     Import-DscResource -ModuleName XenDesktop7
     XD7StoreFrontRegisterStoreGateway XD7StoreFrontRegisterStoreGatewayExample {
         GatewayName = 'Netscaler'
