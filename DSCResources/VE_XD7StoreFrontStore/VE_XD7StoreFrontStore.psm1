@@ -18,6 +18,7 @@ Import-LocalizedData -BindingVariable localizedData -FileName VE_XD7StoreFrontSt
 function Get-TargetResource {
     [CmdletBinding()]
     [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSDSCUseVerboseMessageInDSCResource', '')]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingEmptyCatchBlock', '')]
     [OutputType([System.Collections.Hashtable])]
     param (
         [Parameter(Mandatory = $true)]
@@ -31,7 +32,7 @@ function Get-TargetResource {
 
         [Parameter(Mandatory = $true)]
         [System.String[]]
-        $Servers,
+        $Servers
     )
     process {
 
@@ -124,7 +125,7 @@ function Test-TargetResource {
 
         [Parameter()]
         [System.UInt64]
-        $SiteId=1,
+        $SiteId = 1,
 
         [Parameter()]
         [System.String[]]
@@ -260,7 +261,7 @@ function Set-TargetResource {
 
         [Parameter()]
         [System.UInt64]
-        $SiteId=1,
+        $SiteId = 1,
 
         [Parameter()]
         [System.String[]]
@@ -470,11 +471,5 @@ function Set-TargetResource {
     } #end process
 } #end function Set-TargetResource
 
-$moduleRoot = Split-Path -Path $MyInvocation.MyCommand.Path -Parent;
-
-## Import the XD7Common library functions
-$moduleParent = Split-Path -Path $moduleRoot -Parent;
-#Import-Module (Join-Path -Path $moduleParent -ChildPath 'VE_XD7Common');
 
 Export-ModuleMember -Function *-TargetResource;
-

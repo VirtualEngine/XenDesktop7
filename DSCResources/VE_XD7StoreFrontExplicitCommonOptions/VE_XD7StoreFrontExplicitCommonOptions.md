@@ -1,4 +1,4 @@
-﻿
+
 ## XD7StoreFrontExplicitCommonOptions
 
 Set the ExplicitCommon Authentication service protocol options.
