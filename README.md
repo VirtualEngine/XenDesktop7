@@ -1210,7 +1210,7 @@ XD7StoreFrontStore [string]
 {
     StoreName = [String]
     AuthType = [String] { Explicit | Anonymous }
-    Servers[] = [String]
+    Servers = [String[]]
     [ FarmName = [String] ]
     [ Port = [UInt32] ]
     [ TransportType = [String] { HTTP | HTTPS | SSL } ]
@@ -1219,11 +1219,11 @@ XD7StoreFrontStore [string]
     [ AuthVirtualPath = [String] ]
     [ StoreVirtualPath = [String] ]
     [ SiteId = [UInt64] ]
-    [ ServiceUrls[] = [String] ]
+    [ ServiceUrls = [String[]] ]
     [ SSLRelayPort = [UInt32] ]
     [ AllFailedBypassDuration = [UInt32] ]
     [ BypassDuration = [UInt32] ]
-    [ Zones[] = [String] ]
+    [ Zones = [String[]] ]
     [ LockedDown = [Boolean] ]
     [ Ensure = [String] { Present | Absent } ]
 }
@@ -1237,7 +1237,7 @@ XD7StoreFrontStore [string]
   * If not specified, this value defaults to <StoreName>farm.
 * **Port**: Citrix StoreFront port.
 * **TransportType**: Citrix StoreFront transport type.
-* **Servers[]**: Citrix StoreFront director servers.
+* **Servers[]**: Citrix StoreFront delivery controllers.
 * **LoadBalance**: Citrix StoreFront enable load balancing.
 * **FarmType**: Citrix StoreFront farm type.
 * **AuthVirtualPath**: Citrix StoreFront authenication service virtual path.
@@ -1257,16 +1257,16 @@ XD7StoreFrontStore [string]
 ### Configuration
 
 ```
-Configuration XD7StoreFrontStoreExample {
+Configuration XD7Example {
     Import-DscResource -ModuleName XenDesktop7
     XD7StoreFrontStore XD7StoreFrontStoreExample {
         StoreName = 'mock'
-        port = 8010
-        transportType = 'HTTP'
-        servers = "testserver01,testserver02"
-        farmType = 'XenDesktop'
+        Port = 8010
+        TransportType = 'HTTP'
+        Servers = "testserver01,testserver02"
+        FarmType = 'XenDesktop'
         AuthType = 'Explicit'
-        Ensure = "Present"
+        Ensure = 'Present'
     }
 }
 ```

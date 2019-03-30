@@ -12,3 +12,4 @@
 * Added new XD7StoreFrontOptimalGateway resource
 * Added new XD7StoreFrontRegisterStoreGateway resource
 * Added new XD7StoreFrontSessionStateTimeout resource
+* Added new XD7StoreFrontStore resource

@@ -21,4 +21,3 @@ class VE_XD7StoreFrontStore : OMI_BaseResource
 	[Write, Description(" All the resources delivered by locked-down Store are auto subscribed and do not allow for un-subscription")] Boolean LockedDown;
 	[Write, Description("Ensure"), ValueMap{"Present","Absent"}, Values{"Present","Absent"}] String Ensure;
 };
-
