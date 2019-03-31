@@ -17,3 +17,4 @@
 * Added new XD7StoreFrontWebReceiverCommunication
 * Added new XD7StoreFrontWebReceiverPluginAssistant resource
 * Added new XD7StoreFrontWebReceiverService resource
+* Added new XD7StoreFrontWebReceiverUserInterface resource

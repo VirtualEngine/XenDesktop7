@@ -44,13 +44,12 @@ XD7StoreFrontWebReceiverUserInterface [string]
 * **AppShortcutsEnabled**: Enable App Shortcuts.
 * **AppShortcutsAllowSessionReconnect**: Enable App Shortcuts to support session reconnect.
 
-
 ### Configuration
 
 ```
 Configuration XD7Example {
     Import-DscResource -ModuleName XenDesktop7
-    XD7StoreFrontWebReceiverUserInterface XD7Example {
+    XD7StoreFrontWebReceiverUserInterface XD7StoreFrontWebReceiverUserInterfaceExample {
         StoreName = 'mock'
         WorkspaceControlLogoffAction = 'Disconnect'
         WorkspaceControlEnabled = $True

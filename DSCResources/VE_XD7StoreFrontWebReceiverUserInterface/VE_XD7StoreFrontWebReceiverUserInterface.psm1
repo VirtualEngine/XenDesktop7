@@ -1,4 +1,4 @@
-<#	
+<#
 	===========================================================================
 	 Created with: 	SAPIEN Technologies, Inc., PowerShell Studio 2019 v5.6.157
 	 Created on:   	2/8/2019 12:12 PM
@@ -20,65 +20,23 @@ function Get-TargetResource
     (
         [parameter(Mandatory = $true)]
         [System.String]
-        $StoreName,
-
-        [System.Boolean]
-        $AutoLaunchDesktop,
-
-        [System.UInt32]
-        $MultiClickTimeout,
-
-        [System.Boolean]
-        $EnableAppsFolderView,
-
-        [System.Boolean]
-        $ShowAppsView,
-
-        [System.Boolean]
-        $ShowDesktopsView,
-
-        [ValidateSet("Apps","Auto","Desktops")]
-        [System.String]
-        $DefaultView,
-
-        [System.Boolean]
-        $WorkspaceControlEnabled,
-
-        [System.Boolean]
-        $WorkspaceControlAutoReconnectAtLogon,
-
-        [ValidateSet("Disconnect","None","Terminate")]
-        [System.String]
-        $WorkspaceControlLogoffAction,
-
-        [System.Boolean]
-        $WorkspaceControlShowReconnectButton,
-
-        [System.Boolean]
-        $WorkspaceControlShowDisconnectButton,
-
-        [System.Boolean]
-        $ReceiverConfigurationEnabled,
-
-        [System.Boolean]
-        $AppShortcutsEnabled,
-
-        [System.Boolean]
-        $AppShortcutsAllowSessionReconnect
+        $StoreName
     )
 
     Import-module Citrix.StoreFront -ErrorAction Stop -Verbose:$false;
 
     try {
-        Write-Verbose "Calling Get-STFStoreService for $StoreName"
-        $StoreService = Get-STFStoreService | Where-object {$_.friendlyname -eq $StoreName};
-        Write-Verbose "Calling Get-STFWebReceiverService"
+
+        Write-Verbose -Message ($localizedData.CallingGetSTFStoreService -f $StoreName)
+        $StoreService = Get-STFStoreService | Where-Object { $_.friendlyname -eq $StoreName }
+        Write-Verbose -Message $localizedData.CallingGetSTFWebReceiverService
         $webreceiverservice = Get-STFWebReceiverService -StoreService $Storeservice
-        Write-Verbose "Calling Get-STFWebReceiverUserInterface"
+        Write-Verbose -Message $localizedData.CallingGetSTFWebReceiverUserInterface
         $Configuration = Get-STFWebReceiverUserInterface -WebReceiverService $webreceiverservice
     }
     catch {
-        Write-Verbose "Trapped error getting web receiver user interface. Error: $($Error[0].Exception.Message)"
+
+        Write-Verbose -Message ($localizedData.TrappedError -f $Error[0].Exception.Message)
     }
 
     $returnValue = @{
@@ -106,53 +64,68 @@ function Get-TargetResource
 function Set-TargetResource
 {
     [CmdletBinding()]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseShouldProcessForStateChangingFunctions', '')]
     param
     (
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [System.String]
         $StoreName,
 
+        [Parameter()]
         [System.Boolean]
         $AutoLaunchDesktop,
 
+        [Parameter()]
         [System.UInt32]
         $MultiClickTimeout,
 
+        [Parameter()]
         [System.Boolean]
         $EnableAppsFolderView,
 
+        [Parameter()]
         [System.Boolean]
         $ShowAppsView,
 
+        [Parameter()]
         [System.Boolean]
         $ShowDesktopsView,
 
-        [ValidateSet("Apps","Auto","Desktops")]
+        [Parameter()]
+        [ValidateSet('Apps','Auto','Desktops')]
         [System.String]
         $DefaultView,
 
+        [Parameter()]
         [System.Boolean]
         $WorkspaceControlEnabled,
 
+        [Parameter()]
         [System.Boolean]
         $WorkspaceControlAutoReconnectAtLogon,
 
-        [ValidateSet("Disconnect","None","Terminate")]
+        [Parameter()]
+        [ValidateSet('Disconnect','None','Terminate')]
         [System.String]
         $WorkspaceControlLogoffAction,
 
+        [Parameter()]
         [System.Boolean]
         $WorkspaceControlShowReconnectButton,
 
+        [Parameter()]
         [System.Boolean]
         $WorkspaceControlShowDisconnectButton,
 
+        [Parameter()]
         [System.Boolean]
         $ReceiverConfigurationEnabled,
 
+        [Parameter()]
         [System.Boolean]
         $AppShortcutsEnabled,
 
+        [Parameter()]
         [System.Boolean]
         $AppShortcutsAllowSessionReconnect
     )
@@ -160,15 +133,15 @@ function Set-TargetResource
     Import-module Citrix.StoreFront -ErrorAction Stop -Verbose:$false;
 
     try {
-        Write-Verbose "Calling Get-STFStoreService for $StoreName"
+
+        Write-Verbose -Message ($localizedData.CallingGetSTFStoreService -f $StoreName)
         $StoreService = Get-STFStoreService | Where-object {$_.friendlyname -eq $StoreName};
-        Write-Verbose "Calling Get-STFWebReceiverService"
+        Write-Verbose -Message $localizedData.CallingGetSTFWebReceiverService
         $webreceiverservice = Get-STFWebReceiverService -StoreService $Storeservice
-        Write-Verbose "Calling Get-STFWebReceiverUserInterface"
-        $Configuration = Get-STFWebReceiverUserInterface -WebReceiverService $webreceiverservice
     }
     catch {
-        Write-Verbose "Trapped error getting web receiver user interface. Error: $($Error[0].Exception.Message)"
+
+        Write-Verbose -Message ($localizedData.TrappedError -f $Error[0].Exception.Message)
     }
 
     $ChangedParams = @{
@@ -182,14 +155,14 @@ function Set-TargetResource
             if ($PSBoundParameters[$property] -is [System.String[]]) {
                 if (Compare-Object -ReferenceObject $expected -DifferenceObject $actual) {
                     if (!($ChangedParams.ContainsKey($property))) {
-                        Write-Verbose "Adding $property to ChangedParams"
+                        Write-Verbose -Message ($localizedData.SettingResourceProperty -f $property)
                         $ChangedParams.Add($property,$PSBoundParameters[$property])
                     }
                 }
             }
             elseif ($expected -ne $actual) {
                 if (!($ChangedParams.ContainsKey($property))) {
-                    Write-Verbose "Adding $property to ChangedParams"
+                    Write-Verbose -Message ($localizedData.SettingResourceProperty -f $property)
                     $ChangedParams.Add($property,$PSBoundParameters[$property])
                 }
             }
@@ -197,7 +170,7 @@ function Set-TargetResource
     }
 
     $ChangedParams.Remove('StoreName')
-    Write-Verbose "Calling Set-STFWebReceiverUserInterface"
+    Write-Verbose -Message $localizedData.CallingSetSTFWebReceiverUserInterface
     Set-STFWebReceiverUserInterface @ChangedParams
 
 }
@@ -209,51 +182,65 @@ function Test-TargetResource
     [OutputType([System.Boolean])]
     param
     (
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [System.String]
         $StoreName,
 
+        [Parameter()]
         [System.Boolean]
         $AutoLaunchDesktop,
 
+        [Parameter()]
         [System.UInt32]
         $MultiClickTimeout,
 
+        [Parameter()]
         [System.Boolean]
         $EnableAppsFolderView,
 
+        [Parameter()]
         [System.Boolean]
         $ShowAppsView,
 
+        [Parameter()]
         [System.Boolean]
         $ShowDesktopsView,
 
-        [ValidateSet("Apps","Auto","Desktops")]
+        [Parameter()]
+        [ValidateSet('Apps','Auto','Desktops')]
         [System.String]
         $DefaultView,
 
+        [Parameter()]
         [System.Boolean]
         $WorkspaceControlEnabled,
 
+        [Parameter()]
         [System.Boolean]
         $WorkspaceControlAutoReconnectAtLogon,
 
-        [ValidateSet("Disconnect","None","Terminate")]
+        [Parameter()]
+        [ValidateSet('Disconnect','None','Terminate')]
         [System.String]
         $WorkspaceControlLogoffAction,
 
+        [Parameter()]
         [System.Boolean]
         $WorkspaceControlShowReconnectButton,
 
+        [Parameter()]
         [System.Boolean]
         $WorkspaceControlShowDisconnectButton,
 
+        [Parameter()]
         [System.Boolean]
         $ReceiverConfigurationEnabled,
 
+        [Parameter()]
         [System.Boolean]
         $AppShortcutsEnabled,
 
+        [Parameter()]
         [System.Boolean]
         $AppShortcutsAllowSessionReconnect
     )
@@ -296,4 +283,3 @@ function Test-TargetResource
 
 
 Export-ModuleMember -Function *-TargetResource
-

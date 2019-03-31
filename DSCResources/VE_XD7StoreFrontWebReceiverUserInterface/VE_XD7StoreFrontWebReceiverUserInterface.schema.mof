@@ -18,4 +18,3 @@ class VE_XD7StoreFrontWebReceiverUserInterface : OMI_BaseResource
 	[Write, Description("Enable App Shortcuts")] Boolean AppShortcutsEnabled;
 	[Write, Description("Enable App Shortcuts to support session reconnect")] Boolean AppShortcutsAllowSessionReconnect;
 };
-

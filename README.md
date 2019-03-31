@@ -1504,7 +1504,7 @@ XD7StoreFrontWebReceiverUserInterface [string]
 ```
 Configuration XD7Example {
     Import-DscResource -ModuleName XenDesktop7
-    XD7StoreFrontWebReceiverUserInterface XD7Example {
+    XD7StoreFrontWebReceiverUserInterface XD7StoreFrontWebReceiverUserInterfaceExample {
         StoreName = 'mock'
         WorkspaceControlLogoffAction = 'Disconnect'
         WorkspaceControlEnabled = $True
