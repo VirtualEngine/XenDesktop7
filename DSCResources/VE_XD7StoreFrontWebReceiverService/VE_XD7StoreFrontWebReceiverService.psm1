@@ -1,4 +1,4 @@
-<#	
+<#
 	===========================================================================
 	 Created with: 	SAPIEN Technologies, Inc., PowerShell Studio 2019 v5.6.157
 	 Created on:   	2/8/2019 12:12 PM
@@ -18,39 +18,27 @@ function Get-TargetResource
     [OutputType([System.Collections.Hashtable])]
     param
     (
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [System.String]
         $StoreName,
 
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [System.String]
-        $VirtualPath,
-
-        [parameter()]
-        [System.UInt64]
-        $SiteId=1,
-
-        [System.Boolean]
-        $ClassicReceiverExperience,
-
-        [System.String]
-        $FriendlyName,
-
-        [ValidateSet("Present","Absent")]
-        [System.String]
-        $Ensure
+        $VirtualPath
     )
 
     Import-module Citrix.StoreFront -ErrorAction Stop -Verbose:$false;
 
     try {
-        Write-Verbose "Calling Get-STFStoreService for $StoreName"
+
+        Write-Verbose -Message ($localizedData.CallingGetSTFStoreService -f $StoreName)
         $StoreService = Get-STFStoreService | Where-object {$_.friendlyname -eq $StoreName};
-        Write-Verbose "Calling Get-STFWebReceiverService"
+        Write-Verbose -Message $localizedData.CallingGetSTFWebReceiverService
         $Configuration = Get-STFWebReceiverService -StoreService $StoreService
     }
     catch {
-        Write-Verbose "Trapped error getting web receiver service. Error: $($Error[0].Exception.Message)"
+
+        Write-Verbose -Message ($localizedData.TrappedError -f $Error[0].Exception.Message)
     }
 
     $returnValue = @{
@@ -68,27 +56,31 @@ function Get-TargetResource
 function Set-TargetResource
 {
     [CmdletBinding()]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseShouldProcessForStateChangingFunctions', '')]
     param
     (
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [System.String]
         $StoreName,
 
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [System.String]
         $VirtualPath,
 
-        [parameter()]
+        [Parameter()]
         [System.UInt64]
-        $SiteId=1,
+        $SiteId = 1,
 
+        [Parameter()]
         [System.Boolean]
         $ClassicReceiverExperience,
 
+        [Parameter()]
         [System.String]
         $FriendlyName,
 
-        [ValidateSet("Present","Absent")]
+        [Parameter()]
+        [ValidateSet('Present','Absent')]
         [System.String]
         $Ensure
     )
@@ -96,13 +88,14 @@ function Set-TargetResource
     Import-module Citrix.StoreFront -ErrorAction Stop -Verbose:$false;
 
     try {
-        Write-Verbose "Calling Get-STFStoreService for $StoreName"
-        $StoreService = Get-STFStoreService | Where-object {$_.friendlyname -eq $StoreName};
-        Write-Verbose "Calling Get-STFWebReceiverService"
+        Write-Verbose -Message ($localizedData.CallingGetSTFStoreService -f $StoreName)
+        $StoreService = Get-STFStoreService | Where-Object { $_.friendlyname -eq $StoreName }
+        Write-Verbose -Message $localizedData.CallingGetSTFWebReceiverService
         $Configuration = Get-STFWebReceiverService -StoreService $StoreService
     }
     catch {
-        Write-Verbose "Trapped error getting web receiver service. Error: $($Error[0].Exception.Message)"
+
+        Write-Verbose -Message ($localizedData.TrappedError -f $Error[0].Exception.Message)
     }
 
     $ChangedParams = @{
@@ -118,14 +111,14 @@ function Set-TargetResource
             if ($PSBoundParameters[$property] -is [System.String[]]) {
                 if (Compare-Object -ReferenceObject $expected -DifferenceObject $actual) {
                     if (!($ChangedParams.ContainsKey($property))) {
-                        Write-Verbose "Adding $property to ChangedParams"
+                        Write-Verbose -Message ($localizedData.SettingResourceProperty -f $property)
                         $ChangedParams.Add($property,$PSBoundParameters[$property])
                     }
                 }
             }
             elseif ($expected -ne $actual) {
                 if (!($ChangedParams.ContainsKey($property))) {
-                    Write-Verbose "Adding $property to ChangedParams"
+                    Write-Verbose -Message ($localizedData.SettingResourceProperty -f $property)
                     $ChangedParams.Add($property,$PSBoundParameters[$property])
                 }
             }
@@ -133,18 +126,21 @@ function Set-TargetResource
     }
 
     $ChangedParams.Remove('StoreName')
-    If ($Ensure -eq 'Present') {
-        If ($Configuration) {
-            Write-Verbose "Calling Set-STFWebReceiverService"
+    if ($Ensure -eq 'Present') {
+        if ($Configuration) {
+
+            Write-Verbose -Message $localizedData.CallingSetSTFWebReceiverService
             Set-STFWebReceiverService @ChangedParams
         }
-        Else {
-            Write-Verbose "Calling Add-STFWebReceiverService"
+        else {
+
+            Write-Verbose -Message $localizedData.AddSTFWebReceiverService
             Add-STFWebReceiverService @ChangedParams
         }
     }
-    Else {
-        Write-Verbose "Calling Remove-STFWebReceiverService"
+    else {
+
+        Write-Verbose -Message $localizedData.RemoveSTFWebReceiverService
         Remove-STFWebReceiverService -WebReceiverService $Configuration
     }
 }
@@ -156,73 +152,76 @@ function Test-TargetResource
     [OutputType([System.Boolean])]
     param
     (
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [System.String]
         $StoreName,
 
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [System.String]
         $VirtualPath,
 
-        [parameter()]
+        [Parameter()]
         [System.UInt64]
-        $SiteId=1,
+        $SiteId = 1,
 
+        [Parameter()]
         [System.Boolean]
         $ClassicReceiverExperience,
 
+        [Parameter()]
         [System.String]
         $FriendlyName,
 
-        [ValidateSet("Present","Absent")]
+        [Parameter()]
+        [ValidateSet('Present','Absent')]
         [System.String]
         $Ensure
     )
 
-        $targetResource = Get-TargetResource @PSBoundParameters;
-        If ($Ensure -eq 'Present') {
-            $inCompliance = $true;
-            foreach ($property in $PSBoundParameters.Keys) {
-                if ($targetResource.ContainsKey($property)) {
-                    $expected = $PSBoundParameters[$property];
-                    $actual = $targetResource[$property];
-                    if ($PSBoundParameters[$property] -is [System.String[]]) {
-                        if ($actual) {
-                            if (Compare-Object -ReferenceObject $expected -DifferenceObject $actual -ErrorAction silentlycontinue) {
-                                Write-Verbose ($localizedData.ResourcePropertyMismatch -f $property, ($expected -join ','), ($actual -join ','));
-                                $inCompliance = $false;
-                            }
-                        }
-                        else {
+    $targetResource = Get-TargetResource @PSBoundParameters;
+    If ($Ensure -eq 'Present') {
+        $inCompliance = $true;
+        foreach ($property in $PSBoundParameters.Keys) {
+            if ($targetResource.ContainsKey($property)) {
+                $expected = $PSBoundParameters[$property];
+                $actual = $targetResource[$property];
+                if ($PSBoundParameters[$property] -is [System.String[]]) {
+                    if ($actual) {
+                        if (Compare-Object -ReferenceObject $expected -DifferenceObject $actual -ErrorAction silentlycontinue) {
                             Write-Verbose ($localizedData.ResourcePropertyMismatch -f $property, ($expected -join ','), ($actual -join ','));
                             $inCompliance = $false;
                         }
                     }
-                    elseif ($expected -ne $actual) {
-
-                        Write-Verbose ($localizedData.ResourcePropertyMismatch -f $property, $expected, $actual);
+                    else {
+                        Write-Verbose ($localizedData.ResourcePropertyMismatch -f $property, ($expected -join ','), ($actual -join ','));
                         $inCompliance = $false;
                     }
                 }
-            }
-        }
-        Else {
-            If ($targetResource.VirtualPath) {
-                $inCompliance = $false
-            }
-            Else {
-                $inCompliance = $true
-            }
-        }
+                elseif ($expected -ne $actual) {
 
-        if ($inCompliance) {
-            Write-Verbose ($localizedData.ResourceInDesiredState -f $DeliveryGroup);
+                    Write-Verbose ($localizedData.ResourcePropertyMismatch -f $property, $expected, $actual);
+                    $inCompliance = $false;
+                }
+            }
+        }
+    }
+    else {
+        if ($targetResource.VirtualPath) {
+            $inCompliance = $false
         }
         else {
-            Write-Verbose ($localizedData.ResourceNotInDesiredState -f $DeliveryGroup);
+            $inCompliance = $true
         }
+    }
 
-        return $inCompliance;
+    if ($inCompliance) {
+        Write-Verbose ($localizedData.ResourceInDesiredState -f $DeliveryGroup);
+    }
+    else {
+        Write-Verbose ($localizedData.ResourceNotInDesiredState -f $DeliveryGroup);
+    }
+
+    return $inCompliance;
 
 }
 

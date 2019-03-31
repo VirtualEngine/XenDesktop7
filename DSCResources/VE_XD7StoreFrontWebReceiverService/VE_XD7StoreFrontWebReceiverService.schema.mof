@@ -9,4 +9,3 @@ class VE_XD7StoreFrontWebReceiverService : OMI_BaseResource
 	[Write, Description("Friendly name to identify the Receiver for Web service")] String FriendlyName;
 	[Write, ValueMap{"Present","Absent"}, Values{"Present","Absent"}] String Ensure;
 };
-

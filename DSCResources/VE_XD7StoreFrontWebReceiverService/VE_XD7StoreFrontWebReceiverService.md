@@ -27,13 +27,12 @@ XD7StoreFrontWebReceiverService [string]
 * **FriendlyName**: Friendly name to identify the Receiver for Web service.
 * **Ensure**: Whether the Storefront Web Receiver Service should be added or removed.
 
-
 ### Configuration
 
 ```
 Configuration XD7Example {
     Import-DscResource -ModuleName XenDesktop7
-    XD7StoreFrontWebReceiverService XD7StoreFrontExample {
+    XD7StoreFrontWebReceiverService XD7StoreFrontWebReceiverServiceExample {
         StoreName = 'mock'
         VirtualPath = '/Citrix/mockweb'
         ClassicReceiverExperience = $false

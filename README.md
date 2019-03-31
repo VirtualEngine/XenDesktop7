@@ -1445,7 +1445,7 @@ XD7StoreFrontWebReceiverService [string]
 ```
 Configuration XD7Example {
     Import-DscResource -ModuleName XenDesktop7
-    XD7StoreFrontWebReceiverService XD7StoreFrontExample {
+    XD7StoreFrontWebReceiverService XD7StoreFrontWebReceiverServiceExample {
         StoreName = 'mock'
         VirtualPath = '/Citrix/mockweb'
         ClassicReceiverExperience = $false
