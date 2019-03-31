@@ -159,14 +159,14 @@ function Set-TargetResource
                 if (Compare-Object -ReferenceObject $expected -DifferenceObject $actual) {
                     if (!($ChangedParams.ContainsKey($property))) {
                         Write-Verbose -Message ($localizedData.SettingResourceProperty -f $property)
-                        $ChangedParams.Add($property,$PSBoundParameters[$property])
+                        $ChangedParams.Add($property, $PSBoundParameters[$property])
                     }
                 }
             }
             elseif ($expected -ne $actual) {
                 if (!($ChangedParams.ContainsKey($property))) {
                     Write-Verbose -Message ($localizedData.SettingResourceProperty -f $property)
-                    $ChangedParams.Add($property,$PSBoundParameters[$property])
+                    $ChangedParams.Add($property, $PSBoundParameters[$property])
                 }
             }
         }
@@ -251,7 +251,7 @@ function Test-TargetResource
         $ProtocolHandlerSkipDoubleHopCheckWhenDisabled
     )
 
-    $targetResource = Get-TargetResource @PSBoundParameters;
+    $targetResource = Get-TargetResource -StoreName $StoreName
     $inCompliance = $true;
     foreach ($property in $PSBoundParameters.Keys) {
         if ($targetResource.ContainsKey($property)) {

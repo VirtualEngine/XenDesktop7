@@ -90,7 +90,7 @@ function Set-TargetResource
 
 	Import-module Citrix.StoreFront -ErrorAction Stop -Verbose:$false;
 	Write-Verbose -Message ($localizedData.CallingGetSTFStoreService -f $StoreName)
-	$StoreService = Get-STFStoreService | Where-object {$_.friendlyname -eq $StoreName};
+	$StoreService = Get-STFStoreService | Where-Object { $_.friendlyname -eq $StoreName }
 	Write-Verbose -Message ($localizedData.CallingGetSTFRoamingGateway -f $GatewayName)
 	$GatewayService = Get-STFRoamingGateway -Name $GatewayName
 	Write-Verbose -Message ($localizedData.CallingGetSTFAuthenticationService)
@@ -122,7 +122,7 @@ function Set-TargetResource
 	}
 	else {
 		Write-Verbose -Message $localizedData.CallingUnegisterSTFStoreGateway
-		UnRegister-STFStoreGateway -Gateway $GatewayService -StoreService $StoreService
+		Unregister-STFStoreGateway -Gateway $GatewayService -StoreService $StoreService
 	}
 }
 
@@ -149,10 +149,10 @@ function Test-TargetResource
 		[Parameter()]
 		[ValidateSet('Present','Absent')]
 		[System.String]
-		$Ensure
+		$Ensure = 'Present'
 	)
 
-	$targetResource = Get-TargetResource @PSBoundParameters;
+	$targetResource = Get-TargetResource -StoreName $StoreName -GatewayName $GatewayName -AuthenticationProtocol $AuthenticationProtocol
 	if ($Ensure -eq 'Present') {
 		$inCompliance = $true;
 		foreach ($property in $PSBoundParameters.Keys) {
@@ -193,4 +193,3 @@ function Test-TargetResource
 
 
 Export-ModuleMember -Function *-TargetResource
-

@@ -151,9 +151,9 @@ function Set-TargetResource
         Import-Module (FindXDModule -Name 'FarmsModule' -Path $storefrontCmdletSearchPath) -Scope Global -Verbose:$false >$null *>&1
         Import-Module (FindXDModule -Name 'RoamingRecordsModule' -Path $storefrontCmdletSearchPath) -Scope Global -Verbose:$false >$null *>&1
 
-        Write-Verbose -Message $localizedData.CallingGetDSOptimalGatewayForFarms
         try {
 
+            Write-Verbose -Message $localizedData.CallingGetDSOptimalGatewayForFarms
             $Gateway = Get-DSOptimalGatewayForFarms -SiteId $SiteId -ResourcesVirtualPath $ResourcesVirtualPath -ErrorAction SilentlyContinue
         }
         catch {
@@ -161,7 +161,7 @@ function Set-TargetResource
             Write-Verbose -Message ($localizedData.TrappedError -f 'Get-DSOptimalGatewayForFarms', $Error[0].Exception.Message)
         }
 
-        If (!($Farms)) {
+        if (!($Farms)) {
             try {
 
                 Write-Verbose -Message $localizedData.CallingGetDSFarmSets
@@ -173,56 +173,56 @@ function Set-TargetResource
             }
         }
 
-        If ($Ensure -eq 'Present') {
+        if ($Ensure -eq 'Present') {
             #Region Create Params hashtable
             #  Added all params since powershell command replaces all current values if you set anything
-            If (!($PSBoundParameters.ContainsKey('StaUrls'))) {
+            if (!($PSBoundParameters.ContainsKey('StaUrls'))) {
                 $StaUrls = [System.String[]]$Gateway.StaUrls
                 Write-Verbose -Message ($localizedData.SettingStaUrls -f $StaUrls)
             }
-            Else {
+            else {
                 Write-Verbose -Message ($localizedData.UpdatingStaUrls -f $StaUrls)
             }
-            If (!($PSBoundParameters.ContainsKey('StasUseLoadBalancing'))) {
+            if (!($PSBoundParameters.ContainsKey('StasUseLoadBalancing'))) {
                 $StasUseLoadBalancing = [System.Boolean]$Gateway.StasUseLoadBalancing
                 Write-Verbose -Message ($localizedData.SettingStaLoadBalancing -f $StasUseLoadBalancing)
             }
-            Else {
+            else {
                 Write-Verbose -Message ($localizedData.UpdatingStaLoadBalancing -f $StasUseLoadBalancing)
             }
-            If (!($PSBoundParameters.ContainsKey('StasBypassDuration'))) {
+            if (!($PSBoundParameters.ContainsKey('StasBypassDuration'))) {
                 $StasBypassDuration = [System.String]$Gateway.StasBypassDuration
                 Write-Verbose -Message ($localizedData.SettingStaBypassDuration -f $StasBypassDuration)
             }
-            Else {
+            else {
                 Write-Verbose -Message ($localizedData.UpdatingStaBypassDuration -f $StasBypassDuration)
             }
-            If (!($PSBoundParameters.ContainsKey('EnableSessionReliability'))) {
+            if (!($PSBoundParameters.ContainsKey('EnableSessionReliability'))) {
                 $EnableSessionReliability = [System.Boolean]$Gateway.EnableSessionReliability
                 Write-Verbose -Message ($localizedData.SettingSessionReliability -f $EnableSessionReliability)
             }
-            Else {
+            else {
                 Write-Verbose -Message ($localizedData.UpdatingSessionReliability -f $EnableSessionReliability)
             }
-            If (!($PSBoundParameters.ContainsKey('UseTwoTickets'))) {
+            if (!($PSBoundParameters.ContainsKey('UseTwoTickets'))) {
                 $UseTwoTickets = [System.Boolean]$Gateway.UseTwoTickets
                 Write-Verbose -Message ($localizedData.SettingRequireTwoTickets -f $UseTwoTickets)
             }
-            Else {
+            else {
                 Write-Verbose -Message ($localizedData.UpdatingRequireTwoTickets -f $UseTwoTickets)
             }
-            If (!($PSBoundParameters.ContainsKey('Zones'))) {
+            if (!($PSBoundParameters.ContainsKey('Zones'))) {
                 $Zones = [System.String[]]$Gateway.Zones
                 Write-Verbose -Message ($localizedData.SettingZones -f $Zones)
             }
-            Else {
+            else {
                 Write-Verbose -Message ($localizedData.UpdatingZones -f $Zones)
             }
-            If (!($PSBoundParameters.ContainsKey('EnabledOnDirectAccess'))) {
+            if (!($PSBoundParameters.ContainsKey('EnabledOnDirectAccess'))) {
                 $EnabledOnDirectAccess = [System.Boolean]$Gateway.EnabledOnDirectAccess
                 Write-Verbose -Message ($localizedData.SettingEnabledOnDirectAccess -f $EnabledOnDirectAccess)
             }
-            Else {
+            else {
                 Write-Verbose -Message ($localizedData.UpdaingEnabledOnDirectAccess -f $EnabledOnDirectAccess)
             }
 
@@ -266,7 +266,7 @@ function Test-TargetResource
     (
         [Parameter()]
         [System.UInt64]
-        $SiteId=1,
+        $SiteId = 1,
 
         [Parameter(Mandatory = $true)]
         [System.String]
@@ -318,49 +318,49 @@ function Test-TargetResource
         $Ensure = 'Present'
     )
 
-        $targetResource = Get-TargetResource @PSBoundParameters;
-        If ($Ensure -eq 'Present') {
-            $inCompliance = $true;
-            foreach ($property in $PSBoundParameters.Keys) {
-                if ($targetResource.ContainsKey($property)) {
-                    $expected = $PSBoundParameters[$property];
-                    $actual = $targetResource[$property];
-                    if ($PSBoundParameters[$property] -is [System.String[]]) {
-                        if ($actual) {
-                            if (Compare-Object -ReferenceObject $expected -DifferenceObject $actual) {
-                                Write-Verbose ($localizedData.ResourcePropertyMismatch -f $property, ($expected -join ','), ($actual -join ','));
-                                $inCompliance = $false;
-                            }
-                        }
-                        else {
+    $targetResource = Get-TargetResource -ResourcesVirtualPath $ResourcesVirtualPath -GatewayName $GatewayName -Hostnames $Hostnames -StaUrls $StaUrls
+    if ($Ensure -eq 'Present') {
+        $inCompliance = $true;
+        foreach ($property in $PSBoundParameters.Keys) {
+            if ($targetResource.ContainsKey($property)) {
+                $expected = $PSBoundParameters[$property];
+                $actual = $targetResource[$property];
+                if ($PSBoundParameters[$property] -is [System.String[]]) {
+                    if ($actual) {
+                        if (Compare-Object -ReferenceObject $expected -DifferenceObject $actual) {
                             Write-Verbose ($localizedData.ResourcePropertyMismatch -f $property, ($expected -join ','), ($actual -join ','));
                             $inCompliance = $false;
                         }
                     }
-                    elseif ($expected -ne $actual) {
-                        Write-Verbose ($localizedData.ResourcePropertyMismatch -f $property, $expected, $actual);
+                    else {
+                        Write-Verbose ($localizedData.ResourcePropertyMismatch -f $property, ($expected -join ','), ($actual -join ','));
                         $inCompliance = $false;
                     }
                 }
+                elseif ($expected -ne $actual) {
+                    Write-Verbose ($localizedData.ResourcePropertyMismatch -f $property, $expected, $actual);
+                    $inCompliance = $false;
+                }
             }
         }
-        Else {
-            If ($targetResource.GatewayName -eq $GatewayName) {
-                $inCompliance = $false
-            }
-            Else {
-                $inCompliance = $true
-            }
-        }
-
-        if ($inCompliance) {
-            Write-Verbose ($localizedData.ResourceInDesiredState -f $DeliveryGroup);
+    }
+    else {
+        if ($targetResource.GatewayName -eq $GatewayName) {
+            $inCompliance = $false
         }
         else {
-            Write-Verbose ($localizedData.ResourceNotInDesiredState -f $DeliveryGroup);
+            $inCompliance = $true
         }
+    }
 
-        return $inCompliance;
+    if ($inCompliance) {
+        Write-Verbose ($localizedData.ResourceInDesiredState -f $DeliveryGroup);
+    }
+    else {
+        Write-Verbose ($localizedData.ResourceNotInDesiredState -f $DeliveryGroup);
+    }
+
+    return $inCompliance;
 }
 
 

@@ -29,17 +29,16 @@ function Get-TargetResource
 		[System.String]
 		$LogonType,
 
-		[Parameter()]
-		[parameter(Mandatory = $true)]
+		[Parameter(Mandatory = $true)]
 		[System.String]
 		$GatewayUrl
 	)
 
-		Import-module Citrix.StoreFront -ErrorAction Stop -Verbose:$false;
+		Import-Module Citrix.StoreFront -ErrorAction Stop -Verbose:$false;
 
 		try {
 
-			Write-Verbose "Running Get-STFRoamingGateway -Name $Name"
+			Write-Verbose -Message ($localizedData.CallingGetSTFRoamingGateway -f $Name)
 			$Gateway = Get-STFRoamingGateway -Name $Name -ErrorAction SilentlyContinue
 		}
 		catch { }
@@ -79,6 +78,10 @@ function Set-TargetResource
 		[System.String]
 		$LogonType,
 
+		[Parameter(Mandatory = $true)]
+		[System.String]
+		$GatewayUrl,
+
 		[Parameter()]
 		[System.String]
 		$SmartCardFallbackLogonType,
@@ -86,10 +89,6 @@ function Set-TargetResource
 		[Parameter()]
 		[System.String]
 		$Version,
-
-		[Parameter(Mandatory = $true)]
-		[System.String]
-		$GatewayUrl,
 
 		[Parameter()]
 		[System.String]
@@ -140,11 +139,11 @@ function Set-TargetResource
 			LogonType = $LogonType
 			GatewayUrl = $GatewayUrl
 		}
-		$targetResource = Get-TargetResource @PSBoundParameters;
+		$targetResource = Get-TargetResource -Name $Name -LogonType $LogonType -GatewayUrl $GatewayUrl;
 		foreach ($property in $PSBoundParameters.Keys) {
 			if ($targetResource.ContainsKey($property)) {
 				if (!($AllParams.ContainsKey($property))) {
-					$AllParams.Add($property,$PSBoundParameters[$property])
+					$AllParams.Add($property, $PSBoundParameters[$property])
 				}
 				$expected = $PSBoundParameters[$property];
 				$actual = $targetResource[$property];
@@ -153,7 +152,7 @@ function Set-TargetResource
 						if (Compare-Object -ReferenceObject $expected -DifferenceObject $actual) {
 							if (!($ChangedParams.ContainsKey($property))) {
 								Write-Verbose -Message ($localizedData.SettingResourceProperty -f $property)
-								$ChangedParams.Add($property,$PSBoundParameters[$property])
+								$ChangedParams.Add($property, $PSBoundParameters[$property])
 							}
 						}
 					}
@@ -165,7 +164,7 @@ function Set-TargetResource
 				elseif ($expected -ne $actual) {
 					if (!($ChangedParams.ContainsKey($property))) {
 						Write-Verbose -Message ($localizedData.SettingResourceProperty -f $property)
-						$ChangedParams.Add($property,$PSBoundParameters[$property])
+						$ChangedParams.Add($property, $PSBoundParameters[$property])
 					}
 				}
 			}
@@ -210,6 +209,10 @@ function Test-TargetResource
 		[System.String]
 		$LogonType,
 
+		[Parameter(Mandatory = $true)]
+		[System.String]
+		$GatewayUrl,
+
 		[Parameter()]
 		[System.String]
 		$SmartCardFallbackLogonType,
@@ -217,10 +220,6 @@ function Test-TargetResource
 		[Parameter()]
 		[System.String]
 		$Version,
-
-		[Parameter(Mandatory = $true)]
-		[System.String]
-		$GatewayUrl,
 
 		[Parameter()]
 		[System.String]
@@ -260,7 +259,7 @@ function Test-TargetResource
 		$Ensure = 'Present'
 	)
 
-		$targetResource = Get-TargetResource @PSBoundParameters;
+		$targetResource = Get-TargetResource -Name $Name -LogonType $LogonType -GatewayUrl $GatewayUrl
 		if ($Ensure -eq 'Present') {
 			$inCompliance = $true;
 			foreach ($property in $PSBoundParameters.Keys) {

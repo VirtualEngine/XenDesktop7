@@ -32,7 +32,7 @@ function Get-TargetResource
     try {
 
         Write-Verbose -Message ($localizedData.CallingGetSTFStoreService -f $StoreName)
-        $StoreService = Get-STFStoreService | Where-object {$_.friendlyname -eq $StoreName};
+        $StoreService = Get-STFStoreService | Where-Object { $_.friendlyname -eq $StoreName }
         Write-Verbose -Message $localizedData.CallingGetSTFWebReceiverService
         $Configuration = Get-STFWebReceiverService -StoreService $StoreService
     }
@@ -82,10 +82,10 @@ function Set-TargetResource
         [Parameter()]
         [ValidateSet('Present','Absent')]
         [System.String]
-        $Ensure
+        $Ensure = 'Present'
     )
 
-    Import-module Citrix.StoreFront -ErrorAction Stop -Verbose:$false;
+    Import-Module Citrix.StoreFront -ErrorAction Stop -Verbose:$false;
 
     try {
         Write-Verbose -Message ($localizedData.CallingGetSTFStoreService -f $StoreName)
@@ -112,14 +112,14 @@ function Set-TargetResource
                 if (Compare-Object -ReferenceObject $expected -DifferenceObject $actual) {
                     if (!($ChangedParams.ContainsKey($property))) {
                         Write-Verbose -Message ($localizedData.SettingResourceProperty -f $property)
-                        $ChangedParams.Add($property,$PSBoundParameters[$property])
+                        $ChangedParams.Add($property, $PSBoundParameters[$property])
                     }
                 }
             }
             elseif ($expected -ne $actual) {
                 if (!($ChangedParams.ContainsKey($property))) {
                     Write-Verbose -Message ($localizedData.SettingResourceProperty -f $property)
-                    $ChangedParams.Add($property,$PSBoundParameters[$property])
+                    $ChangedParams.Add($property, $PSBoundParameters[$property])
                 }
             }
         }
@@ -134,13 +134,13 @@ function Set-TargetResource
         }
         else {
 
-            Write-Verbose -Message $localizedData.AddSTFWebReceiverService
+            Write-Verbose -Message $localizedData.CallingAddSTFWebReceiverService
             Add-STFWebReceiverService @ChangedParams
         }
     }
     else {
 
-        Write-Verbose -Message $localizedData.RemoveSTFWebReceiverService
+        Write-Verbose -Message $localizedData.CallingRemoveSTFWebReceiverService
         Remove-STFWebReceiverService -WebReceiverService $Configuration
     }
 }
@@ -175,10 +175,10 @@ function Test-TargetResource
         [Parameter()]
         [ValidateSet('Present','Absent')]
         [System.String]
-        $Ensure
+        $Ensure = 'Present'
     )
 
-    $targetResource = Get-TargetResource @PSBoundParameters;
+    $targetResource = Get-TargetResource -StoreName $StoreName -VirtualPath $VirtualPath
     If ($Ensure -eq 'Present') {
         $inCompliance = $true;
         foreach ($property in $PSBoundParameters.Keys) {

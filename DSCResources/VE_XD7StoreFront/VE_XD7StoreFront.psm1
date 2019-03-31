@@ -20,24 +20,16 @@ function Get-TargetResource {
     [OutputType([System.Collections.Hashtable])]
     param (
 
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [System.UInt64]
-        $SiteId,
-
-        [parameter()]
-        [System.String]
-        $HostBaseUrl = 'http://localhost',
-
-        [Parameter()]
-        [ValidateSet('Present','Absent')]
-        [System.String]
-        $Ensure = 'Present'
+        $SiteId
     )
     process {
 
-        Import-module Citrix.StoreFront -ErrorAction Stop -Verbose:$false;
+        Import-Module Citrix.StoreFront -ErrorAction Stop -Verbose:$false;
 
         try {
+
             $Deployment = Get-STFDeployment -SiteId $SiteId
         }
         catch { }
@@ -73,25 +65,25 @@ function Test-TargetResource {
     )
     process {
 
-        $targetResource = Get-TargetResource @PSBoundParameters;
-        If ($Ensure -eq 'Present') {
+        $targetResource = Get-TargetResource -SiteId $SiteId
+        if ($Ensure -eq 'Present') {
 
-            If (($targetResource.SiteId -eq $SiteId) -and ($targetResource.HostBaseUrl -eq $HostBaseUrl)) {
+            if (($targetResource.SiteId -eq $SiteId) -and ($targetResource.HostBaseUrl -eq $HostBaseUrl)) {
                 Write-Verbose -Message ($localizedData.ResourceInDesiredState -f $SiteId)
                 return $true
             }
-            Else {
+            else {
                 Write-Verbose -Message ($localizedData.ResourceNotInDesiredState -f $SiteId)
                 return $false
             }
         }
-        Else {
+        else {
 
-            If ($targetResource.SiteId) {
+            if ($targetResource.SiteId) {
                 Write-Verbose -Message ($localizedData.ResourceNotInDesiredState -f $SiteId)
                 return $false
             }
-            Else {
+            else {
                 Write-Verbose -Message ($localizedData.ResourceInDesiredState -f $SiteId)
                 return $true
             }
@@ -107,11 +99,11 @@ function Set-TargetResource {
     [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidGlobalFunctions', 'global:Write-Host')]
     [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingEmptyCatchBlock', '')]
     param (
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [System.UInt64]
         $SiteId,
 
-        [parameter()]
+        [Parameter()]
         [System.String]
         $HostBaseUrl = 'http://localhost',
 
@@ -125,15 +117,15 @@ function Set-TargetResource {
 
         Import-module Citrix.StoreFront -ErrorAction Stop -Verbose:$false
         $Deployment = Get-STFDeployment -SiteId $SiteId
-        If ($Ensure -eq 'Present') {
-            If ($Deployment) {
+        if ($Ensure -eq 'Present') {
+            if ($Deployment) {
                 Set-STFDeployment -HostBaseUrl $HostBaseUrl -confirm:$false | Out-Null
             }
-            Else {
+            else {
                 Add-STFDeployment -HostBaseUrl $HostBaseUrl -SiteId $SiteId -confirm:$false | Out-Null
             }
         }
-        Else {
+        else {
             #Uninstall
             Clear-STFDeployment -SiteId $SiteId | Out-Null
         }

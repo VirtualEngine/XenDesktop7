@@ -1,5 +1,6 @@
 <# VE_XD7StoreFrontRoamingGateway\VE_XD7StoreFrontRoamingGateway.Resources.psd1 #>
 ConvertFrom-StringData @'
+    CallingGetSTFRoamingGateway = Calling Get-STFRoamingGateway '{0}'.
     CallingSetSTFRoamingGateway = Calling Set-STFRoamingGateway.
     CallingAddSTFRoamingGateway = Calling Add-STFRoamingGateway.
     SettingResourceProperty     = Setting resource property '{0}'.

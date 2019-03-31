@@ -38,7 +38,8 @@ function Get-TargetResource
         try {
 
             Write-Verbose -Message ($localizedData.CallingGetSTFStoreService -f $StoreName)
-            $StoreService = Get-STFStoreService | Where-object { $_.friendlyname -eq $StoreName };
+            $StoreService = Get-STFStoreService | Where-Object { $_.friendlyname -eq $StoreName }
+            Write-Verbose -Message $localizedData.CallingGetDSWebReceiversSummary
             $Configuration = Get-DSWebReceiversSummary | Where-Object { $_.StoreVirtualPath -eq ($StoreService.VirtualPath) }
         }
         catch {
@@ -99,11 +100,11 @@ function Set-TargetResource
         try {
 
             Write-Verbose -Message ($localizedData.CallingGetSTFStoreService -f $StoreName)
-            $StoreService = Get-STFStoreService | Where-object {$_.friendlyname -eq $StoreName};
+            $StoreService = Get-STFStoreService | Where-Object { $_.friendlyname -eq $StoreName }
             Write-Verbose -Message $localizedData.CallingGetSTFWebReceiverService
             $webreceiverservice = Get-STFWebReceiverService -StoreService $Storeservice
             Write-Verbose -Message $localizedData.CallingGetDSWebReceiversSummary
-            $Configuration = Get-DSWebReceiversSummary | Where-object {$_.StoreVirtualPath -eq ($StoreService.VirtualPath)}
+            $Configuration = Get-DSWebReceiversSummary | Where-Object { $_.StoreVirtualPath -eq ($StoreService.VirtualPath) }
         }
         catch {
 
@@ -123,14 +124,14 @@ function Set-TargetResource
                     if (Compare-Object -ReferenceObject $expected -DifferenceObject $actual) {
                         if (!($ChangedParams.ContainsKey($property))) {
                             Write-Verbose -Message ($localizedData.SettingResourceProperty -f $property)
-                            $ChangedParams.Add($property,$PSBoundParameters[$property])
+                            $ChangedParams.Add($property, $PSBoundParameters[$property])
                         }
                     }
                 }
                 elseif ($expected -ne $actual) {
                     if (!($ChangedParams.ContainsKey($property))) {
                         Write-Verbose -Message ($localizedData.SettingResourceProperty -f $property)
-                        $ChangedParams.Add($property,$PSBoundParameters[$property])
+                        $ChangedParams.Add($property, $PSBoundParameters[$property])
                     }
                 }
             }
@@ -188,7 +189,7 @@ function Test-TargetResource
         $LoginFormTimeout
     )
 
-    $targetResource = Get-TargetResource @PSBoundParameters;
+    $targetResource = Get-TargetResource -StoreName $StoreName
     $inCompliance = $true;
     foreach ($property in $PSBoundParameters.Keys) {
         if ($targetResource.ContainsKey($property)) {

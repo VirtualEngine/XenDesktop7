@@ -3,6 +3,7 @@ ConvertFrom-StringData @'
     TrappedError                          = Trapped error getting web receiver user interface. Error: '{0}'.
     CallingGetSTFStoreService             = Calling GetSTFStoreService for store '{0}'.
     CallingGetSTFWebReceiverService       = Calling Get-STFWebReceiverService.
+    CallingGetSTFWebReceiverCommunication = Calling Get-STFWebReceiverCommunication.
     CallingGetSTFWebReceiverUserInterface = Calling Get-STFWebReceiverUserInterface.
     CallingSetSTFWebReceiverCommunication = Calling Set-STFWebReceiverCommunication.
     SettingResourceProperty               = Setting resource property '{0}'.

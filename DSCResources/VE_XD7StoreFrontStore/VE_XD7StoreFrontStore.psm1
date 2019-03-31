@@ -36,9 +36,10 @@ function Get-TargetResource {
     )
     process {
 
-        Import-module Citrix.StoreFront -ErrorAction Stop -Verbose:$false;
+        Import-Module Citrix.StoreFront -ErrorAction Stop -Verbose:$false;
 
         try {
+
             $StoreService = Get-STFStoreService | Where-Object { $_.friendlyname -eq $StoreName };
             $StoreFarm = Get-STFStoreFarm -StoreService $StoreService
         }
@@ -89,6 +90,10 @@ function Test-TargetResource {
         [System.String]
         $AuthType,
 
+        [Parameter(Mandatory = $true)]
+        [System.String[]]
+        $Servers,
+
         [Parameter()]
         [System.String]
         $FarmName,
@@ -101,10 +106,6 @@ function Test-TargetResource {
         [ValidateSet('HTTP','HTTPS','SSL')]
         [System.String]
         $TransportType,
-
-        [Parameter(Mandatory = $true)]
-        [System.String[]]
-        $Servers,
 
         [Parameter()]
         [System.Boolean]
@@ -154,11 +155,11 @@ function Test-TargetResource {
         [Parameter()]
         [ValidateSet('Present','Absent')]
         [System.String]
-        $Ensure
+        $Ensure = 'Present'
     )
     process {
 
-        $targetResource = Get-TargetResource @PSBoundParameters;
+        $targetResource = Get-TargetResource -StoreName $StoreName -AuthType $AuthType -Servers $Servers
         if ($Ensure -eq 'Present') {
             $inCompliance = $true;
             foreach ($property in $PSBoundParameters.Keys) {
@@ -225,6 +226,10 @@ function Set-TargetResource {
         [System.String]
         $AuthType,
 
+        [Parameter(Mandatory = $true)]
+        [System.String[]]
+        $Servers,
+
         [Parameter()]
         [System.String]
         $FarmName,
@@ -237,10 +242,6 @@ function Set-TargetResource {
         [ValidateSet('HTTP','HTTPS','SSL')]
         [System.String]
         $TransportType,
-
-        [Parameter(Mandatory = $true)]
-        [System.String[]]
-        $Servers,
 
         [parameter()]
         [System.Boolean]
@@ -290,12 +291,12 @@ function Set-TargetResource {
         [Parameter()]
         [ValidateSet('Present','Absent')]
         [System.String]
-        $Ensure
+        $Ensure = 'Present'
     )
     process {
 
-        Import-module Citrix.StoreFront -ErrorAction Stop -Verbose:$false
-        $StoreService = Get-STFStoreService | Where-object {$_.friendlyname -eq $StoreName}
+        Import-Module Citrix.StoreFront -ErrorAction Stop -Verbose:$false
+        $StoreService = Get-STFStoreService | Where-Object { $_.friendlyname -eq $StoreName }
         if ($StoreService) {
 
             $StoreFarm = Get-STFStoreFarm -StoreService $StoreService
@@ -310,7 +311,7 @@ function Set-TargetResource {
             foreach ($property in $PSBoundParameters.Keys) {
                 if ($targetResource.ContainsKey($property)) {
                     if (!($AllParams.ContainsKey($property))) {
-                        $AllParams.Add($property,$PSBoundParameters[$property])
+                        $AllParams.Add($property, $PSBoundParameters[$property])
                     }
                     $expected = $PSBoundParameters[$property];
                     $actual = $targetResource[$property];
@@ -319,19 +320,19 @@ function Set-TargetResource {
                             if (Compare-Object -ReferenceObject $expected -DifferenceObject $actual) {
                                 if (!($ChangedParams.ContainsKey($property))) {
                                     Write-Verbose -Message ($localizedData.SettingResourceProperty -f $property)
-                                    $ChangedParams.Add($property,$PSBoundParameters[$property])
+                                    $ChangedParams.Add($property, $PSBoundParameters[$property])
                                 }
                             }
                         }
                         Else {
                             Write-Verbose -Message ($localizedData.SettingResourceProperty -f $property)
-                            $ChangedParams.Add($property,$PSBoundParameters[$property])
+                            $ChangedParams.Add($property, $PSBoundParameters[$property])
                         }
                     }
                     elseif ($expected -ne $actual) {
                         if (!($ChangedParams.ContainsKey($property))) {
-                            Write-Verbose "Adding $property to ChangedParams"
-                            $ChangedParams.Add($property,$PSBoundParameters[$property])
+                            Write-Verbose -Message ($localizedData.SettingResourceProperty -f $property)
+                            $ChangedParams.Add($property, $PSBoundParameters[$property])
                         }
                     }
                 }

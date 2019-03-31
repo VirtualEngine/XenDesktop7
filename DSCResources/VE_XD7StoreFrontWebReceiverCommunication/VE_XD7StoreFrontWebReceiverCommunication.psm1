@@ -27,16 +27,16 @@ function Get-TargetResource
 
     try {
 
-        Write-Verbose "Calling Get-STFStoreService for $StoreName"
-        $StoreService = Get-STFStoreService | Where-object {$_.friendlyname -eq $StoreName};
-        Write-Verbose "Calling Get-STFWebReceiverService"
+        Write-Verbose -Message ($localizedData.CallingGetSTFStoreService -f $StoreName)
+        $StoreService = Get-STFStoreService | Where-Object { $_.friendlyname -eq $StoreName }
+        Write-Verbose -Message $localizedData.CallingGetSTFWebReceiverService
         $webreceiverservice = Get-STFWebReceiverService -StoreService $Storeservice
-        Write-Verbose "Calling Get-STFWebReceiverCommunication"
+        Write-Verbose -Message $localizedData.CallingGetSTFWebReceiverCommunication
         $Configuration = Get-STFWebReceiverCommunication -WebReceiverService $webreceiverservice
     }
     catch {
 
-        Write-Verbose "Trapped error getting web receiver communication. Error: $($Error[0].Exception.Message)"
+        Write-Verbose -Message ($localizedData.TrappedError -f $Error[0].Exception.Message)
     }
 
     $returnValue = @{
@@ -119,14 +119,14 @@ function Set-TargetResource
                 if (Compare-Object -ReferenceObject $expected -DifferenceObject $actual) {
                     if (!($ChangedParams.ContainsKey($property))) {
                         Write-Verbose -Message ($localizedData.SettingResourceProperty -f $property)
-                        $ChangedParams.Add($property,$PSBoundParameters[$property])
+                        $ChangedParams.Add($property, $PSBoundParameters[$property])
                     }
                 }
             }
             elseif ($expected -ne $actual) {
                 if (!($ChangedParams.ContainsKey($property))) {
                     Write-Verbose -Message ($localizedData.SettingResourceProperty -f $property)
-                    $ChangedParams.Add($property,$PSBoundParameters[$property])
+                    $ChangedParams.Add($property, $PSBoundParameters[$property])
                 }
             }
         }
@@ -178,7 +178,7 @@ function Test-TargetResource
         $ProxyProcessName
     )
 
-    $targetResource = Get-TargetResource @PSBoundParameters;
+    $targetResource = Get-TargetResource -StoreName $StoreName
     $inCompliance = $true;
     foreach ($property in $PSBoundParameters.Keys) {
         if ($targetResource.ContainsKey($property)) {
