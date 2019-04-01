@@ -49,7 +49,7 @@ Task Test {
 Task Deploy -Depends Clean {
     Get-ChildItem -Path $basePath -Exclude $exclude | ForEach-Object {
         Write-Host (' Copying "{0}"' -f $PSItem.FullName) -ForegroundColor Yellow;
-        Copy-Item -Path $PSItem -Destination $releasePath -Recurse;
+        Copy-Item -Path $PSItem -Destination $releasePath -Recurse -Exclude '*.md','Test-Module.ps1';
     }
 } #end task Deploy
 
