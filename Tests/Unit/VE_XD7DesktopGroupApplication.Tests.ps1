@@ -137,6 +137,7 @@ InModuleScope $sut {
         Context 'Set-TargetResource' {
             Mock -CommandName AssertXDModule -MockWith { };
             Mock -CommandName Add-PSSnapin -MockWith { };
+            Mock -CommandName Import-Module -MockWith { };
 
             It 'Calls "New-BrokerApplication" when "Ensure" = "Present" and application does not exists' {
                 Mock -CommandName Get-BrokerDesktopGroup -MockWith { return $fakeBrokerGroup };
