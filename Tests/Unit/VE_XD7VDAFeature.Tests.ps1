@@ -11,7 +11,7 @@ InModuleScope $sut {
     Describe 'XenDesktop7\VE_XD7VDAFeature' {
 
         Context 'ResolveXDVdaSetupArguments' {
-            Mock -CommandName Get-WmiObject -MockWith { }
+            Mock -CommandName Get-CimInstance -MockWith { }
 
             foreach ($role in @('SessionVDA','DesktopVDA')) {
 
@@ -24,7 +24,7 @@ InModuleScope $sut {
                     }
                 }
 
-                foreach ($falseArgument in '/optimize','/enable_real_time_transport','/servervdi','/remove','/removeall')
+                foreach ($falseArgument in '/optimize','/enable_real_time_transport','/remove','/removeall')
                 {
                     It "$role returns default '$falseArgument' argument" {
 
@@ -77,7 +77,7 @@ InModuleScope $sut {
 
             } #end foreach $role
 
-            It 'DesktopVDI returns /servervdi argument on server operating system.' {
+            It 'DesktopVDA returns /servervdi argument on server operating system.' {
                 Mock -CommandName Get-CimInstance -MockWith { return @{ Caption = 'Windows Server 2012'; }; }
 
                 $arguments = ResolveXDVdaSetupArguments  -Role DesktopVDA;
