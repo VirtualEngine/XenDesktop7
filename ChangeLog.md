@@ -2,18 +2,18 @@
 
 ## Versions ##
 
-### Unreleased ###
+### 2.7.1 (2019-04-13) ###
 
 * Features
   * None
 
 * Improvements
-  * Adds AppVeyor build
+  * Implements AppVeyor build
   * Adds linting tests
 
 * Bug fixes
-  * None
-
+  * Fixes Get-STFStoreFarm errors
+  * Ensures XD7StoreFrontRoamingGateway 'GatewayUrl' ends with a '/'
 
 ### 2.7.0 (2019-04-01) ###
 

@@ -38,12 +38,11 @@ function Get-TargetResource {
 
         Import-Module Citrix.StoreFront -ErrorAction Stop -Verbose:$false;
 
-        try {
-
-            $StoreService = Get-STFStoreService | Where-Object { $_.friendlyname -eq $StoreName };
-            $StoreFarm = Get-STFStoreFarm -StoreService $StoreService
+        $StoreService = Get-STFStoreService -Verbose | Where-Object { $_.friendlyname -eq $StoreName };
+        if ($StoreService) {
+            ## This is a hack, as Get-STFStoreFarm throws an error if run twice in quick succession?!
+            $null = Get-STFStoreFarm -StoreService $StoreService -Verbose -OutVariable StoreFarm
         }
-        catch { }
 
         switch ($StoreService.service.Anonymous) {
             $True { $CurrentAuthType = 'Anonymous' }
@@ -66,7 +65,6 @@ function Get-TargetResource {
             SSLRelayPort = $StoreFarm.SSLRelayPort
             AllFailedBypassDuration = $StoreFarm.AllFailedBypassDuration
             BypassDuration = $StoreFarm.BypassDuration
-            FriendlyName = $StoreService.FriendlyName
             Zones = $StoreFarm.Zones
             LockedDown = $storeservice.service.LockedDown
         };
@@ -214,7 +212,6 @@ function Test-TargetResource {
 function Set-TargetResource {
     [CmdletBinding()]
     [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseShouldProcessForStateChangingFunctions', '')]
-    [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidGlobalFunctions', 'global:Write-Host')]
     [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingEmptyCatchBlock', '')]
     param (
         [Parameter(Mandatory = $true)]
@@ -298,8 +295,8 @@ function Set-TargetResource {
         Import-Module Citrix.StoreFront -ErrorAction Stop -Verbose:$false
         $StoreService = Get-STFStoreService | Where-Object { $_.friendlyname -eq $StoreName }
         if ($StoreService) {
-
-            $StoreFarm = Get-STFStoreFarm -StoreService $StoreService
+            ## This is a hack, as Get-STFStoreFarm throws an error if run twice in quick succession?!
+            $null = Get-STFStoreFarm -StoreService $StoreService -Verbose -OutVariable StoreFarm
         }
 
         if ($Ensure -eq 'Present') {
@@ -307,7 +304,7 @@ function Set-TargetResource {
             #Region Create Params hashtable
             $AllParams = @{}
             $ChangedParams = @{}
-            $targetResource = Get-TargetResource @PSBoundParameters;
+            $targetResource = Get-TargetResource -StoreName $StoreName -AuthType $AuthType -Servers $Servers
             foreach ($property in $PSBoundParameters.Keys) {
                 if ($targetResource.ContainsKey($property)) {
                     if (!($AllParams.ContainsKey($property))) {

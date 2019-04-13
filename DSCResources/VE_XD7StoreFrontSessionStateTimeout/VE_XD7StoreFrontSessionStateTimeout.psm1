@@ -115,7 +115,7 @@ function Set-TargetResource
             SiteId = $StoreService.SiteId
             VirtualPath = $webreceiverservice.VirtualPath
         }
-        $targetResource = Get-TargetResource @PSBoundParameters;
+        $targetResource = Get-TargetResource -StoreName $StoreName
         foreach ($property in $PSBoundParameters.Keys) {
             if ($targetResource.ContainsKey($property)) {
                 $expected = $PSBoundParameters[$property];

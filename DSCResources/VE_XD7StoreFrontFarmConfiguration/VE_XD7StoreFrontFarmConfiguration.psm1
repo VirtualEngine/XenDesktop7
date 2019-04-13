@@ -30,7 +30,8 @@ function Get-TargetResource
         Write-Verbose -Message ($localizedData.CallingGetSTFStoreService -f $StoreName)
         $StoreService = Get-STFStoreService | Where-Object { $_.friendlyname -eq $StoreName }
         Write-Verbose -Message $localizedData.CallingGetSTFStoreFarmConfiguration
-        $Configuration = Get-STFStoreFarmConfiguration -StoreService $StoreService
+        ## This is a hack, as Get-STFStoreFarm throws an error if run twice in quick succession?!
+        $null = Get-STFStoreFarm -StoreService $StoreService -Verbose -OutVariable Configuration
     }
     catch {
 
@@ -121,7 +122,7 @@ function Set-TargetResource
     $ChangedParams = @{
         StoreService = $StoreService
     }
-    $targetResource = Get-TargetResource @PSBoundParameters;
+    $targetResource = Get-TargetResource -StoreName $StoreName
     foreach ($property in $PSBoundParameters.Keys) {
         if ($targetResource.ContainsKey($property)) {
             $expected = $PSBoundParameters[$property];
