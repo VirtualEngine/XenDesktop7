@@ -88,7 +88,7 @@ function Set-TargetResource
 		$Ensure = 'Present'
 	)
 
-	Import-module Citrix.StoreFront -ErrorAction Stop -Verbose:$false;
+	Import-Module Citrix.StoreFront -ErrorAction Stop -Verbose:$false
 	Write-Verbose -Message ($localizedData.CallingGetSTFStoreService -f $StoreName)
 	$StoreService = Get-STFStoreService | Where-Object { $_.friendlyname -eq $StoreName }
 	Write-Verbose -Message ($localizedData.CallingGetSTFRoamingGateway -f $GatewayName)

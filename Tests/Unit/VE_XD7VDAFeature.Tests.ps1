@@ -11,68 +11,73 @@ InModuleScope $sut {
     Describe 'XenDesktop7\VE_XD7VDAFeature' {
 
         Context 'ResolveXDVdaSetupArguments' {
-            Mock -CommandName Get-WmiObject -MockWith { }
+            Mock -CommandName Get-CimInstance -MockWith { }
 
             foreach ($role in @('SessionVDA','DesktopVDA')) {
 
-                It "$role returns default install arguments." {
-                    $arguments = ResolveXDVdaSetupArguments -Role $role;
+                foreach ($trueArgument in '/quiet','/logpath','/noreboot','/components VDA','/enable_remote_assistance')
+                {
+                    It "$role returns default '$trueArgument' argument" {
 
-                    $arguments -match '/quiet' | Should Be $true;
-                    $arguments -match '/logpath' | Should Be $true;
-                    $arguments -match '/noreboot' | Should Be $true;
-                    $arguments -match '/components VDA' | Should Be $true;
-                    $arguments -match '/optimize' | Should Be $false;
-                    $arguments -match '/enable_hdx_ports' | Should Be $true;
-                    $arguments -match '/enable_real_time_transport' | Should Be $false;
-                    $arguments -match '/enable_remote_assistance' | Should Be $true;
-                    $arguments -match '/servervdi' | Should Be $false;
-                    $arguments -match '/remove' | Should Be $false;
-                    $arguments -match '/removeall' | Should Be $false;
+                        $arguments = ResolveXDVdaSetupArguments -Role $role;
+                        $arguments -match $trueArgument | Should Be $true;
+                    }
                 }
 
-                It "$role returns /enable_real_time_transport argument." {
+                foreach ($falseArgument in '/optimize','/enable_real_time_transport','/remove','/removeall')
+                {
+                    It "$role returns default '$falseArgument' argument" {
+
+                        $arguments = ResolveXDVdaSetupArguments -Role $role;
+                        $arguments -match $falseArgument | Should Be $false;
+                    }
+                }
+
+                foreach ($trueArgument in '/quiet','/logpath','/noreboot','/components VDA','/remove')
+                {
+                    It "$role returns default uninstall '$trueArgument' argument" {
+
+                        $arguments = ResolveXDVdaSetupArguments -Role $role -Uninstall;
+                        $arguments -match $trueArgument | Should Be $true;
+                    }
+                }
+
+                foreach ($falseArgument in '/optimize','/enable_hdx_ports','/enable_real_time_transport','/enable_remote_assistance','/servervdi')
+                {
+                    It "$role returns default uninstall '$falseArgument' argument" {
+
+                        $arguments = ResolveXDVdaSetupArguments -Role $role -Uninstall;
+                        $arguments -match $falseArgument | Should Be $false;
+                    }
+                }
+
+                It "$role returns /enable_real_time_transport argument when 'EnableRealTimeTransport' specified" {
                     $arguments = ResolveXDVdaSetupArguments -Role $role -EnableRealTimeTransport $true;
 
                     $arguments -match '/enable_real_time_transport' | Should Be $true;
                 }
 
-                It "$role returns /optimize argument." {
+                It "$role returns /optimize argument when 'Optimize' specified" {
                     $arguments = ResolveXDVdaSetupArguments -Role $role -Optimize $true;
 
                     $arguments -match '/optimize' | Should Be $true;
                 }
 
-                It "$role returns /nodesktopexperience argument." {
+                It "$role returns /nodesktopexperience argument when specified" {
                     $arguments = ResolveXDVdaSetupArguments -Role $role -InstallDesktopExperience $false;
 
                     $arguments -match '/nodesktopexperience' | Should Be $true;
                 }
 
-                It "$role returns /components VDA,PLUGINS argument." {
+                It "$role returns /components VDA,PLUGINS argument when 'InstallReceiver' specified" {
                     $arguments = ResolveXDVdaSetupArguments -Role $role -InstallReceiver $true;
 
                     $arguments -match '/components VDA,PLUGINS' | Should Be $true;
                 }
 
-                It "$role returns default uninstall arguments." {
-                    $arguments = ResolveXDVdaSetupArguments  -Role $role -Uninstall;
-
-                    $arguments -match '/quiet' | Should Be $true;
-                    $arguments -match '/logpath' | Should Be $true;
-                    $arguments -match '/noreboot' | Should Be $true;
-                    $arguments -match '/components VDA' | Should Be $true;
-                    $arguments -match '/remove' | Should Be $true;
-                    $arguments -match '/optimize' | Should Be $false;
-                    $arguments -match '/enable_hdx_ports' | Should Be $false;
-                    $arguments -match '/enable_real_time_transport' | Should Be $false;
-                    $arguments -match '/enable_remote_assistance' | Should Be $false;
-                    $arguments -match '/servervdi' | Should Be $false;
-                }
-
             } #end foreach $role
 
-            It 'DesktopVDI returns /servervdi argument on server operating system.' {
+            It 'DesktopVDA returns /servervdi argument on server operating system.' {
                 Mock -CommandName Get-CimInstance -MockWith { return @{ Caption = 'Windows Server 2012'; }; }
 
                 $arguments = ResolveXDVdaSetupArguments  -Role DesktopVDA;
@@ -95,7 +100,7 @@ InModuleScope $sut {
 
             foreach ($role in @('SessionVDA','DesktopVDA')) {
 
-                It "Returns ""Ensure"" = ""Present"" when ""$role"" role is installed" {
+                It "Returns 'Ensure' = 'Present' when '$role' role is installed" {
                     Mock -CommandName TestXDInstalledRole -MockWith { return $true; }
 
                     $targetResource = Get-TargetResource -Role $role -SourcePath $testDrivePath;
@@ -103,7 +108,7 @@ InModuleScope $sut {
                     $targetResource['Ensure'] | Should Be 'Present';
                 }
 
-                It "Returns ""Ensure"" = ""Absent"" when ""$role"" role is not installed" {
+                It "Returns 'Ensure' = 'Absent' when '$role' role is not installed" {
                     Mock -CommandName TestXDInstalledRole -MockWith { return $false; }
 
                     $targetResource = Get-TargetResource -Role $role -SourcePath $testDrivePath;
@@ -202,7 +207,7 @@ InModuleScope $sut {
             foreach ($state in @('Present','Absent')) {
                 foreach ($role in @('DesktopVDA','SessionVDA')) {
                     foreach ($exitCode in @(0, 3010)) {
-                        It "Flags reboot when ""Ensure"" = ""$state"", ""Role"" = ""$role"" and exit code = ""$exitCode""" {
+                        It "Flags reboot when 'Ensure' = '$state', 'Role' = '$role' and exit code = '$exitCode'" {
                             [System.Int32] $global:DSCMachineStatus = 0;
                             Mock -CommandName StartWaitProcess -MockWith { return $exitCode; }
                             Mock -CommandName ResolveXDSetupMedia -MockWith { return $testDrivePath; }
@@ -219,7 +224,6 @@ InModuleScope $sut {
             }
 
         } #end context Set-TargetResource
-
 
     } #end describe XD7VDAFeature
 } #end inmodulescope

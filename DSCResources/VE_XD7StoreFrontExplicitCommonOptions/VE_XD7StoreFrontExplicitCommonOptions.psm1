@@ -104,7 +104,7 @@ function Set-TargetResource
     $ChangedParams = @{
         AuthenticationService = $Auth
     }
-    $targetResource = Get-TargetResource @PSBoundParameters;
+    $targetResource = Get-TargetResource -StoreName $StoreName
     foreach ($property in $PSBoundParameters.Keys) {
         if ($targetResource.ContainsKey($property)) {
             $expected = $PSBoundParameters[$property];
@@ -120,7 +120,6 @@ function Set-TargetResource
             elseif ($expected -ne $actual) {
                 if (!($ChangedParams.ContainsKey($property))) {
                     Write-Verbose -Message ($localizedData.SettingResourceProperty -f $property)
-                    $ChangedParams.Add($property, $PSBoundParameters[$property])
                     $ChangedParams.Add($property, $PSBoundParameters[$property])
                 }
             }

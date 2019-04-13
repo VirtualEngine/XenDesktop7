@@ -147,7 +147,7 @@ function Set-TargetResource
     $ChangedParams = @{
         webreceiverservice = $webreceiverservice
     }
-    $targetResource = Get-TargetResource @PSBoundParameters;
+    $targetResource = Get-TargetResource -StoreName $StoreName
     foreach ($property in $PSBoundParameters.Keys) {
         if ($targetResource.ContainsKey($property)) {
             $expected = $PSBoundParameters[$property];

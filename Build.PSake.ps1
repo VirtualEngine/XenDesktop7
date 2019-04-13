@@ -1,4 +1,6 @@
 #requires -Version 5;
+#requires -Modules VirtualEngine.Build;
+
 [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingWriteHost', '')]
 param ()
 
@@ -10,19 +12,37 @@ Properties {
     $buildDir = 'Release';
     $buildPath = (Join-Path -Path $basePath -ChildPath $buildDir);
     $releasePath = (Join-Path -Path $buildPath -ChildPath $moduleName);
-    $exclude = @('.git*', '.vscode', 'Release', 'DscResource.Tests', 'Tests', 'Build.PSake.ps1', '*.png');
+    $thumbprint = '3DACD0F2D1E60EB33EC774B9CFC89A4BEE9037AF';
+    $timeStampServer = 'http://timestamp.verisign.com/scripts/timestamp.dll';
+    $exclude = @(
+                '.git*',
+                '.vscode',
+                'Release',
+                'Tests',
+                'Build.PSake.ps1',
+                '*.png',
+                '*.md',
+                '*.enc',
+                'TestResults.xml',
+                'appveyor.yml',
+                'appveyor-tools'
+                );
+    $signExclude = @('en-US','*.mof');
 }
 
-Task Default -Depends Build;
-
-Task Build -Depends Init, Clean, Test, Deploy;
-
+# Synopsis:
 Task Init {
 
+    # Properties are not available in the script scope.
+    Set-Variable manifest -Value (Get-ModuleManifest) -Scope Script;
+    Set-Variable version -Value $manifest.Version -Scope Script;
+    Write-Host (" Building module '{0}'." -f $manifest.Name) -ForegroundColor Yellow;
+    Write-Host (" Building version '{0}'." -f $version) -ForegroundColor Yellow;
 } #end task Init
 
-## Remove release directory
+# Synopsis: Cleans the release directory
 Task Clean -Depends Init {
+
     Write-Host (' Cleaning release directory "{0}".' -f $buildPath) -ForegroundColor Yellow;
     if (Test-Path -Path $buildPath) {
         Remove-Item -Path $buildPath -Include * -Recurse -Force;
@@ -31,10 +51,12 @@ Task Clean -Depends Init {
     [ref] $null = New-Item -Path $releasePath -ItemType Directory -Force;
 } #end task Clean
 
-Task Test {
+# Synopsis: Invokes Pester tests
+Task Test -Depends Init {
+
     $invokePesterParams = @{
         Path = "$basePath\Tests";
-        OutputFile = "$releasePath\TestResult.xml";
+        OutputFile = "$basePath\TestResults.xml";
         OutputFormat = 'NUnitXml';
         Strict = $true;
         PassThru = $true;
@@ -44,21 +66,85 @@ Task Test {
     if ($testResult.FailedCount -gt 0) {
         Write-Error ('Failed "{0}" unit tests.' -f $testResult.FailedCount);
     }
-} #end task Test
+}
 
+# Synopsis: Copies release files to the release directory
 Task Deploy -Depends Clean {
-    Get-ChildItem -Path $basePath -Exclude $exclude | ForEach-Object {
-        Write-Host (' Copying "{0}"' -f $PSItem.FullName) -ForegroundColor Yellow;
-        Copy-Item -Path $PSItem -Destination $releasePath -Recurse -Exclude '*.md','Test-Module.ps1';
-    }
-} #end task Deploy
 
-Task Publish -Depends Build {
-    $powershellApiKeyPath = Join-Path -Path $env:UserProfile -ChildPath 'PSGallery.apitoken';
-    Write-Host (' Loading PowerShell Gallery API Key "{0}"' -f $powershellApiKeyPath) -ForegroundColor Yellow;
-    $psGalleryApiKey = Get-Content -Path $powershellApiKeyPath | ConvertTo-SecureString;
-    $bstr = [System.Runtime.InteropServices.Marshal]::SecureStringToBSTR($psGalleryApiKey);
-    $nuGetApiKey = [System.Runtime.InteropServices.Marshal]::PtrToStringAuto($bstr);
-    Write-Host (' Publishing module "{0}"' -f $releasePath) -ForegroundColor Yellow;
-    Publish-Module -Path $releasePath -NuGetApiKey $nuGetApiKey;
+    Get-ChildItem -Path $basePath -Exclude $exclude | ForEach-Object {
+        Write-Host (' Copying {0}' -f $PSItem.FullName) -ForegroundColor Yellow;
+        Copy-Item -Path $PSItem -Destination $releasePath -Recurse;
+    }
+} #end
+
+# Synopsis: Signs files in release directory
+Task Sign -Depends Deploy {
+
+    if (-not (Get-ChildItem -Path Cert:\CurrentUser\My | Where-Object Thumbprint -eq $thumbprint)) {
+        ## Decrypt and import code signing cert
+        .\appveyor-tools\secure-file.exe -decrypt .\VE_Certificate_2019.pfx.enc -secret $env:certificate_secret
+        $certificatePassword = ConvertTo-SecureString -String $env:certificate_secret -AsPlainText -Force
+        Import-PfxCertificate -FilePath .\VE_Certificate_2019.pfx -CertStoreLocation 'Cert:\CurrentUser\My' -Password $certificatePassword
+    }
+
+    Get-ChildItem -Path $releasePath -Exclude $signExclude | ForEach-Object {
+        if ($PSItem -is [System.IO.DirectoryInfo]) {
+            Get-ChildItem -Path $PSItem.FullName -Include *.ps* -Recurse | ForEach-Object {
+                Write-Host (' Signing {0}' -f $PSItem.FullName) -ForegroundColor Yellow -NoNewline;
+                $signResult = Set-ScriptSignature -Path $PSItem.FullName -Thumbprint $thumbprint -TimeStampServer $timeStampServer -ErrorAction Stop;
+                Write-Host (' {0}.' -f $signResult.Status) -ForegroundColor Green;
+            }
+
+        }
+        elseif ($PSItem.Name -like '*.ps*') {
+            Write-Host (' Signing {0}' -f $PSItem.FullName) -ForegroundColor Yellow -NoNewline;
+            $signResult = Set-ScriptSignature -Path $PSItem.FullName -Thumbprint $thumbprint -TimeStampServer $timeStampServer -ErrorAction Stop;
+            Write-Host (' {0}.' -f $signResult.Status) -ForegroundColor Green;
+        }
+    }
+}
+
+Task Version -Depends Deploy {
+
+    $nuSpecPath = Join-Path -Path $releasePath -ChildPath "$ModuleName.nuspec"
+    $nuspec = [System.Xml.XmlDocument] (Get-Content -Path $nuSpecPath -Raw)
+    $nuspec.Package.MetaData.Version = $version.ToString()
+    $nuspec.Save($nuSpecPath)
+}
+
+# Synopsis: Publishes release module to PSGallery
+Task Publish_PSGallery -Depends Version {
+
+    Publish-Module -Path $releasePath -NuGetApiKey "$env:gallery_api_key";
 } #end task Publish
+
+# Synopsis: Creates release module Nuget package
+Task Package -Depends Build {
+
+    $targetNuSpecPath = Join-Path -Path $releasePath -ChildPath "$ModuleName.nuspec"
+    NuGet.exe pack "$targetNuSpecPath" -OutputDirectory "$env:TEMP"
+}
+
+# Synopsis: Publish release module to Dropbox repository
+Task Publish_Dropbox -Depends Package {
+
+    $targetNuPkgPath = Join-Path -Path "$env:TEMP" -ChildPath "$ModuleName.$version.nupkg"
+    $destinationPath = "$env:USERPROFILE\Dropbox\PSRepository"
+    Copy-Item -Path "$targetNuPkgPath"-Destination $destinationPath -Force
+}
+
+# Synopsis: Publish test results to AppVeyor
+Task AppVeyor {
+
+    Get-ChildItem -Path "$basePath\*Results*.xml" | Foreach-Object {
+        $address = 'https://ci.appveyor.com/api/testresults/nunit/{0}' -f $env:APPVEYOR_JOB_ID
+        $source = $_.FullName
+        Write-Verbose "UPLOADING TEST FILE: $address $source" -Verbose
+        (New-Object 'System.Net.WebClient').UploadFile( $address, $source )
+    }
+}
+
+Task Default -Depends Init, Clean, Test
+Task Build -Depends Default, Deploy, Version, Sign;
+Task Publish -Depends Build, Package, Publish_PSGallery
+Task Local -Depends Build, Package, Publish_Dropbox

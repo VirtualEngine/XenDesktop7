@@ -103,7 +103,7 @@ function Set-TargetResource
         VirtualPath = $VirtualPath
         SiteId = $SiteId
     }
-    $targetResource = Get-TargetResource @PSBoundParameters;
+    $targetResource = Get-TargetResource -StoreName $StoreName -VirtualPath $VirtualPath
     foreach ($property in $PSBoundParameters.Keys) {
         if ($targetResource.ContainsKey($property)) {
             $expected = $PSBoundParameters[$property];

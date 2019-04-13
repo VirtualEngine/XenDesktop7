@@ -34,30 +34,30 @@ function Get-TargetResource
 		$GatewayUrl
 	)
 
-		Import-Module Citrix.StoreFront -ErrorAction Stop -Verbose:$false;
+	Import-Module Citrix.StoreFront -ErrorAction Stop -Verbose:$false;
 
-		try {
+	try {
 
-			Write-Verbose -Message ($localizedData.CallingGetSTFRoamingGateway -f $Name)
-			$Gateway = Get-STFRoamingGateway -Name $Name -ErrorAction SilentlyContinue
-		}
-		catch { }
+		Write-Verbose -Message ($localizedData.CallingGetSTFRoamingGateway -f $Name)
+		$Gateway = Get-STFRoamingGateway -Name $Name -ErrorAction SilentlyContinue
+	}
+	catch { }
 
-		$returnValue = @{
-			Name = [System.String]$Gateway.Name
-			LogonType = [System.String]$Gateway.Logon
-			SmartCardFallbackLogonType = [System.String]$Gateway.SmartCardFallback
-			Version = [System.String]$Gateway.Version
-			GatewayUrl = [System.String]$Gateway.Location
-			CallbackUrl = [System.String]$Gateway.CallbackUrl
-			SessionReliability = [System.Boolean]$Gateway.SessionReliability
-			RequestTicketTwoSTAs = [System.Boolean]$Gateway.RequestTicketTwoStas
-			SubnetIPAddress = [System.String]$Gateway.IpAddress
-			SecureTicketAuthorityUrls = [System.String[]]$Gateway.SecureTicketAuthorityUrls
-			StasUseLoadBalancing = [System.Boolean]$Gateway.StasUseLoadBalancing
-			StasBypassDuration = [System.String]$Gateway.StasBypassDuration
-			GslbUrl = [System.String]$Gateway.GslbLocation
-		}
+	$returnValue = @{
+		Name = [System.String]$Gateway.Name
+		LogonType = [System.String]$Gateway.Logon
+		SmartCardFallbackLogonType = [System.String]$Gateway.SmartCardFallback
+		Version = [System.String]$Gateway.Version
+		GatewayUrl = [System.String]$Gateway.Location
+		CallbackUrl = [System.String]$Gateway.CallbackUrl
+		SessionReliability = [System.Boolean]$Gateway.SessionReliability
+		RequestTicketTwoSTAs = [System.Boolean]$Gateway.RequestTicketTwoStas
+		SubnetIPAddress = [System.String]$Gateway.IpAddress
+		SecureTicketAuthorityUrls = [System.String[]]$Gateway.SecureTicketAuthorityUrls
+		StasUseLoadBalancing = [System.Boolean]$Gateway.StasUseLoadBalancing
+		StasBypassDuration = [System.String]$Gateway.StasBypassDuration
+		GslbUrl = [System.String]$Gateway.GslbLocation
+	}
 
 	$returnValue
 }
@@ -128,6 +128,7 @@ function Set-TargetResource
 		$Ensure = 'Present'
 	)
 
+	if (!$GatewayUrl.EndsWith('/')) { $PSBoundParameters['GatewayUrl'] = '{0}/' -f $GatewayUrl }
 	Import-module Citrix.StoreFront -ErrorAction Stop -Verbose:$false;
 	$Gateway = Get-STFRoamingGateway
 
@@ -259,49 +260,50 @@ function Test-TargetResource
 		$Ensure = 'Present'
 	)
 
-		$targetResource = Get-TargetResource -Name $Name -LogonType $LogonType -GatewayUrl $GatewayUrl
-		if ($Ensure -eq 'Present') {
-			$inCompliance = $true;
-			foreach ($property in $PSBoundParameters.Keys) {
-				if ($targetResource.ContainsKey($property)) {
-					$expected = $PSBoundParameters[$property];
-					$actual = $targetResource[$property];
-					if ($PSBoundParameters[$property] -is [System.String[]]) {
-						if ($actual) {
-							if (Compare-Object -ReferenceObject $expected -DifferenceObject $actual) {
-								Write-Verbose ($localizedData.ResourcePropertyMismatch -f $property, ($expected -join ','), ($actual -join ','));
-								$inCompliance = $false;
-							}
-						}
-						else {
+	if (!$GatewayUrl.EndsWith('/')) { $PSBoundParameters['GatewayUrl'] = '{0}/' -f $GatewayUrl }
+	$targetResource = Get-TargetResource -Name $Name -LogonType $LogonType -GatewayUrl $GatewayUrl
+	if ($Ensure -eq 'Present') {
+		$inCompliance = $true;
+		foreach ($property in $PSBoundParameters.Keys) {
+			if ($targetResource.ContainsKey($property)) {
+				$expected = $PSBoundParameters[$property];
+				$actual = $targetResource[$property];
+				if ($PSBoundParameters[$property] -is [System.String[]]) {
+					if ($actual) {
+						if (Compare-Object -ReferenceObject $expected -DifferenceObject $actual) {
 							Write-Verbose ($localizedData.ResourcePropertyMismatch -f $property, ($expected -join ','), ($actual -join ','));
 							$inCompliance = $false;
 						}
 					}
-					elseif ($expected -ne $actual) {
-						Write-Verbose ($localizedData.ResourcePropertyMismatch -f $property, $expected, $actual);
+					else {
+						Write-Verbose ($localizedData.ResourcePropertyMismatch -f $property, ($expected -join ','), ($actual -join ','));
 						$inCompliance = $false;
 					}
 				}
+				elseif ($expected -ne $actual) {
+					Write-Verbose ($localizedData.ResourcePropertyMismatch -f $property, $expected, $actual);
+					$inCompliance = $false;
+				}
 			}
+		}
+	}
+	else {
+		if ($targetResource.Name -eq $Name) {
+			$inCompliance = $false
 		}
 		else {
-			if ($targetResource.Name -eq $Name) {
-				$inCompliance = $false
-			}
-			else {
-				$inCompliance = $true
-			}
+			$inCompliance = $true
 		}
+	}
 
-		if ($inCompliance) {
-			Write-Verbose ($localizedData.ResourceInDesiredState -f $DeliveryGroup);
-		}
-		else {
-			Write-Verbose ($localizedData.ResourceNotInDesiredState -f $DeliveryGroup);
-		}
+	if ($inCompliance) {
+		Write-Verbose ($localizedData.ResourceInDesiredState -f $DeliveryGroup);
+	}
+	else {
+		Write-Verbose ($localizedData.ResourceNotInDesiredState -f $DeliveryGroup);
+	}
 
-		return $inCompliance;
+	return $inCompliance;
 }
 
 
