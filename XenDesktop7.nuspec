@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<package xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <metadata>
+    <id>xendesktop7</id>
+    <title>XenDesktop7</title>
+    <version>0.0.0</version>
+    <authors>Iain Brighton</authors>
+    <owners>Virtual Engine</owners>
+    <summary>The XenDesktop7 DSC resources can automate the deployment and configuration of Citrix XenDesktop 7.x.</summary>
+    <description>The XenDesktop7 DSC resources can automate the deployment and configuration of Citrix XenDesktop 7.x. These DSC resources are provided AS IS, and are not supported through any means.</description>
+    <projectUrl>https://github.com/VirtualEngine/XenDesktop7</projectUrl>
+    <copyright>(c) 2019 Virtual Engine Limited. All rights reserved.</copyright>
+    <iconUrl>https://raw.githubusercontent.com/VirtualEngine/XenDesktop7/master/CitrixReceiver.png</iconUrl>
+    <license type="expression">MIT</license>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <tags>VirtualEngine Citrix XenDesktop XenApp Storefront DSC</tags>
+  </metadata>
+</package>

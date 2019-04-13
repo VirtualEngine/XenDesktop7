@@ -118,5 +118,11 @@ InModuleScope $sut {
 
         } #end Set-TargetResource
 
-    } #end describe XD7Site
+        AfterAll {
+
+            Remove-Item -Path Function:\Write-Host -ErrorAction SilentlyContinue
+        }
+
+    } #end describe
+
 } #end inmodulescope

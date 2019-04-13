@@ -2,6 +2,19 @@
 
 ## Versions ##
 
+### Unreleased ###
+
+* Features
+  * None
+
+* Improvements
+  * Adds AppVeyor build
+  * Adds linting tests
+
+* Bug fixes
+  * None
+
+
 ### 2.7.0 (2019-04-01) ###
 
 * Features
