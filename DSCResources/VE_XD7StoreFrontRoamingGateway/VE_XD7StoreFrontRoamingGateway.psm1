@@ -29,9 +29,43 @@ function Get-TargetResource
 		[System.String]
 		$LogonType,
 
-		[Parameter(Mandatory = $true)]
 		[System.String]
-		$GatewayUrl
+		$SmartCardFallbackLogonType,
+
+		[System.String]
+		$Version,
+
+		[parameter(Mandatory = $true)]
+		[System.String]
+		$GatewayUrl,
+
+		[System.String]
+		$CallbackUrl,
+
+		[System.Boolean]
+		$SessionReliability,
+
+		[System.Boolean]
+		$RequestTicketTwoSTAs,
+
+		[System.String]
+		$SubnetIPAddress,
+
+		[System.String[]]
+		$SecureTicketAuthorityUrls,
+
+		[System.Boolean]
+		$StasUseLoadBalancing,
+
+		[System.String]
+		$StasBypassDuration,
+
+		[System.String]
+		$GslbUrl,
+
+		[ValidateSet("Present","Absent")]
+		[System.String]
+		$Ensure
 	)
 
 	Import-Module Citrix.StoreFront -ErrorAction Stop -Verbose:$false;
