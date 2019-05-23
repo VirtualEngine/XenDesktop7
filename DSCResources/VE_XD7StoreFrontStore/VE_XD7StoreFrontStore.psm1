@@ -65,6 +65,7 @@ function Get-TargetResource {
             SSLRelayPort = $StoreFarm.SSLRelayPort
             AllFailedBypassDuration = $StoreFarm.AllFailedBypassDuration
             BypassDuration = $StoreFarm.BypassDuration
+            FriendlyName = $StoreService.FriendlyName
             Zones = $StoreFarm.Zones
             LockedDown = $storeservice.service.LockedDown
         };
@@ -360,6 +361,7 @@ function Set-TargetResource {
 
             #Region Check for Authentication service - create if needed
             $AllParams.Remove('AuthType')
+			$AllParams.Remove("AuthVirtualPath")
             if ($AuthType -eq 'Anonymous') {
                 $AllParams.Add('Anonymous', $true)
                 $ChangedAuth = 'Anonymous'
@@ -411,6 +413,9 @@ function Set-TargetResource {
                     $ChangedParams.Remove('LockedDown')
                 }
 
+                If ($ChangedParams.ContainsKey('AuthVirtualPath')) {
+                    $ChangedParams.Remove('AuthVirtualPath')
+                }
                 if ($StoreFarm) {
                     #update params
                     $ChangedParams.Add('StoreService', $StoreService)

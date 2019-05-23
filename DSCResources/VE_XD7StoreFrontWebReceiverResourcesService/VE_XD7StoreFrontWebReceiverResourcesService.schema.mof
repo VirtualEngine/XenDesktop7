@@ -1,0 +1,11 @@
+
+[ClassVersion("1.0.0.0"), FriendlyName("XD7StoreFrontWebReceiverResourcesService")]
+class VE_XD7StoreFrontWebReceiverResourcesService : OMI_BaseResource
+{
+	[Key, Description("StoreFront store name")] String StoreName;
+	[Write, Description("Whether to cache icon data in the local file system")] Boolean PersistentIconCacheEnabled;
+	[Write, Description("How long the ICA file data is cached in the memory of the Web Proxy")] UInt32 IcaFileCacheExpiry;
+	[Write, Description("The desired icon size sent to the Store Service in icon requests")] UInt32 IconSize;
+	[Write, Description("Shows the Citrix Desktop Viewer window and toolbar when users access their desktops from legacy clients. This setting may fix problems where the Desktop Viewer is not displayed. Default: Off.")] Boolean ShowDesktopViewer;
+};
+

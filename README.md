@@ -27,12 +27,14 @@ XD7StoreFront* resources don't have a `Credential` parameter.__
 * [XD7SiteConfig](#xd7siteconfig)
 * [XD7SiteLicense](#xd7sitelicense)
 * [XD7StoreFront](#xd7storefront)
+* [XD7StoreFrontAccountSelfService](#xd7storefrontaccountselfservice)
 * [XD7StoreFrontAuthenticationMethod](#xd7storefrontauthenticationmethod)
 * [XD7StoreFrontBaseUrl](#xd7storefrontbaseurl)
 * [XD7StoreFrontExplicitCommonOptions](#xd7storefrontexplicitcommonoptions)
 * [XD7StoreFrontFarmConfiguration](#xd7storefrontfarmconfiguration)
 * [XD7StoreFrontFilterKeyword](#xd7storefrontfilterkeyword)
 * [XD7StoreFrontOptimalGateway](#xd7storefrontoptimalgateway)
+* [XD7StoreFrontPNA](#xd7storefrontpna)
 * [XD7StoreFrontReceiverAuthenticationMethod](#xd7storefrontreceiverauthenticationmethod)
 * [XD7StoreFrontRegisterStoreGateway](#xd7storefrontregisterstoregateway)
 * [XD7StoreFrontRoamingGateway](#xd7storefrontroaminggateway)
@@ -41,6 +43,7 @@ XD7StoreFront* resources don't have a `Credential` parameter.__
 * [XD7StoreFrontUnifiedExperience](#xd7storefrontunifiedexperience)
 * [XD7StoreFrontWebReceiverCommunication](#xd7storefrontwebreceivercommunication)
 * [XD7StoreFrontWebReceiverPluginAssistant](#xd7storefrontwebreceiverpluginassistant)
+* [XD7StoreFrontWebReceiverResourcesService](#xd7storefrontwebreceiverresourcesservice)
 * [XD7StoreFrontWebReceiverService](#xd7storefrontwebreceiverservice)
 * [XD7StoreFrontWebReceiverUserInterface](#xd7storefrontwebreceiveruserinterface)
 * [XD7VDAController](#xd7vdacontroller)
@@ -773,6 +776,42 @@ Configuration XD7StoreFrontExample {
     }
 }
 ```
+## XD7StoreFrontAccountSelfService
+
+Sets StoreFront account self-service options.
+
+### Syntax
+
+```
+XD7StoreFrontAccountSelfService [string]
+{
+    StoreName = [String]
+    [ AllowResetPassword = [Boolean] ]
+    [ AllowUnlockAccount = [Boolean] ]
+    [ PasswordManagerServiceUrl = [String] ]
+}
+```
+
+### Properties
+
+* **StoreName**: StoreFront store name.
+* **AllowResetPassword**: Allow self-service reset password.
+* **AllowUnlockAccount**: Allow self-service account unlock.
+* **PasswordManagerServiceUrl**: The Url of the password manager account self-service service. This must end with a /. Set to $null to remove.
+
+
+### Configuration
+
+```
+Configuration XD7Example {
+    Import-DscResource -ModuleName XenDesktop7
+    XD7StoreFrontAccountSelfService XD7StoreFrontAccountSelfServiceExample {
+        StoreName = 'mock'
+        AllowResetPassword = $true
+        AllowUnlockAccount = $true
+        PasswordManagerServiceUrl = 'http://WebServer/url/'
+    }
+```
 
 ## XD7StoreFrontAuthenticationMethod
 
@@ -1025,6 +1064,39 @@ Configuration XD7Example {
         StaUrls = @('http://test/Scripts/CtxSTA.dll','http://test2/Scripts/CtxSTA.dll')
         StasBypassDuration = '02:00:00'
         Ensure = 'Present'
+    }
+}
+```
+## XD7StoreFrontPNA
+
+Enables or disables PNA (XenApp Services) for a Store.
+
+### Syntax
+
+```
+XD7StoreFrontPNA [string]
+{
+    StoreName = [String]
+    [ DefaultPnaService = [Boolean] ]
+    [ Ensure = [String] { Absent | Present } ]
+}
+```
+
+### Properties
+
+* **StoreName**: StoreFront store name.
+* **DefaultPnaService**: Configure the Store to be the default PNA site hosted at http://example.storefront.com/Citrix/Store/PNAgent/config.xml.
+* **Ensure**: Ensure. If not specified, the value defaults to Present
+
+
+### Configuration
+
+```
+Configuration XD7StoreFrontUnifiedExperienceExample {
+    Import-DscResource -ModuleName XenDesktop7
+    XD7StoreFrontPNA XD7StoreFrontPNAExample {
+       StoreName = 'mock'
+       DefaultPnaService = $true
     }
 }
 ```
@@ -1411,6 +1483,43 @@ Configuration XD7Example {
     XD7StoreFrontWebReceiverPluginAssistant XD7StoreFrontWebReceiverPluginAssistantExample {
         StoreName = 'mock'
         Enabled = $false
+    }
+}
+```
+
+## XD7StoreFrontWebReceiverResourcesService
+
+Set the WebReceiver Resources Service settings
+
+### Syntax
+
+```
+XD7StoreFrontWebReceiverResourcesService [string]
+{
+    StoreName = [String]
+    [ PersistentIconCacheEnabled = [Boolean] ]
+    [ IcaFileCacheExpiry = [UInt32] ]
+    [ IconSize = [UInt32] ]
+    [ ShowDesktopViewer = [Boolean] ]
+}
+```
+
+### Properties
+
+* **StoreName**: StoreFront store name.
+* **PersistentIconCacheEnabled**: Whether to cache icon data in the local file system.
+* **IcaFileCacheExpiry**: How long the ICA file data is cached in the memory of the Web Proxy.
+* **IconSize**: The desired icon size sent to the Store Service in icon requests.
+* **ShowDesktopViewer**: Shows the Citrix Desktop Viewer window and toolbar when users access their desktops from legacy clients. This setting may fix problems where the Desktop Viewer is not displayed. Default: Off..
+
+### Configuration
+
+```
+Configuration XD7Example {
+    Import-DSCResource -ModuleName XenDesktop7 {
+    XD7StoreFrontWebReceiverResourcesService XD7StoreFrontWebReceiverResourcesServiceExample {
+        StoreName = 'mock'
+        ShowDesktopViewer = $false
     }
 }
 ```
