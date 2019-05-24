@@ -90,13 +90,18 @@ function Set-TargetResource
                     }
                 }
             }
-        }
-		if ($ChangedParams.ContainsKey('InternalUri')) {
-			Write-Verbose -Message ($localizedData.CallingSetSTFRoamingBeacon -f 'Internal')
-			Set-STFRoamingBeacon -Internal $PSBoundParameters['InternalUri'] -Verbose
 		}
-		if ($ChangedParams.ContainsKey('ExternalUri')) {
-			Set-STFRoamingBeacon -External $ExternalUri $PSBoundParameters['ExternalUri'] -Verbose
+		if (($ChangedParams.ContainsKey('InternalUri')) -and ($ChangedParams.ContainsKey('ExternalUri'))) {
+			Write-Verbose -Message ($localizedData.CallingSetSTFRoamingBeacon)
+			Set-STFRoamingBeacon -Internal $PSBoundParameters['InternalUri'] -External $PSBoundParameters['ExternalUri']
+		}
+		elseif ($ChangedParams.ContainsKey('InternalUri')) {
+			Write-Verbose -Message ($localizedData.CallingSetSTFRoamingBeacon -f 'Internal',$PSBoundParameters['InternalUri'])
+			Set-STFRoamingBeacon -Internal $PSBoundParameters['InternalUri']
+		}
+		elseif ($ChangedParams.ContainsKey('ExternalUri')) {
+			#this appears to be a bug where you can't just set the externaluri
+			Throw "Unable to set ExternalUri without also specifying an InternalUri."
 		}
 
     } #end process

@@ -4,13 +4,13 @@
 	 Created on:   	2/8/2019 12:12 PM
 	 Created by:   	CERBDM
 	 Organization: 	Cerner Corporation
-	 Filename:     	VE_XD7StoreFrontWebReceiverResourcesService.psm1
+	 Filename:     	VE_XD7StoreFrontWebReceiverSiteStyle.psm1
 	-------------------------------------------------------------------------
-	 Module Name: VE_XD7StoreFrontWebReceiverResourcesService
+	 Module Name: VE_XD7StoreFrontWebReceiverSiteStyle
 	===========================================================================
 #>
 
-Import-LocalizedData -BindingVariable localizedData -FileName VE_XD7StoreFrontWebReceiverResourcesService.Resources.psd1;
+Import-LocalizedData -BindingVariable localizedData -FileName VE_XD7StoreFrontWebReceiverSiteStyle.Resources.psd1;
 
 function Get-TargetResource
 {
@@ -22,6 +22,7 @@ function Get-TargetResource
 		[System.String]
 		$StoreName
 	)
+
     process {
 
 		Import-Module Citrix.StoreFront -ErrorAction Stop -Verbose:$false;
@@ -32,16 +33,17 @@ function Get-TargetResource
         if ($StoreService) {
 			Write-Verbose -Message $localizedData.CallingGetSTFWebReceiverService
 			$WebReceiverService = Get-STFWebReceiverService -StoreService $StoreService
-			Write-Verbose -Message $localizedData.CallingGetSTFWebReceiverResourcesService
-			$WebReceiverResourcesService = Get-STFWebReceiverResourcesService -WebReceiverService $WebReceiverService
+			Write-Verbose -Message $localizedData.CallingGetSTFWebReceiverSiteStyle
+			$WebReceiverSiteStyle = Get-STFWebReceiverSiteStyle -WebReceiverService $WebReceiverService
 		}
 
         $targetResource = @{
 			StoreName = [System.String]$StoreName
-			PersistentIconCacheEnabled = [System.Boolean]$WebReceiverResourcesService.PersistentIconCacheEnabled
-			IcaFileCacheExpiry = [System.UInt32]$WebReceiverResourcesService.IcaFileCacheExpiry
-			IconSize = [System.UInt32]$WebReceiverResourcesService.IconSize
-			ShowDesktopViewer = [System.Boolean]$WebReceiverResourcesService.ShowDesktopViewer
+			HeaderLogoPath = [System.String]$WebReceiverSiteStyle.HeaderLogoPath
+			LogonLogoPath = [System.String]$WebReceiverSiteStyle.LogonLogoPath
+			HeaderBackgroundColor = [System.String]$WebReceiverSiteStyle.HeaderBackgroundColor
+			HeaderForegroundColor = [System.String]$WebReceiverSiteStyle.HeaderForegroundColor
+			LinkColor = [System.String]$WebReceiverSiteStyle.LinkColor
 		};
 
         return $targetResource;
@@ -60,20 +62,24 @@ function Set-TargetResource
 		$StoreName,
 
         [Parameter()]
-		[System.Boolean]
-		$PersistentIconCacheEnabled,
+		[System.String]
+		$HeaderLogoPath,
 
         [Parameter()]
-		[System.UInt32]
-		$IcaFileCacheExpiry,
+		[System.String]
+		$LogonLogoPath,
 
         [Parameter()]
-		[System.UInt32]
-		$IconSize,
+		[System.String]
+		$HeaderBackgroundColor,
 
         [Parameter()]
-		[System.Boolean]
-		$ShowDesktopViewer
+		[System.String]
+		$HeaderForegroundColor,
+
+        [Parameter()]
+		[System.String]
+		$LinkColor
 	)
     process {
 
@@ -117,8 +123,8 @@ function Set-TargetResource
         }
 
         $ChangedParams.Remove('StoreName')
-        Write-Verbose -Message $localizedData.CallingSetSTFWebReceiverResourcesService
-        Set-STFWebReceiverResourcesService @ChangedParams
+		Write-Verbose -Message $localizedData.CallingSetSTFWebReceiverSiteStyle
+        Set-STFWebReceiverSiteStyle @ChangedParams
 
     } #end process
 }
@@ -135,20 +141,24 @@ function Test-TargetResource
 		$StoreName,
 
         [Parameter()]
-		[System.Boolean]
-		$PersistentIconCacheEnabled,
+		[System.String]
+		$HeaderLogoPath,
 
         [Parameter()]
-		[System.UInt32]
-		$IcaFileCacheExpiry,
+		[System.String]
+		$LogonLogoPath,
 
         [Parameter()]
-		[System.UInt32]
-		$IconSize,
+		[System.String]
+		$HeaderBackgroundColor,
 
         [Parameter()]
-		[System.Boolean]
-		$ShowDesktopViewer
+		[System.String]
+		$HeaderForegroundColor,
+
+        [Parameter()]
+		[System.String]
+		$LinkColor
 	)
     process {
 

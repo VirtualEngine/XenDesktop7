@@ -26,6 +26,10 @@ function Get-TargetResource {
         $StoreName,
 
         [Parameter(Mandatory = $true)]
+        [System.String]
+        $FarmName,
+
+        [Parameter(Mandatory = $true)]
         [ValidateSet('Explicit','Anonymous')]
         [System.String]
         $AuthType,
@@ -41,7 +45,7 @@ function Get-TargetResource {
         $StoreService = Get-STFStoreService -Verbose | Where-Object { $_.friendlyname -eq $StoreName };
         if ($StoreService) {
             ## This is a hack, as Get-STFStoreFarm throws an error if run twice in quick succession?!
-            $null = Get-STFStoreFarm -StoreService $StoreService -Verbose -OutVariable StoreFarm
+            $null = Get-STFStoreFarm -StoreService $StoreService -FarmName $FarmName -Verbose -OutVariable StoreFarm
         }
 
         switch ($StoreService.service.Anonymous) {
@@ -93,7 +97,7 @@ function Test-TargetResource {
         [System.String[]]
         $Servers,
 
-        [Parameter()]
+        [Parameter(Mandatory = $true)]
         [System.String]
         $FarmName,
 
@@ -158,7 +162,7 @@ function Test-TargetResource {
     )
     process {
 
-        $targetResource = Get-TargetResource -StoreName $StoreName -AuthType $AuthType -Servers $Servers
+        $targetResource = Get-TargetResource -StoreName $StoreName -AuthType $AuthType -FarmName $FarmName -Servers $Servers
         if ($Ensure -eq 'Present') {
             $inCompliance = $true;
             foreach ($property in $PSBoundParameters.Keys) {
@@ -228,7 +232,7 @@ function Set-TargetResource {
         [System.String[]]
         $Servers,
 
-        [Parameter()]
+        [Parameter(Mandatory = $true)]
         [System.String]
         $FarmName,
 
@@ -297,7 +301,7 @@ function Set-TargetResource {
         $StoreService = Get-STFStoreService | Where-Object { $_.friendlyname -eq $StoreName }
         if ($StoreService) {
             ## This is a hack, as Get-STFStoreFarm throws an error if run twice in quick succession?!
-            $null = Get-STFStoreFarm -StoreService $StoreService -Verbose -OutVariable StoreFarm
+            $null = Get-STFStoreFarm -StoreService $StoreService -FarmName $FarmName -Verbose -OutVariable StoreFarm
         }
 
         if ($Ensure -eq 'Present') {
@@ -305,7 +309,7 @@ function Set-TargetResource {
             #Region Create Params hashtable
             $AllParams = @{}
             $ChangedParams = @{}
-            $targetResource = Get-TargetResource -StoreName $StoreName -AuthType $AuthType -Servers $Servers
+            $targetResource = Get-TargetResource -StoreName $StoreName -AuthType $AuthType -Servers $Servers -FarmName $FarmName
             foreach ($property in $PSBoundParameters.Keys) {
                 if ($targetResource.ContainsKey($property)) {
                     if (!($AllParams.ContainsKey($property))) {

@@ -10,7 +10,7 @@ XD7StoreFrontStore [string]
     StoreName = [String]
     AuthType = [String] { Explicit | Anonymous }
     Servers = [String[]]
-    [ FarmName = [String] ]
+    FarmName = [String]
     [ Port = [UInt32] ]
     [ TransportType = [String] { HTTP | HTTPS | SSL } ]
     [ LoadBalance = [Boolean] ]
@@ -33,7 +33,6 @@ XD7StoreFrontStore [string]
 * **StoreName**: Citrix StoreFront name.
 * **AuthType**: Citrix StoreFront Authentication type.
 * **FarmName**: Citrix StoreFront farm name.
-  * If not specified, this value defaults to <StoreName>farm.
 * **Port**: Citrix StoreFront port.
 * **TransportType**: Citrix StoreFront transport type.
 * **Servers[]**: Citrix StoreFront delivery controllers.
@@ -60,6 +59,7 @@ Configuration XD7Example {
     Import-DscResource -ModuleName XenDesktop7
     XD7StoreFrontStore XD7StoreFrontStoreExample {
         StoreName = 'mock'
+        FarmName = 'mockfarm'
         Port = 8010
         TransportType = 'HTTP'
         Servers = "testserver01,testserver02"

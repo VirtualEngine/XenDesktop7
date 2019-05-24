@@ -4,7 +4,7 @@ class VE_XD7StoreFrontStore : OMI_BaseResource
 {
 	[Key, Description("Citrix StoreFront name")] String StoreName;
 	[Required, Description("Citrix StoreFront Authentication type"), ValueMap{"Explicit","Anonymous"}, Values{"Explicit","Anonymous"}] String AuthType;
-	[Write, Description("Citrix StoreFront farm name")] String FarmName;
+	[Required, Description("Citrix StoreFront farm name")] String FarmName;
 	[Write, Description("Citrix StoreFront port")] UInt32 Port;
 	[Write, Description("Citrix StoreFront transport type"), ValueMap{"HTTP","HTTPS","SSL"}, Values{"HTTP","HTTPS","SSL"}] String TransportType;
 	[Required, Description("Citrix StoreFront director servers")] String Servers[];
