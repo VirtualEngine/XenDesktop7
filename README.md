@@ -1207,7 +1207,7 @@ XD7StoreFrontRoamingBeacon [string]
 ```
 Configuration XD7Example {
     Import-DSCResource -ModuleName XenDesktop7 {
-    XD7StoreFrontRoamingBeacon XD7StoreFrontStoreFarmExample {
+    XD7StoreFrontRoamingBeacon XD7StoreFrontRoamingBeaconExample {
        SiteId = 1
        InternalURI = 'http://localhost/'
        ExternalURI = 'http://web.client1.com','http://web.client2.com'
@@ -1411,6 +1411,7 @@ XD7StoreFrontStoreFarm [string]
     [ Product = [String] ]
     [ RestrictPoPs = [String] ]
     [ FarmGuid = [String] ]
+    [ Ensure = [string] { Present | Absent }]
 }
 ```
 
@@ -1434,6 +1435,7 @@ XD7StoreFrontStoreFarm [string]
 * **Product**: Cloud deployments only otherwise ignored. The product name of the farm configured.
 * **RestrictPoPs**: Cloud deployments only otherwise ignored. Restricts GWaaS traffic to the specified POP.
 * **FarmGuid**: Cloud deployments only otherwise ignored. A tag indicating the scope of the farm.
+* **Ensure**: Specifies whether the store farm should be present or not. If not specified, the value defaults to Present.
 
 ### Configuration
 

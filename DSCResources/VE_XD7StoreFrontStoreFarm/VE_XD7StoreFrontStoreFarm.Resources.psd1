@@ -3,6 +3,7 @@ ConvertFrom-StringData @'
     UpdatingBaseUrl                      = Updating Citrix XenDesktop 7.x StoreFront base url '{0}'.
     RunningAddSTFAuthenicationService    = Running Add-STFAuthenicationService.
     CallingGetSTFStoreService            = Calling Get-STFStoreService for store '{0}'.
+    RunningRemoveSTFStoreFarm            = Running Remove-STFStoreFarm.
     RunningSetSTFStoreService            = Running Set-STFStoreService.
     RunningSetSTFStoreFarm               = Running Set-STFStoreFarm.
     RunningNewSTFStoreFarm               = Running New-STFStoreFarm.

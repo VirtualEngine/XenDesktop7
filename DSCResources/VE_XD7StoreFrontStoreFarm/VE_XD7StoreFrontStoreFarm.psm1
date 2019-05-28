@@ -141,7 +141,13 @@ function Set-TargetResource
 
         [Parameter()]
 		[System.String]
-		$FarmGuid
+		$FarmGuid,
+
+		[Parameter()]
+        [ValidateSet('Present','Absent')]
+        [System.String]
+        $Ensure = 'Present'
+
 	)
     process {
 
@@ -152,50 +158,59 @@ function Set-TargetResource
             ## This is a hack, as Get-STFStoreFarm throws an error if run twice in quick succession?!
             $null = Get-STFStoreFarm -StoreService $StoreService -FarmName $FarmName -Verbose -OutVariable StoreFarm
         }
-		if ($StoreFarm.FarmName -ne $FarmName) {
-			#Create new one
-			$Params = $PSBoundParameters
-			$Params.Remove('StoreName')
-			$Params.Add('StoreService',$StoreService)
-			Add-STFStoreFarm @PSBoundParameters
-		}
-		else {
-			#Update existing
-			$ChangedParams = @{
-				StoreService = $StoreService
+	
+		if ($Ensure -eq 'Present') {
+
+			if ($StoreFarm.FarmName -ne $FarmName) {
+				#Create new one
+				$Params = $PSBoundParameters
+				$Params.Remove('StoreName')
+				$Params.Add('StoreService',$StoreService)
+				Add-STFStoreFarm @PSBoundParameters
 			}
-			$targetResource = Get-TargetResource -StoreName $StoreName -FarmName $FarmName
-			foreach ($property in $PSBoundParameters.Keys) {
-				if ($targetResource.ContainsKey($property)) {
-					if (!($AllParams.ContainsKey($property))) {
-						$AllParams.Add($property, $PSBoundParameters[$property])
-					}
-					$expected = $PSBoundParameters[$property];
-					$actual = $targetResource[$property];
-					if ($PSBoundParameters[$property] -is [System.String[]]) {
-						if ($actual) {
-							if (Compare-Object -ReferenceObject $expected -DifferenceObject $actual) {
-								if (!($ChangedParams.ContainsKey($property))) {
-									Write-Verbose -Message ($localizedData.SettingResourceProperty -f $property)
-									$ChangedParams.Add($property, $PSBoundParameters[$property])
+			else {
+				#Update existing
+				$ChangedParams = @{
+					StoreService = $StoreService
+				}
+				$targetResource = Get-TargetResource -StoreName $StoreName -FarmName $FarmName
+				foreach ($property in $PSBoundParameters.Keys) {
+					if ($targetResource.ContainsKey($property)) {
+						if (!($AllParams.ContainsKey($property))) {
+							$AllParams.Add($property, $PSBoundParameters[$property])
+						}
+						$expected = $PSBoundParameters[$property];
+						$actual = $targetResource[$property];
+						if ($PSBoundParameters[$property] -is [System.String[]]) {
+							if ($actual) {
+								if (Compare-Object -ReferenceObject $expected -DifferenceObject $actual) {
+									if (!($ChangedParams.ContainsKey($property))) {
+										Write-Verbose -Message ($localizedData.SettingResourceProperty -f $property)
+										$ChangedParams.Add($property, $PSBoundParameters[$property])
+									}
 								}
 							}
+							Else {
+								Write-Verbose -Message ($localizedData.SettingResourceProperty -f $property)
+								$ChangedParams.Add($property, $PSBoundParameters[$property])
+							}
 						}
-						Else {
-							Write-Verbose -Message ($localizedData.SettingResourceProperty -f $property)
-							$ChangedParams.Add($property, $PSBoundParameters[$property])
-						}
-					}
-					elseif ($expected -ne $actual) {
-						if (!($ChangedParams.ContainsKey($property))) {
-							Write-Verbose -Message ($localizedData.SettingResourceProperty -f $property)
-							$ChangedParams.Add($property, $PSBoundParameters[$property])
+						elseif ($expected -ne $actual) {
+							if (!($ChangedParams.ContainsKey($property))) {
+								Write-Verbose -Message ($localizedData.SettingResourceProperty -f $property)
+								$ChangedParams.Add($property, $PSBoundParameters[$property])
+							}
 						}
 					}
 				}
+				$ChangedParams.Remove('StoreName')
+				Write-Verbose -Message ($localizedData.RunningSetSTFStoreFarm)
+				Set-STFStoreFarm @ChangedParams
 			}
-			$ChangedParams.Remove('StoreName')
-			Set-STFStoreFarm @ChangedParams
+		}
+		else {
+			Write-Verbose -Message ($localizedData.RunningRemoveSTFStoreFarm)
+			Remove-STFStoreFarm -FarmName $FarmName -StoreService $StoreService #-confirm:$false
 		}
 
     } #end process
@@ -281,38 +296,54 @@ function Test-TargetResource
 
         [Parameter()]
 		[System.String]
-		$FarmGuid
-	)
+		$FarmGuid,
+
+        [Parameter()]
+        [ValidateSet('Present','Absent')]
+        [System.String]
+        $Ensure = 'Present'
+
+		)
     process {
 
 		$targetResource = Get-TargetResource -StoreName $StoreName -FarmName $FarmName
-		$inCompliance = $true;
-		foreach ($property in $PSBoundParameters.Keys) {
+        if ($Ensure -eq 'Present') {
+            $inCompliance = $true;
+            foreach ($property in $PSBoundParameters.Keys) {
 
-			if ($targetResource.ContainsKey($property)) {
+                if ($targetResource.ContainsKey($property)) {
 
-				$expected = $PSBoundParameters[$property];
-				$actual = $targetResource[$property];
-				if ($PSBoundParameters[$property] -is [System.String[]]) {
-					if ($actual) {
-						if (Compare-Object -ReferenceObject $expected -DifferenceObject $actual -ErrorAction silentlycontinue) {
-							Write-Verbose ($localizedData.ResourcePropertyMismatch -f $property, ($expected -join ','), ($actual -join ','));
-							$inCompliance = $false;
-						}
-					}
-					else {
-						Write-Verbose ($localizedData.ResourcePropertyMismatch -f $property, ($expected -join ','), ($actual -join ','));
-						$inCompliance = $false;
-					}
-				}
-				elseif ($expected -ne $actual) {
+                    $expected = $PSBoundParameters[$property];
+                    $actual = $targetResource[$property];
+                    if ($PSBoundParameters[$property] -is [System.String[]]) {
+                        if ($actual) {
+                            if (Compare-Object -ReferenceObject $expected -DifferenceObject $actual -ErrorAction silentlycontinue) {
+                                Write-Verbose ($localizedData.ResourcePropertyMismatch -f $property, ($expected -join ','), ($actual -join ','));
+                                $inCompliance = $false;
+                            }
+                        }
+                        else {
+                            Write-Verbose ($localizedData.ResourcePropertyMismatch -f $property, ($expected -join ','), ($actual -join ','));
+                            $inCompliance = $false;
+                        }
+                    }
+                    elseif ($expected -ne $actual) {
 
-					Write-Verbose ($localizedData.ResourcePropertyMismatch -f $property, $expected, $actual);
-					$inCompliance = $false;
-				}
-			}
+                        Write-Verbose ($localizedData.ResourcePropertyMismatch -f $property, $expected, $actual);
+                        $inCompliance = $false;
+                    }
+                }
 
-		}
+            }
+        }
+        else {
+            if ($targetResource.FarmName) {
+                $inCompliance = $false
+            }
+            else {
+                $inCompliance = $true
+            }
+        }
 
         if ($inCompliance) {
             Write-Verbose ($localizedData.ResourceInDesiredState -f $DeliveryGroup);
