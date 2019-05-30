@@ -52,7 +52,7 @@ function Get-TargetResource
 
 	$returnValue = @{
 		StoreName = [System.String]$StoreService.name
-		GatewayName = [System.String]$StoreService.gateways.Name
+		GatewayName = [System.String[]]$StoreService.gateways.Name
 		AuthenticationProtocol = [System.String[]]$EnabledProtocols
 	}
 
@@ -71,7 +71,7 @@ function Set-TargetResource
 		$StoreName,
 
 		[Parameter(Mandatory = $true)]
-		[System.String]
+		[System.String[]]
 		$GatewayName,
 
 		[Parameter(Mandatory = $true)]
@@ -146,7 +146,7 @@ function Test-TargetResource
 		$StoreName,
 
 		[Parameter(Mandatory = $true)]
-		[System.String]
+		[System.String[]]
 		$GatewayName,
 
 		[Parameter(Mandatory = $true)]

@@ -166,19 +166,20 @@ function Set-TargetResource
 				$Params = $PSBoundParameters
 				$Params.Remove('StoreName')
 				$Params.Add('StoreService',$StoreService)
-				Add-STFStoreFarm @PSBoundParameters
+				Add-STFStoreFarm @Params
 			}
 			else {
 				#Update existing
 				$ChangedParams = @{
 					StoreService = $StoreService
+					FarmName = $FarmName
+				}
+				If ($Servers) {
+					$ChangedParams.Add('Servers',$Servers)
 				}
 				$targetResource = Get-TargetResource -StoreName $StoreName -FarmName $FarmName
 				foreach ($property in $PSBoundParameters.Keys) {
 					if ($targetResource.ContainsKey($property)) {
-						if (!($AllParams.ContainsKey($property))) {
-							$AllParams.Add($property, $PSBoundParameters[$property])
-						}
 						$expected = $PSBoundParameters[$property];
 						$actual = $targetResource[$property];
 						if ($PSBoundParameters[$property] -is [System.String[]]) {
