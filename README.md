@@ -29,6 +29,7 @@ XD7StoreFront* resources don't have a `Credential` parameter.__
 * [XD7StoreFront](#xd7storefront)
 * [XD7StoreFrontAccountSelfService](#xd7storefrontaccountselfservice)
 * [XD7StoreFrontAuthenticationMethod](#xd7storefrontauthenticationmethod)
+* [XD7StoreFrontAuthenticationService](#xd7storefrontauthenticationservice)
 * [XD7StoreFrontBaseUrl](#xd7storefrontbaseurl)
 * [XD7StoreFrontExplicitCommonOptions](#xd7storefrontexplicitcommonoptions)
 * [XD7StoreFrontFarmConfiguration](#xd7storefrontfarmconfiguration)
@@ -850,6 +851,42 @@ Configuration XD7StoreFrontAuthenticationMethodExample {
         SiteId = 1
         AuthenticationMethod = 'WindowsIntegrated'
         Ensure = 'Present'
+    }
+}
+```
+
+## XD7StoreFrontAuthenticationService
+
+Add or Remove a new Authentication service for Store and Receiver for Web authentication
+
+### Syntax
+
+```
+XD7StoreFrontAuthenticationService [string]
+{
+    VirtualPath = [String]
+    [ FriendlyName = [String] ]
+    [ SiteId = [UInt64] ]
+    [ Ensure = [String] { Present | Absent } ]
+}
+```
+
+### Properties
+
+* **VirtualPath**: The IIS virtual path to use for the service.
+* **FriendlyName**: The friendly name the service should be known as.
+* **SiteId**: The IIS site to configure the Authentication service for.
+* **Ensure**: Ensure.  If not specified, this value defaults to Present.
+
+### Configuration
+
+```
+Configuration XD7Example {
+    Import-DSCResource -ModuleName XenDesktop7 {
+    XD7StoreFrontAuthenticationService XD7StoreFrontAuthenticationServiceExample {
+        VirtualPath = '/Citrix/mockweb'
+        FriendlyName = 'mockauth'
+        SiteId = 1
     }
 }
 ```

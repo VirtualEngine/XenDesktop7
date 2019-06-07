@@ -1,5 +1,5 @@
 @{
-    ModuleVersion        = '2.6.3';
+    ModuleVersion        = '2.7.1';
     GUID                 = '3bacd95f-494b-4ea2-989b-09cb5e324940';
     Author               = 'Iain Brighton';
     CompanyName          = 'Virtual Engine';
@@ -24,6 +24,7 @@
                                 'XD7StoreFrontBaseUrl',
                                 'XD7StoreFront',
                                 'XD7StoreFrontAccountSelfService',
+                                'XD7StoreFrontAuthenticationService',
                                 'XD7StoreFrontExplicitCommonOptions',
                                 'XD7StoreFrontFarmConfiguration',
                                 'XD7StoreFrontFilterKeyword',

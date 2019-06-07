@@ -92,14 +92,10 @@ function Set-TargetResource
 	Import-Module Citrix.StoreFront -ErrorAction Stop -Verbose:$false
 	Write-Verbose -Message ($localizedData.CallingGetSTFStoreService -f $StoreName)
 	$StoreService = Get-STFStoreService | Where-Object { $_.friendlyname -eq $StoreName }
-	Write-Verbose -Message ($localizedData.CallingGetSTFRoamingGateway -f $GatewayName)
-	$GatewayService = Get-STFRoamingGateway -Name $GatewayName
 	Write-Verbose -Message ($localizedData.CallingGetSTFAuthenticationService)
 	$Auth = Get-STFAuthenticationService -VirtualPath ($StoreService.AuthenticationServiceVirtualPath) -SiteID ($StoreService.SiteId)
 
 	if ($Ensure -eq 'Present') {
-		Write-Verbose -Message ($localizedData.CallingRegisterSTFStoreGateway)
-		Register-STFStoreGateway -Gateway $GatewayService -StoreService $StoreService -DefaultGateway
 		if ($EnableRemoteAccess -eq $true) {
 			foreach ($Name in $GatewayName) {
 				Write-Verbose -Message ($localizedData.CallingGetSTFRoamingGateway -f $Name)
@@ -129,8 +125,12 @@ function Set-TargetResource
 		}
 	}
 	else {
-		Write-Verbose -Message $localizedData.CallingUnegisterSTFStoreGateway
-		Unregister-STFStoreGateway -Gateway $GatewayService -StoreService $StoreService
+		foreach ($Name in $GatewayName) {
+			Write-Verbose -Message ($localizedData.CallingGetSTFRoamingGateway -f $Name)
+			$GatewayService = Get-STFRoamingGateway -Name $Name
+			Write-Verbose -Message $localizedData.CallingUnregisterSTFStoreGateway
+			Unregister-STFStoreGateway -Gateway $GatewayService -StoreService $StoreService
+		}
 	}
 }
 

@@ -202,10 +202,10 @@ function Test-TargetResource {
         }
 
         if ($inCompliance) {
-            Write-Verbose ($localizedData.ResourceInDesiredState -f $DeliveryGroup);
+            Write-Verbose ($localizedData.ResourceInDesiredState);
         }
         else {
-            Write-Verbose ($localizedData.ResourceNotInDesiredState -f $DeliveryGroup);
+            Write-Verbose ($localizedData.ResourceNotInDesiredState);
         }
 
         return $inCompliance;
@@ -374,7 +374,7 @@ function Set-TargetResource {
                 $Auth = Get-STFAuthenticationService -VirtualPath $AuthVirtualPath -SiteID $SiteId
                 if ($Auth.VirtualPath -ne $AuthVirtualPath) {
 
-                    Write-Verbose -Message $localizedData.RunningAddSTFAuthenicationService
+                    Write-Verbose -Message $localizedData.RunningAddSTFAuthenticationService
                     $Auth = Add-STFAuthenticationService -VirtualPath $AuthVirtualPath -SiteID $SiteId -confirm:$false
                 }
                 $AllParams.Add('AuthenticationService', $Auth)
@@ -470,7 +470,7 @@ function Set-TargetResource {
             Write-Verbose -Message ($localizedData.RunningGetSTFAuthenticationService -f $AuthVirtPath)
             $Auth = Get-STFAuthenticationService -VirtualPath $AuthVirtPath -SiteID $SiteId
             if ($Auth) {
-                Write-Verbose -Message $localizedData.RunningRemoveSTFAuthenicationService
+                Write-Verbose -Message $localizedData.RunningRemoveSTFAuthenticationService
                 $Auth | Remove-STFAuthenticationService -confirm:$false
             }
         }
