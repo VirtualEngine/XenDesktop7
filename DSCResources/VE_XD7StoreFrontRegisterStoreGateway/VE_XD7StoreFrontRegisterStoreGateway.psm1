@@ -171,7 +171,7 @@ function Test-TargetResource
 			if ($targetResource.ContainsKey($property)) {
 				$expected = $PSBoundParameters[$property];
 				$actual = $targetResource[$property];
-				if (($PSBoundParameters[$property] -is [System.String[]]) -and ($actual -ne $null)) {
+				if (($PSBoundParameters[$property] -is [System.String[]]) -and ($null -ne $actual)) {
 					if (Compare-Object -ReferenceObject $expected -DifferenceObject $actual) {
 						Write-Verbose ($localizedData.ResourcePropertyMismatch -f $property, ($expected -join ','), ($actual -join ','));
 						$inCompliance = $false;

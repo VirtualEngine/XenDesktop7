@@ -53,6 +53,7 @@ function Get-TargetResource
 function Set-TargetResource
 {
 	[CmdletBinding()]
+	[Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseShouldProcessForStateChangingFunctions', '')]
 	param
 	(
 		[parameter(Mandatory = $true)]

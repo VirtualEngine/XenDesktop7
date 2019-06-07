@@ -28,12 +28,14 @@ InModuleScope $sut {
         $testResource = @{
             StoreName              = 'Store';
             GatewayName            = 'TestGateway';
+            EnableRemoteAccess     = $True
             AuthenticationProtocol = 'CitrixAGBasic','ExplicitForms';
         }
 
         $fakeResource = @{
             StoreName              = 'Store';
             GatewayName            = 'TestGateway';
+            EnableRemoteAccess     = $True
             AuthenticationProtocol = 'CitrixAGBasic','ExplicitForms';
         }
 
