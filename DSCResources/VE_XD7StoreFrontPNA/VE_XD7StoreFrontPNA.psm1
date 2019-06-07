@@ -66,9 +66,7 @@ function Set-TargetResource
 
     process {
 
-        Import-Module Citrix.StoreFront -ErrorAction Stop -Verbose:$false
-		$targetResource = Get-TargetResource -StoreName $StoreName
-		
+        Import-Module Citrix.StoreFront -ErrorAction Stop -Verbose:$false		
 		Write-Verbose -Message ($localizedData.CallingGetSTFStoreService -f $StoreName)
         $StoreService = Get-STFStoreService -Verbose | Where-Object { $_.friendlyname -eq $StoreName };
 		if ($Ensure -eq 'Present') {
