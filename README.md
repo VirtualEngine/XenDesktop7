@@ -1,3 +1,5 @@
+[![Build status](https://ci.appveyor.com/api/projects/status/8jquwox9xpatqb03?svg=true)](https://ci.appveyor.com/project/iainbrighton/xendesktop7)
+
 # XenDesktop7
 
 The XenDesktop7 PowerShell DSC resources can be used to deploy, configure and maintain a  Citrix
@@ -17,8 +19,8 @@ XD7StoreFront* resources don't have a `Credential` parameter.__
 * [XD7Controller](#xd7controller)
 * [XD7Database](#xd7database)
 * [XD7DesktopGroup](#xd7desktopgroup)
-* [XD7DesktopGroupMember](#xd7desktopgroupmember)
 * [XD7DesktopGroupApplication](#xd7desktopgroupapplication)
+* [XD7DesktopGroupMember](#xd7desktopgroupmember)
 * [XD7EntitlementPolicy](#xd7entitlementpolicy)
 * [XD7Feature](#xd7feature)
 * [XD7Features](#xd7features)
@@ -1189,7 +1191,7 @@ XD7StoreFrontRegisterStoreGateway [string]
     StoreName = [String]
     GatewayName = [String[]]
     AuthenticationProtocol[] = [String] { CitrixAGBasic | CitrixAGBasicNoPassword | HttpBasic | Certificate | CitrixFederation | IntegratedWindows | Forms-Saml | ExplicitForms}
-    EnableRemoteAccess = [Boolean] 
+    EnableRemoteAccess = [Boolean]
     [ Ensure = [String] { Present | Absent } ]
 }
 ```

@@ -17,7 +17,7 @@ function Get-TargetResource
 	[OutputType([System.Collections.Hashtable])]
 	param
 	(
-		[parameter(Mandatory = $true)]
+		[Parameter(Mandatory = $true)]
 		[System.UInt64]
 		$SiteId
 	)
@@ -46,7 +46,7 @@ function Set-TargetResource
 	[Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseShouldProcessForStateChangingFunctions', '')]
 	param
 	(
-		[parameter(Mandatory = $true)]
+		[Parameter(Mandatory = $true)]
 		[System.UInt64]
 		$SiteId,
 
@@ -98,7 +98,7 @@ function Set-TargetResource
 			$ChangedParams.Add('InternalUri',$InternalBeacon)
 		}
 		If (!($ChangedParams.ContainsKey('ExternalUri'))) {
-			$ExternalBeacon = Get-STFRoamingBeacon -External	
+			$ExternalBeacon = Get-STFRoamingBeacon -External
 			$ChangedParams.Add('ExternalUri',$ExternalBeacon)
 		}
 		Write-Verbose -Message ($localizedData.CallingSetSTFRoamingBeacon)
@@ -114,7 +114,7 @@ function Test-TargetResource
 	[OutputType([System.Boolean])]
 	param
 	(
-		[parameter(Mandatory = $true)]
+		[Parameter(Mandatory = $true)]
 		[System.UInt64]
 		$SiteId,
 
@@ -131,6 +131,7 @@ function Test-TargetResource
 
         $targetResource = Get-TargetResource -SiteId $SiteId
 		$inCompliance = $true;
+
 		foreach ($property in $PSBoundParameters.Keys) {
 
 			if ($targetResource.ContainsKey($property)) {

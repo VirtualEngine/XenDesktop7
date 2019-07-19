@@ -35,7 +35,7 @@ function Get-TargetResource
 		[System.String]
 		$Version,
 
-		[parameter(Mandatory = $true)]
+		[Parameter(Mandatory = $true)]
 		[System.String]
 		$GatewayUrl,
 

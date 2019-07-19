@@ -10,7 +10,7 @@ XD7StoreFrontRegisterStoreGateway [string]
     StoreName = [String]
     GatewayName = [String[]]
     AuthenticationProtocol[] = [String] { CitrixAGBasic | CitrixAGBasicNoPassword | HttpBasic | Certificate | CitrixFederation | IntegratedWindows | Forms-Saml | ExplicitForms }
-    EnableRemoteAccess = [Boolean] 
+    EnableRemoteAccess = [Boolean]
     [ Ensure = [String] { Present | Absent } ]
 }
 ```

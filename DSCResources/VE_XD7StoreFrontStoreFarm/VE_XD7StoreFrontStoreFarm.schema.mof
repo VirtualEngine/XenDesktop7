@@ -21,6 +21,4 @@ class VE_XD7StoreFrontStoreFarm : OMI_BaseResource
 	[Write, Description("Cloud deployments only otherwise ignored. Restricts GWaaS traffic to the specified POP")] String RestrictPoPs;
 	[Write, Description("Cloud deployments only otherwise ignored. A tag indicating the scope of the farm")] String FarmGuid;
 	[Write, Description("Ensure"), ValueMap{"Present","Absent"}, Values{"Present","Absent"}] String Ensure;
-}
-;
-
+};

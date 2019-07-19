@@ -6,4 +6,3 @@ class VE_XD7StoreFrontRoamingBeacon : OMI_BaseResource
 	[Write, Description("Beacon internal address uri")] String InternalUri;
 	[Write, Description("Beacon external address uri")] String ExternalUri[];
 };
-
