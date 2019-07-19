@@ -1,0 +1,10 @@
+
+[ClassVersion("1.0.0.0"), FriendlyName("XD7StoreFrontAuthenticationService")]
+class VE_XD7StoreFrontAuthenticationService : OMI_BaseResource
+{
+	[Key, Description("The IIS virtual path to use for the service")] String VirtualPath;
+	[Write, Description("The friendly name the service should be known as")] String FriendlyName;
+	[Write, Description("The IIS site to configure the Authentication service for")] UInt64 SiteId;
+	[Write, Description("Ensure"), ValueMap{"Present","Absent"}, Values{"Present","Absent"}] String Ensure;
+};
+

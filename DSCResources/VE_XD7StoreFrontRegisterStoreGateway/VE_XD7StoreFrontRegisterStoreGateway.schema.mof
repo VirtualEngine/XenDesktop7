@@ -3,7 +3,8 @@
 class VE_XD7StoreFrontRegisterStoreGateway : OMI_BaseResource
 {
 	[Key, Description("Citrix StoreFront name")] String StoreName;
-	[Required, Description("Gateway name")] String GatewayName;
+	[Required, Description("Gateway name")] String GatewayName[];
 	[Required, Description("Authentication Protocol"), ValueMap{"CitrixAGBasic","CitrixAGBasicNoPassword","HttpBasic","Certificate","CitrixFederation","IntegratedWindows","Forms-Saml","ExplicitForms"}, Values{"CitrixAGBasic","CitrixAGBasicNoPassword","HttpBasic","Certificate","CitrixFederation","IntegratedWindows","Forms-Saml","ExplicitForms"}] String AuthenticationProtocol[];
+	[Required, Description("Enable Remote Access")] Boolean EnableRemoteAccess;
 	[Write, Description("Ensure"), ValueMap{"Present","Absent"}, Values{"Present","Absent"}] String Ensure;
 };

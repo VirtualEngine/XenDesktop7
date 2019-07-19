@@ -46,6 +46,7 @@ function Get-TargetResource
         LeasingStatusExpiryFailed = [System.String]$Configuration.LeasingStatusExpiryFailed
         LeasingStatusExpiryLeasing = [System.String]$Configuration.LeasingStatusExpiryLeasing
         LeasingStatusExpiryPending = [System.String]$Configuration.LeasingStatusExpiryPending
+        #PooledSockets does not actually show up with the Get, so if you change this, it will always do the Set.
         PooledSockets = [System.Boolean]$Configuration.PooledSockets
         ServerCommunicationAttempts = [System.UInt32]$Configuration.ServerCommunicationAttempts
         BackgroundHealthCheckPollingPeriod = [System.String]$Configuration.BackgroundHealthCheckPollingPeriod

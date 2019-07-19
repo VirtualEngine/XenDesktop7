@@ -34,12 +34,14 @@ InModuleScope $sut {
 
         $testResource = @{
             StoreName = 'Store';
+            FarmName  = 'Farm1'
             AuthType  = 'Explicit';
             Servers   = 'Server1', 'Server2';
         }
 
         $fakeResource = @{
             StoreName = 'Store';
+            FarmName  = 'Farm1'
             AuthType  = 'Explicit';
             Servers   = 'Server1', 'Server2';
         }

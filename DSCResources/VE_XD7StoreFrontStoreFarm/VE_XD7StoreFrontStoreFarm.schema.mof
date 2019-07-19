@@ -1,0 +1,26 @@
+
+[ClassVersion("1.0.0.0"), FriendlyName("XD7StoreFrontStoreFarm")]
+class VE_XD7StoreFrontStoreFarm : OMI_BaseResource
+{
+	[Key, Description("StoreFront store name")] String StoreName;
+	[Key, Description("The name of the Farm")] String FarmName;
+	[Write, Description("The type of farm"), ValueMap{"XenApp","XenDesktop","AppController","VDIinaBox","Store"}, Values{"XenApp","XenDesktop","AppController","VDIinaBox","Store"}] String FarmType;
+	[Write, Description("The hostnames or IP addresses of the xml services")] String Servers[];
+	[Write, Description("The url to the service location used to provide web and SaaS apps via this farm")] String ServiceUrls[];
+	[Write, Description("Service communication port")] UInt32 Port;
+	[Write, Description("Type of transport to use. Http, Https, SSL for example"), ValueMap{"HTTP","HTTPS","SSL"}, Values{"HTTP","HTTPS","SSL"}] String TransportType;
+	[Write, Description("The SSL Relay port")] UInt32 SSLRelayPort;
+	[Write, Description("Round robin load balance the xml service servers")] Boolean LoadBalance;
+	[Write, Description("Period of time to skip all xml service requests should all servers fail to respond")] UInt32 AllFailedBypassDuration;
+	[Write, Description("Period of time to skip a server when is fails to respond")] UInt32 BypassDuration;
+	[Write, Description("Period of time an ICA launch ticket is valid once requested on pre 7.0 XenApp and XenDesktop farms")] UInt32 TicketTimeToLive;
+	[Write, Description("Period of time a RADE launch ticket is valid once requested on pre 7.0 XenApp and XenDesktop farms")] UInt32 RadeTicketTimeToLive;
+	[Write, Description("Maximum number of servers within a single farm that can fail before aborting a request")] UInt32 MaxFailedServersPerRequest;
+	[Write, Description("The list of Zone names associated with the Store Farm")] String Zones[];
+	[Write, Description("Cloud deployments only otherwise ignored. The product name of the farm configured")] String Product;
+	[Write, Description("Cloud deployments only otherwise ignored. Restricts GWaaS traffic to the specified POP")] String RestrictPoPs;
+	[Write, Description("Cloud deployments only otherwise ignored. A tag indicating the scope of the farm")] String FarmGuid;
+	[Write, Description("Ensure"), ValueMap{"Present","Absent"}, Values{"Present","Absent"}] String Ensure;
+}
+;
+

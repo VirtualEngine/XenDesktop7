@@ -4,7 +4,7 @@ ConvertFrom-StringData @'
     CallingGetSTFAuthenticationService = Calling Get-STFAuthenticationService.
     CallingGetSTFRoamingGateway        = Calling Get-STFRoamingGateway for gateway '{0}'.
     CallingRegisterSTFStoreGateway     = Calling Register-STFStoreGateway.
-    CallingUnegisterSTFStoreGateway    = Calling Unregister-STFStoreGateway.
+    CallingUnregisterSTFStoreGateway   = Calling Unregister-STFStoreGateway.
     ProtocolEnabled                    = Gateway protocol '{0}' enabled.
     EnablingProtocol                   = Enabling gateway protocol '{0}'.
     DisablingProtocol                  = Disabling gateway protocol '{0}'.

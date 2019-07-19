@@ -4,7 +4,7 @@ class VE_XD7StoreFrontStore : OMI_BaseResource
 {
 	[Key, Description("Citrix StoreFront name")] String StoreName;
 	[Required, Description("Citrix StoreFront Authentication type"), ValueMap{"Explicit","Anonymous"}, Values{"Explicit","Anonymous"}] String AuthType;
-	[Write, Description("Citrix StoreFront farm name")] String FarmName;
+	[Required, Description("Citrix StoreFront farm name")] String FarmName;
 	[Write, Description("Citrix StoreFront port")] UInt32 Port;
 	[Write, Description("Citrix StoreFront transport type"), ValueMap{"HTTP","HTTPS","SSL"}, Values{"HTTP","HTTPS","SSL"}] String TransportType;
 	[Required, Description("Citrix StoreFront director servers")] String Servers[];
@@ -18,6 +18,6 @@ class VE_XD7StoreFrontStore : OMI_BaseResource
 	[Write, Description("Citrix StoreFront all failed bypass duration")] UInt32 AllFailedBypassDuration;
 	[Write, Description("Citrix StoreFront bypass duration")] UInt32 BypassDuration;
 	[Write, Description("Citrix StoreFront zones")] String Zones[];
-	[Write, Description(" All the resources delivered by locked-down Store are auto subscribed and do not allow for un-subscription")] Boolean LockedDown;
+	[Write, Description("All the resources delivered by locked-down Store are auto subscribed and do not allow for un-subscription")] Boolean LockedDown;
 	[Write, Description("Ensure"), ValueMap{"Present","Absent"}, Values{"Present","Absent"}] String Ensure;
 };

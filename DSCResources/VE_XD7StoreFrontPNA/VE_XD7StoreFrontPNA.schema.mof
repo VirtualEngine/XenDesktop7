@@ -1,0 +1,9 @@
+
+[ClassVersion("1.0.0.0"), FriendlyName("XD7StoreFrontPNA")]
+class VE_XD7StoreFrontPNA : OMI_BaseResource
+{
+	[Key, Description("StoreFront store name")] String StoreName;
+	[Write, Description("Configure the Store to be the default PNA site hosted at http://example.storefront.com/Citrix/Store/PNAgent/config.xml")] Boolean DefaultPnaService;
+	[Write, Description("Ensure"), ValueMap{"Absent","Present"}, Values{"Absent","Present"}] String Ensure;
+};
+

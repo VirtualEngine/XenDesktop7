@@ -26,6 +26,10 @@ function Get-TargetResource {
         $StoreName,
 
         [Parameter(Mandatory = $true)]
+        [System.String]
+        $FarmName,
+
+        [Parameter(Mandatory = $true)]
         [ValidateSet('Explicit','Anonymous')]
         [System.String]
         $AuthType,
@@ -41,7 +45,7 @@ function Get-TargetResource {
         $StoreService = Get-STFStoreService -Verbose | Where-Object { $_.friendlyname -eq $StoreName };
         if ($StoreService) {
             ## This is a hack, as Get-STFStoreFarm throws an error if run twice in quick succession?!
-            $null = Get-STFStoreFarm -StoreService $StoreService -Verbose -OutVariable StoreFarm
+            $null = Get-STFStoreFarm -StoreService $StoreService -FarmName $FarmName -Verbose -OutVariable StoreFarm
         }
 
         switch ($StoreService.service.Anonymous) {
@@ -65,6 +69,7 @@ function Get-TargetResource {
             SSLRelayPort = $StoreFarm.SSLRelayPort
             AllFailedBypassDuration = $StoreFarm.AllFailedBypassDuration
             BypassDuration = $StoreFarm.BypassDuration
+            FriendlyName = $StoreService.FriendlyName
             Zones = $StoreFarm.Zones
             LockedDown = $storeservice.service.LockedDown
         };
@@ -92,7 +97,7 @@ function Test-TargetResource {
         [System.String[]]
         $Servers,
 
-        [Parameter()]
+        [Parameter(Mandatory = $true)]
         [System.String]
         $FarmName,
 
@@ -157,7 +162,7 @@ function Test-TargetResource {
     )
     process {
 
-        $targetResource = Get-TargetResource -StoreName $StoreName -AuthType $AuthType -Servers $Servers
+        $targetResource = Get-TargetResource -StoreName $StoreName -AuthType $AuthType -FarmName $FarmName -Servers $Servers
         if ($Ensure -eq 'Present') {
             $inCompliance = $true;
             foreach ($property in $PSBoundParameters.Keys) {
@@ -197,10 +202,10 @@ function Test-TargetResource {
         }
 
         if ($inCompliance) {
-            Write-Verbose ($localizedData.ResourceInDesiredState -f $DeliveryGroup);
+            Write-Verbose ($localizedData.ResourceInDesiredState);
         }
         else {
-            Write-Verbose ($localizedData.ResourceNotInDesiredState -f $DeliveryGroup);
+            Write-Verbose ($localizedData.ResourceNotInDesiredState);
         }
 
         return $inCompliance;
@@ -227,7 +232,7 @@ function Set-TargetResource {
         [System.String[]]
         $Servers,
 
-        [Parameter()]
+        [Parameter(Mandatory = $true)]
         [System.String]
         $FarmName,
 
@@ -296,7 +301,7 @@ function Set-TargetResource {
         $StoreService = Get-STFStoreService | Where-Object { $_.friendlyname -eq $StoreName }
         if ($StoreService) {
             ## This is a hack, as Get-STFStoreFarm throws an error if run twice in quick succession?!
-            $null = Get-STFStoreFarm -StoreService $StoreService -Verbose -OutVariable StoreFarm
+            $null = Get-STFStoreFarm -StoreService $StoreService -FarmName $FarmName -Verbose -OutVariable StoreFarm
         }
 
         if ($Ensure -eq 'Present') {
@@ -304,7 +309,7 @@ function Set-TargetResource {
             #Region Create Params hashtable
             $AllParams = @{}
             $ChangedParams = @{}
-            $targetResource = Get-TargetResource -StoreName $StoreName -AuthType $AuthType -Servers $Servers
+            $targetResource = Get-TargetResource -StoreName $StoreName -AuthType $AuthType -Servers $Servers -FarmName $FarmName
             foreach ($property in $PSBoundParameters.Keys) {
                 if ($targetResource.ContainsKey($property)) {
                     if (!($AllParams.ContainsKey($property))) {
@@ -360,6 +365,7 @@ function Set-TargetResource {
 
             #Region Check for Authentication service - create if needed
             $AllParams.Remove('AuthType')
+			$AllParams.Remove("AuthVirtualPath")
             if ($AuthType -eq 'Anonymous') {
                 $AllParams.Add('Anonymous', $true)
                 $ChangedAuth = 'Anonymous'
@@ -368,7 +374,7 @@ function Set-TargetResource {
                 $Auth = Get-STFAuthenticationService -VirtualPath $AuthVirtualPath -SiteID $SiteId
                 if ($Auth.VirtualPath -ne $AuthVirtualPath) {
 
-                    Write-Verbose -Message $localizedData.RunningAddSTFAuthenicationService
+                    Write-Verbose -Message $localizedData.RunningAddSTFAuthenticationService
                     $Auth = Add-STFAuthenticationService -VirtualPath $AuthVirtualPath -SiteID $SiteId -confirm:$false
                 }
                 $AllParams.Add('AuthenticationService', $Auth)
@@ -411,6 +417,9 @@ function Set-TargetResource {
                     $ChangedParams.Remove('LockedDown')
                 }
 
+                If ($ChangedParams.ContainsKey('AuthVirtualPath')) {
+                    $ChangedParams.Remove('AuthVirtualPath')
+                }
                 if ($StoreFarm) {
                     #update params
                     $ChangedParams.Add('StoreService', $StoreService)
@@ -461,7 +470,7 @@ function Set-TargetResource {
             Write-Verbose -Message ($localizedData.RunningGetSTFAuthenticationService -f $AuthVirtPath)
             $Auth = Get-STFAuthenticationService -VirtualPath $AuthVirtPath -SiteID $SiteId
             if ($Auth) {
-                Write-Verbose -Message $localizedData.RunningRemoveSTFAuthenicationService
+                Write-Verbose -Message $localizedData.RunningRemoveSTFAuthenticationService
                 $Auth | Remove-STFAuthenticationService -confirm:$false
             }
         }
