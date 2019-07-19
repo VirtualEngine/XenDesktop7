@@ -84,7 +84,7 @@ Task Sign -Depends Deploy {
         ## Decrypt and import code signing cert
         .\appveyor-tools\secure-file.exe -decrypt .\VE_Certificate_2021.pfx.enc -secret $env:certificate_secret
         $certificatePassword = ConvertTo-SecureString -String $env:certificate_secret -AsPlainText -Force
-        Import-PfxCertificate -FilePath .\VE_Certificate_2019.pfx -CertStoreLocation 'Cert:\CurrentUser\My' -Password $certificatePassword
+        Import-PfxCertificate -FilePath .\VE_Certificate_2021.pfx -CertStoreLocation 'Cert:\CurrentUser\My' -Password $certificatePassword
     }
 
     Get-ChildItem -Path $releasePath -Exclude $signExclude | ForEach-Object {
