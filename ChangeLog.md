@@ -2,6 +2,26 @@
 
 ## Versions ##
 
+### 2.8.0 (2019-07-19)
+
+**BREAKING CHANGE** Makes '_FarmName_' property in XD7StoreFrontStore resource mandatory
+
+* Features
+  * Added new XD7StoreFrontAccountSelfService resource (via @BrianMcLain)
+  * Added new XD7StoreFrontAuthenticationService resource (via @BrianMcLain)
+  * Added new XD7StoreFrontPNA resource (via @BrianMcLain)
+  * Added new XD7StoreFrontRoamingBeacon resource (via @BrianMcLain)
+  * Added new XD7StoreFrontStoreFarm resource (via @BrianMcLain)
+  * Added new XD7StoreFrontWebReceiverResourcesService resource (via @BrianMcLain)
+  * Added new XD7StoreFrontWebReceiverSiteStyle resource (via @BrianMcLain)
+
+* Improvements
+  * Permits assigning multiple NetScaler gateways in StoreFrontRegisterStoreGateway resource
+
+* Bug Fixes
+  * Fixes bug in XD7StoreFrontFarmConfiguration when '_PooledSockets_' is specified
+  * Fixed bug in XD7StoreFrontRoamingGateway updating gateway that was not present
+
 ### 2.7.1 (2019-04-13) ###
 
 * Features
@@ -13,7 +33,6 @@
 
 * Bug fixes
   * Fixes Get-STFStoreFarm errors
-  * Ensures XD7StoreFrontRoamingGateway 'GatewayUrl' ends with a '/'
 
 ### 2.7.0 (2019-04-01) ###
 
