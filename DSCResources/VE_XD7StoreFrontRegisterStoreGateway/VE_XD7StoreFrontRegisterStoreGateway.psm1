@@ -19,20 +19,20 @@ function Get-TargetResource
 	[OutputType([System.Collections.Hashtable])]
 	param
 	(
-		[parameter(Mandatory = $true)]
+		[Parameter(Mandatory = $true)]
 		[System.String]
 		$StoreName,
 
-		[parameter(Mandatory = $true)]
+		[Parameter(Mandatory = $true)]
 		[System.String[]]
 		$GatewayName,
 
-		[parameter(Mandatory = $true)]
+		[Parameter(Mandatory = $true)]
 		[ValidateSet('CitrixAGBasic','CitrixAGBasicNoPassword','HttpBasic','Certificate','CitrixFederation','IntegratedWindows','Forms-Saml','ExplicitForms')]
 		[System.String[]]
 		$AuthenticationProtocol,
 
-		[parameter(Mandatory = $true)]
+		[Parameter(Mandatory = $true)]
 		[System.Boolean]
 		$EnableRemoteAccess,
 
@@ -79,7 +79,7 @@ function Set-TargetResource
 		[System.String[]]
 		$AuthenticationProtocol,
 
-		[parameter(Mandatory = $true)]
+		[Parameter(Mandatory = $true)]
 		[System.Boolean]
 		$EnableRemoteAccess,
 
@@ -154,7 +154,7 @@ function Test-TargetResource
 		[System.String[]]
 		$AuthenticationProtocol,
 
-		[parameter(Mandatory = $true)]
+		[Parameter(Mandatory = $true)]
 		[System.Boolean]
 		$EnableRemoteAccess,
 

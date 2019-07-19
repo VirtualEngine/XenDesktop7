@@ -7,4 +7,3 @@ class VE_XD7StoreFrontAuthenticationService : OMI_BaseResource
 	[Write, Description("The IIS site to configure the Authentication service for")] UInt64 SiteId;
 	[Write, Description("Ensure"), ValueMap{"Present","Absent"}, Values{"Present","Absent"}] String Ensure;
 };
-

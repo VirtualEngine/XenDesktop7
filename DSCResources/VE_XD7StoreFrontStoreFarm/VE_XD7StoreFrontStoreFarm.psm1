@@ -18,11 +18,11 @@ function Get-TargetResource
 	[OutputType([System.Collections.Hashtable])]
 	param
 	(
-		[parameter(Mandatory = $true)]
+		[Parameter(Mandatory = $true)]
 		[System.String]
 		$StoreName,
 
-		[parameter(Mandatory = $true)]
+		[Parameter(Mandatory = $true)]
 		[System.String]
 		$FarmName
 	)
@@ -70,11 +70,11 @@ function Set-TargetResource
 	[Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseShouldProcessForStateChangingFunctions', '')]
 	param
 	(
-		[parameter(Mandatory = $true)]
+		[Parameter(Mandatory = $true)]
 		[System.String]
 		$StoreName,
 
-		[parameter(Mandatory = $true)]
+		[Parameter(Mandatory = $true)]
 		[System.String]
 		$FarmName,
 
@@ -159,7 +159,7 @@ function Set-TargetResource
             ## This is a hack, as Get-STFStoreFarm throws an error if run twice in quick succession?!
             $null = Get-STFStoreFarm -StoreService $StoreService -FarmName $FarmName -Verbose -OutVariable StoreFarm
         }
-	
+
 		if ($Ensure -eq 'Present') {
 
 			if ($StoreFarm.FarmName -ne $FarmName) {
@@ -226,11 +226,11 @@ function Test-TargetResource
 	[OutputType([System.Boolean])]
 	param
 	(
-		[parameter(Mandatory = $true)]
+		[Parameter(Mandatory = $true)]
 		[System.String]
 		$StoreName,
 
-		[parameter(Mandatory = $true)]
+		[Parameter(Mandatory = $true)]
 		[System.String]
 		$FarmName,
 

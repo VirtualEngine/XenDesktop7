@@ -18,7 +18,7 @@ function Get-TargetResource
 	[OutputType([System.Collections.Hashtable])]
 	param
 	(
-		[parameter(Mandatory = $true)]
+		[Parameter(Mandatory = $true)]
 		[System.String]
 		$StoreName
 	)
@@ -56,7 +56,7 @@ function Set-TargetResource
 	[Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseShouldProcessForStateChangingFunctions', '')]
 	param
 	(
-		[parameter(Mandatory = $true)]
+		[Parameter(Mandatory = $true)]
 		[System.String]
 		$StoreName,
 
@@ -131,7 +131,7 @@ function Test-TargetResource
 	[OutputType([System.Boolean])]
 	param
 	(
-		[parameter(Mandatory = $true)]
+		[Parameter(Mandatory = $true)]
 		[System.String]
 		$StoreName,
 

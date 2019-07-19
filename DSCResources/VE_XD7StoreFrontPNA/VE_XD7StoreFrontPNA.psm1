@@ -17,7 +17,7 @@ function Get-TargetResource
 	[OutputType([System.Collections.Hashtable])]
 	param
 	(
-		[parameter(Mandatory = $true)]
+		[Parameter(Mandatory = $true)]
 		[System.String]
 		$StoreName
 	)
@@ -50,7 +50,7 @@ function Set-TargetResource
     [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseShouldProcessForStateChangingFunctions', '')]
 	param
 	(
-		[parameter(Mandatory = $true)]
+		[Parameter(Mandatory = $true)]
 		[System.String]
 		$StoreName,
 
@@ -66,7 +66,7 @@ function Set-TargetResource
 
     process {
 
-        Import-Module Citrix.StoreFront -ErrorAction Stop -Verbose:$false		
+        Import-Module Citrix.StoreFront -ErrorAction Stop -Verbose:$false
 		Write-Verbose -Message ($localizedData.CallingGetSTFStoreService -f $StoreName)
         $StoreService = Get-STFStoreService -Verbose | Where-Object { $_.friendlyname -eq $StoreName };
 		if ($Ensure -eq 'Present') {
@@ -95,7 +95,7 @@ function Test-TargetResource
 	[OutputType([System.Boolean])]
 	param
 	(
-		[parameter(Mandatory = $true)]
+		[Parameter(Mandatory = $true)]
 		[System.String]
 		$StoreName,
 
