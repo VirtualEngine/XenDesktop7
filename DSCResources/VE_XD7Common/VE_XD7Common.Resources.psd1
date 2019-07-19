@@ -1,4 +1,4 @@
-﻿<# VE_XD7Common\VE_XD7Common.Resources.psd1 #>
+<# VE_XD7Common\VE_XD7Common.Resources.psd1 #>
 ConvertFrom-StringData @'
     StartingProcess                     = Starting process '{0}' with arguments '{1}'.
     StartingProcessAs                   = Starting process with user credential '{0}'.
