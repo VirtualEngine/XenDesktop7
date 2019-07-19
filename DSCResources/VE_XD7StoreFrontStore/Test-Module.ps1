@@ -1,10 +1,10 @@
-﻿<#	
+<#
 	.NOTES
 	===========================================================================
 	 Created with: 	SAPIEN Technologies, Inc., PowerShell Studio 2019 v5.6.157
 	 Created on:   	2/8/2019 12:12 PM
 	 Created by:   	CERBDM
-	 Organization: 	
+	 Organization:
 	 Filename:     	Test-Module.ps1
 	===========================================================================
 	.DESCRIPTION
@@ -17,7 +17,7 @@
 	tests, too.
 
 	To run the script, click Run or Run in Console. Or, when working on any file
-	in the project, click Home\Run or Home\Run in Console, or in the Project pane, 
+	in the project, click Home\Run or Home\Run in Console, or in the Project pane,
 	right-click the project name, and then click Run Project.
 #>
 
@@ -32,5 +32,5 @@ Write-HelloWorld
 #Describe "Test VE_XD7StoreFrontFarm" {
 #	It "tests Write-HellowWorld" {
 #		Write-HelloWorld | Should BeExactly "Hello World"
-#	}	
+#	}
 #}

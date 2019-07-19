@@ -1,0 +1,9 @@
+
+[ClassVersion("1.0.0.0"), FriendlyName("XD7StoreFrontAccountSelfService")]
+class VE_XD7StoreFrontAccountSelfService : OMI_BaseResource
+{
+	[Key, Description("StoreFront store name")] String StoreName;
+	[Write, Description("Allow self-service reset password")] Boolean AllowResetPassword;
+	[Write, Description("Allow self-service account unlock")] Boolean AllowUnlockAccount;
+	[Write, Description("The Url of the password manager account self-service service")] String PasswordManagerServiceUrl;
+};

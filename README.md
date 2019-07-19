@@ -1,3 +1,5 @@
+[![Build status](https://ci.appveyor.com/api/projects/status/8jquwox9xpatqb03?svg=true)](https://ci.appveyor.com/project/iainbrighton/xendesktop7)
+
 # XenDesktop7
 
 The XenDesktop7 PowerShell DSC resources can be used to deploy, configure and maintain a  Citrix
@@ -17,8 +19,8 @@ XD7StoreFront* resources don't have a `Credential` parameter.__
 * [XD7Controller](#xd7controller)
 * [XD7Database](#xd7database)
 * [XD7DesktopGroup](#xd7desktopgroup)
-* [XD7DesktopGroupMember](#xd7desktopgroupmember)
 * [XD7DesktopGroupApplication](#xd7desktopgroupapplication)
+* [XD7DesktopGroupMember](#xd7desktopgroupmember)
 * [XD7EntitlementPolicy](#xd7entitlementpolicy)
 * [XD7Feature](#xd7feature)
 * [XD7Features](#xd7features)
@@ -27,21 +29,28 @@ XD7StoreFront* resources don't have a `Credential` parameter.__
 * [XD7SiteConfig](#xd7siteconfig)
 * [XD7SiteLicense](#xd7sitelicense)
 * [XD7StoreFront](#xd7storefront)
+* [XD7StoreFrontAccountSelfService](#xd7storefrontaccountselfservice)
 * [XD7StoreFrontAuthenticationMethod](#xd7storefrontauthenticationmethod)
+* [XD7StoreFrontAuthenticationService](#xd7storefrontauthenticationservice)
 * [XD7StoreFrontBaseUrl](#xd7storefrontbaseurl)
 * [XD7StoreFrontExplicitCommonOptions](#xd7storefrontexplicitcommonoptions)
 * [XD7StoreFrontFarmConfiguration](#xd7storefrontfarmconfiguration)
 * [XD7StoreFrontFilterKeyword](#xd7storefrontfilterkeyword)
 * [XD7StoreFrontOptimalGateway](#xd7storefrontoptimalgateway)
+* [XD7StoreFrontPNA](#xd7storefrontpna)
 * [XD7StoreFrontReceiverAuthenticationMethod](#xd7storefrontreceiverauthenticationmethod)
 * [XD7StoreFrontRegisterStoreGateway](#xd7storefrontregisterstoregateway)
+* [XD7StoreFrontRoamingBeacon](#xd7storefrontroamingbeacon)
 * [XD7StoreFrontRoamingGateway](#xd7storefrontroaminggateway)
 * [XD7StoreFrontSessionStateTimeout](#xd7storefrontsessionstatetimeout)
 * [XD7StoreFrontStore](#xd7storefrontstore)
+* [XD7StoreFrontStoreFarm](#xd7storefrontstorefarm)
 * [XD7StoreFrontUnifiedExperience](#xd7storefrontunifiedexperience)
 * [XD7StoreFrontWebReceiverCommunication](#xd7storefrontwebreceivercommunication)
 * [XD7StoreFrontWebReceiverPluginAssistant](#xd7storefrontwebreceiverpluginassistant)
+* [XD7StoreFrontWebReceiverResourcesService](#xd7storefrontwebreceiverresourcesservice)
 * [XD7StoreFrontWebReceiverService](#xd7storefrontwebreceiverservice)
+* [XD7StoreFrontWebReceiverSiteStyle](#xd7storefrontwebreceiversitestyle)
 * [XD7StoreFrontWebReceiverUserInterface](#xd7storefrontwebreceiveruserinterface)
 * [XD7VDAController](#xd7vdacontroller)
 * [XD7VDAFeature](#xd7vdafeature)
@@ -773,6 +782,42 @@ Configuration XD7StoreFrontExample {
     }
 }
 ```
+## XD7StoreFrontAccountSelfService
+
+Sets StoreFront account self-service options.
+
+### Syntax
+
+```
+XD7StoreFrontAccountSelfService [string]
+{
+    StoreName = [String]
+    [ AllowResetPassword = [Boolean] ]
+    [ AllowUnlockAccount = [Boolean] ]
+    [ PasswordManagerServiceUrl = [String] ]
+}
+```
+
+### Properties
+
+* **StoreName**: StoreFront store name.
+* **AllowResetPassword**: Allow self-service reset password.
+* **AllowUnlockAccount**: Allow self-service account unlock.
+* **PasswordManagerServiceUrl**: The Url of the password manager account self-service service. This must end with a /. Set to $null to remove.
+
+
+### Configuration
+
+```
+Configuration XD7Example {
+    Import-DscResource -ModuleName XenDesktop7
+    XD7StoreFrontAccountSelfService XD7StoreFrontAccountSelfServiceExample {
+        StoreName = 'mock'
+        AllowResetPassword = $true
+        AllowUnlockAccount = $true
+        PasswordManagerServiceUrl = 'http://WebServer/url/'
+    }
+```
 
 ## XD7StoreFrontAuthenticationMethod
 
@@ -808,6 +853,42 @@ Configuration XD7StoreFrontAuthenticationMethodExample {
         SiteId = 1
         AuthenticationMethod = 'WindowsIntegrated'
         Ensure = 'Present'
+    }
+}
+```
+
+## XD7StoreFrontAuthenticationService
+
+Add or Remove a new Authentication service for Store and Receiver for Web authentication
+
+### Syntax
+
+```
+XD7StoreFrontAuthenticationService [string]
+{
+    VirtualPath = [String]
+    [ FriendlyName = [String] ]
+    [ SiteId = [UInt64] ]
+    [ Ensure = [String] { Present | Absent } ]
+}
+```
+
+### Properties
+
+* **VirtualPath**: The IIS virtual path to use for the service.
+* **FriendlyName**: The friendly name the service should be known as.
+* **SiteId**: The IIS site to configure the Authentication service for.
+* **Ensure**: Ensure.  If not specified, this value defaults to Present.
+
+### Configuration
+
+```
+Configuration XD7Example {
+    Import-DSCResource -ModuleName XenDesktop7 {
+    XD7StoreFrontAuthenticationService XD7StoreFrontAuthenticationServiceExample {
+        VirtualPath = '/Citrix/mockweb'
+        FriendlyName = 'mockauth'
+        SiteId = 1
     }
 }
 ```
@@ -1028,6 +1109,39 @@ Configuration XD7Example {
     }
 }
 ```
+## XD7StoreFrontPNA
+
+Enables or disables PNA (XenApp Services) for a Store.
+
+### Syntax
+
+```
+XD7StoreFrontPNA [string]
+{
+    StoreName = [String]
+    [ DefaultPnaService = [Boolean] ]
+    [ Ensure = [String] { Absent | Present } ]
+}
+```
+
+### Properties
+
+* **StoreName**: StoreFront store name.
+* **DefaultPnaService**: Configure the Store to be the default PNA site hosted at http://example.storefront.com/Citrix/Store/PNAgent/config.xml.
+* **Ensure**: Ensure. If not specified, the value defaults to Present
+
+
+### Configuration
+
+```
+Configuration XD7StoreFrontUnifiedExperienceExample {
+    Import-DscResource -ModuleName XenDesktop7
+    XD7StoreFrontPNA XD7StoreFrontPNAExample {
+       StoreName = 'mock'
+       DefaultPnaService = $true
+    }
+}
+```
 
 ## XD7StoreFrontReceiverAuthenticationMethod
 
@@ -1075,8 +1189,9 @@ Register an authentication Gateway with a Store.
 XD7StoreFrontRegisterStoreGateway [string]
 {
     StoreName = [String]
-    GatewayName = [String]
-    AuthenticationProtocol[] = [String] { CitrixAGBasic | CitrixAGBasicNoPassword | HttpBasic | Certificate | CitrixFederation | IntegratedWindows | Forms-Saml | ExplicitForms }
+    GatewayName = [String[]]
+    AuthenticationProtocol[] = [String] { CitrixAGBasic | CitrixAGBasicNoPassword | HttpBasic | Certificate | CitrixFederation | IntegratedWindows | Forms-Saml | ExplicitForms}
+    EnableRemoteAccess = [Boolean]
     [ Ensure = [String] { Present | Absent } ]
 }
 ```
@@ -1084,8 +1199,9 @@ XD7StoreFrontRegisterStoreGateway [string]
 ### Properties
 
 * **StoreName**: Citrix StoreFront name.
-* **GatewayName**: Gateway name.
+* **GatewayName[]**: Gateway name.
 * **AuthenticationProtocol[]**: Authentication Protocol.
+* **EnableRemoteAccess**: Enable Remote Access.
 * **Ensure**: Ensure.
 
 ### Configuration
@@ -1097,7 +1213,43 @@ Configuration XD7Example {
         GatewayName = 'Netscaler'
         StoreName = 'mock'
         AuthenticationProtocol = @('ExplicitForms','CitrixFederation','CitrixAGBasicNoPassword')
+        EnableRemoteAccess = $True
         Ensure = 'Present'
+    }
+}
+```
+
+## XD7StoreFrontRoamingBeacon
+
+Set the internal and external beacons
+
+### Syntax
+
+```
+XD7StoreFrontRoamingBeacon [string]
+{
+    SiteId = [UInt64]
+    [ InternalUri = [String] ]
+    [ ExternalUri = [String[]] ]
+}
+```
+
+### Properties
+
+* **SiteId**: Site Id.
+* **InternalUri**: Beacon internal address uri. You can set this one by itself.
+* **ExternalUri**: Beacon external address uri. If you specify Externaluri, you must also include Internaluri.
+
+
+### Configuration
+
+```
+Configuration XD7Example {
+    Import-DSCResource -ModuleName XenDesktop7 {
+    XD7StoreFrontRoamingBeacon XD7StoreFrontRoamingBeaconExample {
+       SiteId = 1
+       InternalURI = 'http://localhost/'
+       ExternalURI = 'http://web.client1.com','http://web.client2.com'
     }
 }
 ```
@@ -1211,7 +1363,7 @@ XD7StoreFrontStore [string]
     StoreName = [String]
     AuthType = [String] { Explicit | Anonymous }
     Servers = [String[]]
-    [ FarmName = [String] ]
+    FarmName = [String]
     [ Port = [UInt32] ]
     [ TransportType = [String] { HTTP | HTTPS | SSL } ]
     [ LoadBalance = [Boolean] ]
@@ -1234,7 +1386,6 @@ XD7StoreFrontStore [string]
 * **StoreName**: Citrix StoreFront name.
 * **AuthType**: Citrix StoreFront Authentication type.
 * **FarmName**: Citrix StoreFront farm name.
-  * If not specified, this value defaults to <StoreName>farm.
 * **Port**: Citrix StoreFront port.
 * **TransportType**: Citrix StoreFront transport type.
 * **Servers[]**: Citrix StoreFront delivery controllers.
@@ -1261,12 +1412,81 @@ Configuration XD7Example {
     Import-DscResource -ModuleName XenDesktop7
     XD7StoreFrontStore XD7StoreFrontStoreExample {
         StoreName = 'mock'
+        FarmName = 'mockfarm'
         Port = 8010
         TransportType = 'HTTP'
         Servers = "testserver01,testserver02"
         FarmType = 'XenDesktop'
         AuthType = 'Explicit'
         Ensure = 'Present'
+    }
+}
+```
+
+## XD7StoreFrontStoreFarm
+
+Set the details of a StoreFront farm or create a StoreFront farm
+
+### Syntax
+
+```
+XD7StoreFrontStoreFarm [string]
+{
+    StoreName = [String]
+    FarmName = [String]
+    [ FarmType = [String] { XenApp | XenDesktop | AppController | VDIinaBox | Store } ]
+    [ Servers = [String[]] ]
+    [ ServiceUrls = [String[]] ]
+    [ Port = [UInt32] ]
+    [ TransportType = [String] { HTTP | HTTPS | SSL } ]
+    [ SSLRelayPort = [UInt32] ]
+    [ LoadBalance = [Boolean] ]
+    [ AllFailedBypassDuration = [UInt32] ]
+    [ BypassDuration = [UInt32] ]
+    [ TicketTimeToLive = [UInt32] ]
+    [ RadeTicketTimeToLive = [UInt32] ]
+    [ MaxFailedServersPerRequest = [UInt32] ]
+    [ Zones = [String[]] ]
+    [ Product = [String] ]
+    [ RestrictPoPs = [String] ]
+    [ FarmGuid = [String] ]
+    [ Ensure = [string] { Present | Absent }]
+}
+```
+
+### Properties
+
+* **StoreName**: StoreFront store name.
+* **FarmName**: The name of the Farm.
+* **FarmType**: The type of farm.
+* **Servers**: The hostnames or IP addresses of the xml services.
+* **ServiceUrls**: The url to the service location used to provide web and SaaS apps via this farm.
+* **Port**: Service communication port.
+* **TransportType**: Type of transport to use. Http, Https, SSL for example.
+* **SSLRelayPort**: The SSL Relay port.
+* **LoadBalance**: Round robin load balance the xml service servers.
+* **AllFailedBypassDuration**: Period of time to skip all xml service requests should all servers fail to respond.
+* **BypassDuration**: Period of time to skip a server when is fails to respond.
+* **TicketTimeToLive**: Period of time an ICA launch ticket is valid once requested on pre 7.0 XenApp and XenDesktop farms.
+* **RadeTicketTimeToLive**: Period of time a RADE launch ticket is valid once requested on pre 7.0 XenApp and XenDesktop farms.
+* **MaxFailedServersPerRequest**: Maximum number of servers within a single farm that can fail before aborting a request.
+* **Zones**: The list of Zone names associated with the Store Farm.
+* **Product**: Cloud deployments only otherwise ignored. The product name of the farm configured.
+* **RestrictPoPs**: Cloud deployments only otherwise ignored. Restricts GWaaS traffic to the specified POP.
+* **FarmGuid**: Cloud deployments only otherwise ignored. A tag indicating the scope of the farm.
+* **Ensure**: Specifies whether the store farm should be present or not. If not specified, the value defaults to Present.
+
+### Configuration
+
+```
+Configuration XD7Example {
+    Import-DSCResource -ModuleName XenDesktop7 {
+    XD7StoreFrontStoreFarm XD7StoreFrontStoreFarmExample {
+       StoreName = 'mock'
+       FarmName = 'farm2'
+       Servers = 'Server10','Server11'
+       FarmType = 'XenApp'
+       TransportType = 'HTTPS'
     }
 }
 ```
@@ -1412,6 +1632,43 @@ Configuration XD7Example {
 }
 ```
 
+## XD7StoreFrontWebReceiverResourcesService
+
+Set the WebReceiver Resources Service settings
+
+### Syntax
+
+```
+XD7StoreFrontWebReceiverResourcesService [string]
+{
+    StoreName = [String]
+    [ PersistentIconCacheEnabled = [Boolean] ]
+    [ IcaFileCacheExpiry = [UInt32] ]
+    [ IconSize = [UInt32] ]
+    [ ShowDesktopViewer = [Boolean] ]
+}
+```
+
+### Properties
+
+* **StoreName**: StoreFront store name.
+* **PersistentIconCacheEnabled**: Whether to cache icon data in the local file system.
+* **IcaFileCacheExpiry**: How long the ICA file data is cached in the memory of the Web Proxy.
+* **IconSize**: The desired icon size sent to the Store Service in icon requests.
+* **ShowDesktopViewer**: Shows the Citrix Desktop Viewer window and toolbar when users access their desktops from legacy clients. This setting may fix problems where the Desktop Viewer is not displayed. Default: Off..
+
+### Configuration
+
+```
+Configuration XD7Example {
+    Import-DSCResource -ModuleName XenDesktop7 {
+    XD7StoreFrontWebReceiverResourcesService XD7StoreFrontWebReceiverResourcesServiceExample {
+        StoreName = 'mock'
+        ShowDesktopViewer = $false
+    }
+}
+```
+
 ## XD7StoreFrontWebReceiverService
 
 Configure Receiver for Web service options
@@ -1450,6 +1707,49 @@ Configuration XD7Example {
         VirtualPath = '/Citrix/mockweb'
         ClassicReceiverExperience = $false
         Ensure = 'Present'
+    }
+}
+```
+
+## XD7StoreFrontWebReceiverSiteStyle
+
+Sets the Style info in the custom style sheet
+
+### Syntax
+
+```
+XD7StoreFrontWebReceiverSiteStyle [string]
+{
+    StoreName = [String]
+    [ HeaderLogoPath = [String] ]
+    [ LogonLogoPath = [String] ]
+    [ HeaderBackgroundColor = [String] ]
+    [ HeaderForegroundColor = [String] ]
+    [ LinkColor = [String] ]
+}
+```
+
+### Properties
+
+* **StoreName**: StoreFront store name.
+* **HeaderLogoPath**: Header logo path. This file must exist and it cannot be in the ..\receiver\images folder or subfolders. Preferably the custom folder.
+* **LogonLogoPath**: Logon logo path. This file must exist and it cannot be in the ..\receiver\images folder or subfolders. Preferably the custom folder.
+* **HeaderBackgroundColor**: Background color of the Header.
+* **HeaderForegroundColor**: Foreground color of the Header.
+* **LinkColor**: Link color of the page.
+
+### Configuration
+
+```
+Configuration XD7Example {
+    Import-DSCResource -ModuleName XenDesktop7 {
+    XD7StoreFrontWebReceiverSiteStyle XD7StoreFrontWebReceiverSiteStyleExample {
+       StoreName = 'mock'
+       LinkColor = '#02a1c1'
+       HeaderBackgroundColor = '#0574f5b'
+       HeaderForegroundColor = '#fff'
+       HeaderLogoPath = 'C:\inetpub\wwwroot\Citrix\mockweb\custom\CustomHeader.png'
+       LogonLogoPath = 'C:\inetpub\wwwroot\Citrix\mockweb\custom\CustomLogon.png'
     }
 }
 ```

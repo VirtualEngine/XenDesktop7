@@ -1,0 +1,11 @@
+
+[ClassVersion("1.0.0.0"), FriendlyName("XD7StoreFrontWebReceiverSiteStyle")]
+class VE_XD7StoreFrontWebReceiverSiteStyle : OMI_BaseResource
+{
+	[Key, Description("StoreFront store name")] String StoreName;
+	[Write, Description("Header logo path")] String HeaderLogoPath;
+	[Write, Description("Logon logo path")] String LogonLogoPath;
+	[Write, Description("Background color of the Header")] String HeaderBackgroundColor;
+	[Write, Description("Foreground color of the Header")] String HeaderForegroundColor;
+	[Write, Description("Link color of the page")] String LinkColor;
+};

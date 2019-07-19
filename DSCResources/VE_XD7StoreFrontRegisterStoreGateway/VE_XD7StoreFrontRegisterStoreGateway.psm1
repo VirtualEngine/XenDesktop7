@@ -8,17 +8,6 @@
 	-------------------------------------------------------------------------
 	 Module Name: VE_XD7StoreFrontRegisterStoreGateway
 	===========================================================================
-
-	.Example
-		Configuration XD7StoreFrontRegisterStoreGatewayExample {
-			Import-DscResource -ModuleName XenDesktop7
-			XD7StoreFrontRegisterStoreGateway XD7StoreFrontRegisterStoreGatewayExample {
-				GatewayName = 'Netscaler'
-				StoreName = 'mock'
-				Ensure = 'Present'
-			}
-		}
-
 #>
 
 
@@ -30,18 +19,26 @@ function Get-TargetResource
 	[OutputType([System.Collections.Hashtable])]
 	param
 	(
-		[parameter(Mandatory = $true)]
+		[Parameter(Mandatory = $true)]
 		[System.String]
 		$StoreName,
 
-		[parameter(Mandatory = $true)]
-		[System.String]
+		[Parameter(Mandatory = $true)]
+		[System.String[]]
 		$GatewayName,
 
-		[parameter(Mandatory = $true)]
+		[Parameter(Mandatory = $true)]
 		[ValidateSet('CitrixAGBasic','CitrixAGBasicNoPassword','HttpBasic','Certificate','CitrixFederation','IntegratedWindows','Forms-Saml','ExplicitForms')]
 		[System.String[]]
-		$AuthenticationProtocol
+		$AuthenticationProtocol,
+
+		[Parameter(Mandatory = $true)]
+		[System.Boolean]
+		$EnableRemoteAccess,
+
+		[ValidateSet("Present","Absent")]
+		[System.String]
+		$Ensure = 'Present'
 	)
 
 	Import-module Citrix.StoreFront -ErrorAction Stop -Verbose:$false
@@ -55,7 +52,7 @@ function Get-TargetResource
 
 	$returnValue = @{
 		StoreName = [System.String]$StoreService.name
-		GatewayName = [System.String]$StoreService.gateways.Name
+		GatewayName = [System.String[]]$StoreService.gateways.Name
 		AuthenticationProtocol = [System.String[]]$EnabledProtocols
 	}
 
@@ -74,13 +71,17 @@ function Set-TargetResource
 		$StoreName,
 
 		[Parameter(Mandatory = $true)]
-		[System.String]
+		[System.String[]]
 		$GatewayName,
 
 		[Parameter(Mandatory = $true)]
 		[ValidateSet('CitrixAGBasic','CitrixAGBasicNoPassword','HttpBasic','Certificate','CitrixFederation','IntegratedWindows','Forms-Saml','ExplicitForms')]
 		[System.String[]]
 		$AuthenticationProtocol,
+
+		[Parameter(Mandatory = $true)]
+		[System.Boolean]
+		$EnableRemoteAccess,
 
 		[Parameter()]
 		[ValidateSet('Present','Absent')]
@@ -91,14 +92,17 @@ function Set-TargetResource
 	Import-Module Citrix.StoreFront -ErrorAction Stop -Verbose:$false
 	Write-Verbose -Message ($localizedData.CallingGetSTFStoreService -f $StoreName)
 	$StoreService = Get-STFStoreService | Where-Object { $_.friendlyname -eq $StoreName }
-	Write-Verbose -Message ($localizedData.CallingGetSTFRoamingGateway -f $GatewayName)
-	$GatewayService = Get-STFRoamingGateway -Name $GatewayName
 	Write-Verbose -Message ($localizedData.CallingGetSTFAuthenticationService)
 	$Auth = Get-STFAuthenticationService -VirtualPath ($StoreService.AuthenticationServiceVirtualPath) -SiteID ($StoreService.SiteId)
 
 	if ($Ensure -eq 'Present') {
-		Write-Verbose -Message ($localizedData.CallingRegisterSTFStoreGateway)
-		Register-STFStoreGateway -Gateway $GatewayService -StoreService $StoreService -DefaultGateway
+		if ($EnableRemoteAccess -eq $true) {
+			foreach ($Name in $GatewayName) {
+				Write-Verbose -Message ($localizedData.CallingGetSTFRoamingGateway -f $Name)
+				$GatewayService = Get-STFRoamingGateway -Name $Name
+				Register-STFStoreGateway -Gateway $GatewayService -StoreService $StoreService -DefaultGateway
+			}
+		}
 		foreach ($Protocol in $Auth.Authentication.ProtocolChoices) {
 			if ($AuthenticationProtocol -contains $Protocol.Name) {
 				if ($Protocol.Enabled) {
@@ -121,8 +125,12 @@ function Set-TargetResource
 		}
 	}
 	else {
-		Write-Verbose -Message $localizedData.CallingUnegisterSTFStoreGateway
-		Unregister-STFStoreGateway -Gateway $GatewayService -StoreService $StoreService
+		foreach ($Name in $GatewayName) {
+			Write-Verbose -Message ($localizedData.CallingGetSTFRoamingGateway -f $Name)
+			$GatewayService = Get-STFRoamingGateway -Name $Name
+			Write-Verbose -Message $localizedData.CallingUnregisterSTFStoreGateway
+			Unregister-STFStoreGateway -Gateway $GatewayService -StoreService $StoreService
+		}
 	}
 }
 
@@ -138,7 +146,7 @@ function Test-TargetResource
 		$StoreName,
 
 		[Parameter(Mandatory = $true)]
-		[System.String]
+		[System.String[]]
 		$GatewayName,
 
 		[Parameter(Mandatory = $true)]
@@ -146,20 +154,24 @@ function Test-TargetResource
 		[System.String[]]
 		$AuthenticationProtocol,
 
+		[Parameter(Mandatory = $true)]
+		[System.Boolean]
+		$EnableRemoteAccess,
+
 		[Parameter()]
 		[ValidateSet('Present','Absent')]
 		[System.String]
 		$Ensure = 'Present'
 	)
 
-	$targetResource = Get-TargetResource -StoreName $StoreName -GatewayName $GatewayName -AuthenticationProtocol $AuthenticationProtocol
+	$targetResource = Get-TargetResource @PSBoundParameters
 	if ($Ensure -eq 'Present') {
 		$inCompliance = $true;
 		foreach ($property in $PSBoundParameters.Keys) {
 			if ($targetResource.ContainsKey($property)) {
 				$expected = $PSBoundParameters[$property];
 				$actual = $targetResource[$property];
-				if ($PSBoundParameters[$property] -is [System.String[]]) {
+				if (($PSBoundParameters[$property] -is [System.String[]]) -and ($null -ne $actual)) {
 					if (Compare-Object -ReferenceObject $expected -DifferenceObject $actual) {
 						Write-Verbose ($localizedData.ResourcePropertyMismatch -f $property, ($expected -join ','), ($actual -join ','));
 						$inCompliance = $false;

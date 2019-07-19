@@ -1,0 +1,8 @@
+
+[ClassVersion("1.0.0.0"), FriendlyName("XD7StoreFrontRoamingBeacon")]
+class VE_XD7StoreFrontRoamingBeacon : OMI_BaseResource
+{
+	[Key, Description("Site Id")] UInt64 SiteId;
+	[Write, Description("Beacon internal address uri")] String InternalUri;
+	[Write, Description("Beacon external address uri")] String ExternalUri[];
+};

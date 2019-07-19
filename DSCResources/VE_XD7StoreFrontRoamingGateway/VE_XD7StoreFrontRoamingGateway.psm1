@@ -130,7 +130,7 @@ function Set-TargetResource
 
 	if (!$GatewayUrl.EndsWith('/')) { $PSBoundParameters['GatewayUrl'] = '{0}/' -f $GatewayUrl }
 	Import-module Citrix.StoreFront -ErrorAction Stop -Verbose:$false;
-	$Gateway = Get-STFRoamingGateway
+	$Gateway = Get-STFRoamingGateway -Name $Name -ErrorAction SilentlyContinue
 
 	if ($Ensure -eq 'Present') {
 		#Region Create Params hashtable

@@ -1,4 +1,4 @@
-﻿@{
+@{
     RootModule        = 'VE_XD7Common.psm1'
     ModuleVersion     = '1.0'
     GUID              = '68e21726-3708-4ec2-828f-e1a00799fb0e'
