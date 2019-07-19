@@ -1,4 +1,4 @@
-﻿<# VE_XD7DesktopGroup\VE_XD7DesktopGroup.Resources.psd1 #>
+<# VE_XD7DesktopGroup\VE_XD7DesktopGroup.Resources.psd1 #>
 ConvertFrom-StringData @'
     XenDesktopSDKNotFoundError    = Citrix XenDesktop 7.x Powershell SDK/Snap-in was not found.
     InvokingScriptBlockWithParams = Invoking script block with parameters: '{0}'.
