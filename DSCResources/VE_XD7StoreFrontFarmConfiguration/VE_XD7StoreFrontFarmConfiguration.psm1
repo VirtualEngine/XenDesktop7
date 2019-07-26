@@ -33,7 +33,7 @@ function Get-TargetResource
         ## This is a hack, as Get-STFStoreFarm throws an error if run twice in quick succession?!
         $null = Get-STFStoreFarm -StoreService $StoreService -Verbose -OutVariable Configuration
         # XML contains some data points that we cannot obtain using the cmdlet
-        $storeSettings = [xml]$(Get-Content $StoreService.ConfigurationFile).configuration.'citrix.deliveryservices'.wing.farmsets.farmset
+        $storeSettings = $([xml]$(Get-Content $StoreService.ConfigurationFile)).configuration.'citrix.deliveryservices'.wing.farmsets.farmset
     }
     catch {
 
