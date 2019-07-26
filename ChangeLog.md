@@ -2,6 +2,11 @@
 
 ## Versions ##
 
+### 2.8.1 (2019-07-26)
+
+* Bug Fixes
+  * Fix bug in XD7StoreFrontFarmConfiguration where PooledSocket and ServerCommunicationAttempts were returning incorrect values
+
 ### 2.8.0 (2019-07-19)
 
 **BREAKING CHANGE** Makes '_FarmName_' property in XD7StoreFrontStore resource mandatory
