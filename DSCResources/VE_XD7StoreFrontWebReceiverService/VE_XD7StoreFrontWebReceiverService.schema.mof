@@ -4,8 +4,10 @@ class VE_XD7StoreFrontWebReceiverService : OMI_BaseResource
 {
 	[Key, Description("StoreFront store name")] String StoreName;
 	[Required, Description("Site virtual path")] String VirtualPath;
-	[Read, Description("IIS site id")] UInt64 SiteId;
+	[Write, Description("IIS site id")] UInt64 SiteId;
 	[Write, Description("Enable the classic Receiver experience")] Boolean ClassicReceiverExperience;
+	[Write, Description("Set the session state timeout, in minutes")] UInt32 SessionStateTimeout;
+	[Write, Description("Set the Receiver for Web site as the default page in IIS")] Boolean DefaultIISSite;
 	[Write, Description("Friendly name to identify the Receiver for Web service")] String FriendlyName;
 	[Write, ValueMap{"Present","Absent"}, Values{"Present","Absent"}] String Ensure;
 };

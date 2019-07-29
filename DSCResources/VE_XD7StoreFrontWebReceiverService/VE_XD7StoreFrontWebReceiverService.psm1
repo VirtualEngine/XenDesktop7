@@ -35,6 +35,7 @@ function Get-TargetResource
         $StoreService = Get-STFStoreService | Where-Object { $_.friendlyname -eq $StoreName }
         Write-Verbose -Message $localizedData.CallingGetSTFWebReceiverService
         $Configuration = Get-STFWebReceiverService -StoreService $StoreService
+        [System.Xml.XmlDocument] $webConfig = Get-Content -Path $Configuration.ConfigurationFile -Raw
     }
     catch {
 
@@ -42,11 +43,13 @@ function Get-TargetResource
     }
 
     $returnValue = @{
-        StoreName = [System.String]$StoreName
-        VirtualPath = [System.String]$Configuration.VirtualPath
-        SiteId = [System.UInt64]$Configuration.SiteId
-        ClassicReceiverExperience = [System.Boolean]$Configuration.IDONTKNOWWHERETHISIS
-        FriendlyName = [System.String]$Configuration.FriendlyName
+        StoreName = [System.String] $StoreName
+        VirtualPath = [System.String] $Configuration.VirtualPath
+        SiteId = [System.UInt64] $Configuration.SiteId
+        ClassicReceiverExperience = [System.Boolean] $webConfig.Configuration.'system.webServer'.defaultDocument.files.add.value -notcontains 'recevier.html'
+        SessionStateTimeout = [System.UInt32] $webConfig.Configuration.'system.web'.sessionState.Timeout
+        DefaultIISSite = [System.Boolean] $Configuration.DefaultIISSite
+        FriendlyName = [System.String] $Configuration.FriendlyName
     }
 
     $returnValue
@@ -78,6 +81,14 @@ function Set-TargetResource
         [Parameter()]
         [System.String]
         $FriendlyName,
+
+        [Parameter()]
+        [System.UInt32]
+        $SessionStateTimeout,
+
+        [Parameter()]
+        [System.Boolean]
+        $DefaultIISSite,
 
         [Parameter()]
         [ValidateSet('Present','Absent')]
@@ -126,17 +137,29 @@ function Set-TargetResource
     }
 
     $ChangedParams.Remove('StoreName')
-    if ($Ensure -eq 'Present') {
-        if ($Configuration) {
+    $ChangedParams.Remove('DefaultIISSite')
+    $ChangedParams.Remove('ClassicReceiverExperience')
+    $ChangedParams.Remove('SessionStateTimeout')
 
-            Write-Verbose -Message $localizedData.CallingSetSTFWebReceiverService
-            Set-STFWebReceiverService @ChangedParams
-        }
-        else {
+    if ($Ensure -eq 'Present') {
+
+        ## SessionStateTimeout and DefaultIISSite can only be configured with Set-STFWebReceiverStore
+        if (-not $Configuration) {
 
             Write-Verbose -Message $localizedData.CallingAddSTFWebReceiverService
-            Add-STFWebReceiverService @ChangedParams
+            $Configuration = Add-STFWebReceiverService @ChangedParams
         }
+
+        $setSTFWebReceiverServiceParams = @{
+            WebReceiverService        = $Configuration
+            DefaultIISSite            = $DefaultIISSite
+            ClassicReceiverExperience = $ClassicReceiverExperience
+        }
+        if ($PSBoundParameters.ContainsKey('SessionStateTimeout')) {
+            $setSTFWebReceiverServiceParams['SessionStateTimeout'] = $SessionStateTimeout
+        }
+        Write-Verbose -Message $localizedData.CallingSetSTFWebReceiverService
+        Set-STFWebReceiverService @setSTFWebReceiverServiceParams
     }
     else {
 
@@ -169,6 +192,14 @@ function Test-TargetResource
         $ClassicReceiverExperience,
 
         [Parameter()]
+        [System.UInt32]
+        $SessionStateTimeout,
+
+        [Parameter()]
+        [System.Boolean]
+        $DefaultIISSite,
+
+        [Parameter()]
         [System.String]
         $FriendlyName,
 
@@ -182,7 +213,8 @@ function Test-TargetResource
     If ($Ensure -eq 'Present') {
         $inCompliance = $true;
         foreach ($property in $PSBoundParameters.Keys) {
-            if ($targetResource.ContainsKey($property)) {
+            ## FriendlyName cannot be changed after the WebReceiverService is provisioned so skip testing it
+            if ($targetResource.ContainsKey($property) -and ($property -ne 'FriendlyName')) {
                 $expected = $PSBoundParameters[$property];
                 $actual = $targetResource[$property];
                 if ($PSBoundParameters[$property] -is [System.String[]]) {
