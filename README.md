@@ -1682,6 +1682,8 @@ XD7StoreFrontWebReceiverService [string]
     VirtualPath = [String]
     SiteId = [UInt64]
     [ ClassicReceiverExperience = [Boolean] ]
+    [ SessionStateTimeout = [UInt32] ]
+    [ DefaultIISSite = [Boolean] ]
     [ FriendlyName = [String] ]
     [ Ensure = [String] { Present | Absent } ]
 }
@@ -1694,7 +1696,10 @@ XD7StoreFrontWebReceiverService [string]
 * **SiteId**: IIS site id.
   * If not specified, this value defaults to 1.
 * **ClassicReceiverExperience**: Enable the classic Receiver experience.
+* **SessionStateTimeout**: Set the session state timeout, in minutes.
+* **DefaultIISSite**:Set the Receiver for Web site as the default page in IIS.
 * **FriendlyName**: Friendly name to identify the Receiver for Web service.
+  * **Note: this name cannot be changed after initial configuration**
 * **Ensure**: Whether the Storefront Web Receiver Service should be added or removed.
 
 ### Configuration

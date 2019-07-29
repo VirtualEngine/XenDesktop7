@@ -4,8 +4,12 @@
 
 ### Unreleased
 
+* Improvements
+  * Adds SessionStateTimeout and DefaultIISSite properties to XD7StoreFrontWebReceiverService
+
 * Bug Fixes
   * Fix bug in XD7StoreFrontFarmConfiguration where PooledSocket and ServerCommunicationAttempts were returning incorrect values
+  * Fix bug in XD7StoreFrontWebReceiverService where SiteId could not be specified
 
 ### 2.8.0 (2019-07-19)
 
