@@ -245,6 +245,29 @@ function AssertXDModule {
     } #end process
 } #end function AssertXDModule
 
+function AssertModule {
+    <#
+        .SYNOPSIS
+            Asserts whether all the specified modules are present, throwing if not.
+    #>
+        [CmdletBinding()]
+        param (
+            [Parameter()]
+            [ValidateNotNullOrEmpty()]
+            [System.String[]] $Name
+        )
+        process {
+
+            foreach ($moduleName in $Name) {
+
+                if (-not (Get-Module -Name $moduleName -ListAvailable -ErrorAction SilentlyContinue)) {
+
+                    ThrowInvalidProgramException -ErrorId $moduleName -ErrorMessage $localized.XenDesktopModuleNotFoundError;
+                }
+            } #end foreach module
+
+        } #end process
+    } #end function AssertModule
 
 function Add-PSSnapin {
 <#
