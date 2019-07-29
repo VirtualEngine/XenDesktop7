@@ -2,7 +2,7 @@
 
 ## Versions ##
 
-### 2.8.1 (2019-07-26)
+### Unreleased
 
 * Bug Fixes
   * Fix bug in XD7StoreFrontFarmConfiguration where PooledSocket and ServerCommunicationAttempts were returning incorrect values
