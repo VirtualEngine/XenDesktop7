@@ -24,12 +24,9 @@ Describe 'Linting\FileEncoding' {
                 ForEach-Object {
                     if ($_ -is [System.IO.FileInfo])
                     {
-                        if ($_.Name -ne 'Resolve-ProgramFilesFolder.ps1')
-                        {
-                            It "File '$($_.FullName.Replace($repoRoot,''))' uses UTF-8 (no BOM) encoding" {
-                                $encoding = (Get-FileEncoding -Path $_.FullName -WarningAction SilentlyContinue).HeaderName
-                                $encoding | Should Be 'us-ascii'
-                            }
+                        It "File '$($_.FullName.Replace($repoRoot,''))' uses UTF-8 (no BOM) encoding" {
+                            $encoding = (Get-FileEncoding -Path $_.FullName -WarningAction SilentlyContinue).HeaderName
+                            $encoding | Should Be 'us-ascii'
                         }
                     }
                     elseif ($_ -is [System.IO.DirectoryInfo])
@@ -39,6 +36,8 @@ Describe 'Linting\FileEncoding' {
                 }
         } #end process
     } #end function
+
+    Import-Module VirtualEngine.Build -Force
 
     Get-ChildItem -Path $repoRoot -Exclude $excludedPaths |
         ForEach-Object {
