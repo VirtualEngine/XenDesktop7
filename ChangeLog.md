@@ -4,6 +4,10 @@
 
 ### Unreleased
 
+* Features
+  * Adds XD7StoreFrontStoreBase resource
+  * Adds XD7AuthenticationServiceProtocol resource
+
 * Improvements
   * Adds SessionStateTimeout and DefaultIISSite properties to XD7StoreFrontWebReceiverService
 

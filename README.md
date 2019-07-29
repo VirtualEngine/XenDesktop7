@@ -10,6 +10,8 @@ is not supported. This typically only affects the
 [XenDesktop7Lab](https://github.com/virtualengine/XenDesktop7Lab) composite resources as the
 XD7StoreFront* resources don't have a `Credential` parameter.__
 
+__NOTE: The majority of the XD7StoreFront* resources use the newer StoreFront 3.6+ PowerShell module and not the legacy StoreFront 3.0 SDK.__
+
 ## Included Resources
 
 * [XD7AccessPolicy](#xd7accesspolicy)
@@ -32,6 +34,7 @@ XD7StoreFront* resources don't have a `Credential` parameter.__
 * [XD7StoreFrontAccountSelfService](#xd7storefrontaccountselfservice)
 * [XD7StoreFrontAuthenticationMethod](#xd7storefrontauthenticationmethod)
 * [XD7StoreFrontAuthenticationService](#xd7storefrontauthenticationservice)
+* [XD7StoreFrontAuthenticationServiceProtocol](#xd7storefrontauthenticationserviceprotocol)
 * [XD7StoreFrontBaseUrl](#xd7storefrontbaseurl)
 * [XD7StoreFrontExplicitCommonOptions](#xd7storefrontexplicitcommonoptions)
 * [XD7StoreFrontFarmConfiguration](#xd7storefrontfarmconfiguration)
@@ -44,6 +47,7 @@ XD7StoreFront* resources don't have a `Credential` parameter.__
 * [XD7StoreFrontRoamingGateway](#xd7storefrontroaminggateway)
 * [XD7StoreFrontSessionStateTimeout](#xd7storefrontsessionstatetimeout)
 * [XD7StoreFrontStore](#xd7storefrontstore)
+* [XD7StoreFrontStoreBase](#xd7storefrontstorebase)
 * [XD7StoreFrontStoreFarm](#xd7storefrontstorefarm)
 * [XD7StoreFrontUnifiedExperience](#xd7storefrontunifiedexperience)
 * [XD7StoreFrontWebReceiverCommunication](#xd7storefrontwebreceivercommunication)
@@ -765,7 +769,7 @@ XD7StoreFront [string]
 
 ### Properties
 
-* **SiteId**: Citrix StoreFront base url.
+* **SiteId**: Citrix Storefront IIS site id.
 * **HostBaseUrl**: Citrix StoreFront host base url.
   * If not specified, this value defaults to http://localhost.
 * **Ensure**: Whether the Storefront deployment should be added or removed.
@@ -877,7 +881,7 @@ XD7StoreFrontAuthenticationService [string]
 
 * **VirtualPath**: The IIS virtual path to use for the service.
 * **FriendlyName**: The friendly name the service should be known as.
-* **SiteId**: The IIS site to configure the Authentication service for.
+* **SiteId**: Citrix Storefront IIS site id to configure the Authentication service for.
 * **Ensure**: Ensure.  If not specified, this value defaults to Present.
 
 ### Configuration
@@ -889,6 +893,46 @@ Configuration XD7Example {
         VirtualPath = '/Citrix/mockweb'
         FriendlyName = 'mockauth'
         SiteId = 1
+    }
+}
+```
+
+## XD7StoreFrontAuthenticationServiceProtocol
+
+Enables or disables StoreFront authentication service protocol(s).
+
+**NOTE: this is a replacement for the `XD7StoreFrontAuthenticationMethod` resource implemented using the new StoreFront 3.x PowerShell cmdlets.**
+
+### Syntax
+
+```
+XD7StoreFrontAuthenticationServiceProtocol [string]
+{
+    VirtualPath = [String]
+    AuthenticationProtocol = [String[]]
+    [ SiteId = [Uint64] ]
+    [ Ensure = [String] { Present | Absent } ]
+}
+```
+
+### Properties
+
+* **VirtualPath**: Citrix Storefront Authentication Service IIS virtual path.
+* **AuthenticationProtocol**: Citrix Storefront Authentication protocols to enable or disable.
+* **SiteId**: Citrix Storefront Authentication Service IIS Site Id.
+  * If not specified, this value defaults to 1.
+* **Ensure**: Specifies whether to enable or disable the authentication protocol(s).
+  * If not specified, this value defaults to 'Present'.
+
+### Configuration
+
+```
+Configuration XD7Example {
+    Import-DSCResource -ModuleName XenDesktop7 {
+    XD7StoreFrontAuthenticationServiceProtocol AuthenticationServiceProtocolExample {
+       VirtualPath = '/Citrix/Authentication'
+       AuthenticationProtocol= 'ExplicitForms','IntegratedWindows','CitrixAGBasic'
+       Ensure = 'Present'
     }
 }
 ```
@@ -1236,7 +1280,7 @@ XD7StoreFrontRoamingBeacon [string]
 
 ### Properties
 
-* **SiteId**: Site Id.
+* **SiteId**: Citrix Storefront IIS Site Id.
 * **InternalUri**: Beacon internal address uri. You can set this one by itself.
 * **ExternalUri**: Beacon external address uri. If you specify Externaluri, you must also include Internaluri.
 
@@ -1417,6 +1461,52 @@ Configuration XD7Example {
         TransportType = 'HTTP'
         Servers = "testserver01,testserver02"
         FarmType = 'XenDesktop'
+        AuthType = 'Explicit'
+        Ensure = 'Present'
+    }
+}
+```
+
+## XD7StoreFrontStoreBase
+
+Creates or sets a StoreFront store and all it's properties.
+
+### Syntax
+
+```
+VE_XD7StoreFrontStoreBase [string]
+{
+    StoreName = [String]
+    AuthType = [String] { Explicit | Anonymous }
+    [ AuthVirtualPath = [String] ]
+    [ StoreVirtualPath = [String] ]
+    [ SiteId = [UInt64] ]
+    [ LockedDown = [Boolean] ]
+    [ Ensure = [String] { Present | Absent } ]
+}
+```
+
+### Properties
+
+* **StoreName**: Citrix StoreFront name.
+* **AuthType**: Citrix StoreFront Authentication type.
+* **AuthVirtualPath**: Citrix StoreFront authenication service virtual path.
+  * If not specified, this value defaults to /Citrix/Authentication.
+* **StoreVirtualPath**: Citrix StoreFront store virtual path.
+  * If not specified, this value defaults to /Citrix/<StoreName>.
+* **SiteId**: Citrix StoreFront site id.
+  * If not specified, this value defaults to 1.
+* **LockedDown**: All the resources delivered by locked-down Store are auto subscribed and do not allow for un-subscription.
+* **Ensure**: Specifies whether the Store should be present or absent.
+  * If not specified, this value defaults to 'Present'.
+
+### Configuration
+
+```
+Configuration XD7Example {
+    Import-DscResource -ModuleName XenDesktop7
+    VE_XD7StoreFrontStoreBase VE_XD7StoreFrontStoreBaseExample {
+        StoreName = 'mock'
         AuthType = 'Explicit'
         Ensure = 'Present'
     }
@@ -1693,7 +1783,7 @@ XD7StoreFrontWebReceiverService [string]
 
 * **StoreName**: StoreFront store name.
 * **VirtualPath**: Site virtual path.
-* **SiteId**: IIS site id.
+* **SiteId**: Citrix Storefront IIS Site Id.
   * If not specified, this value defaults to 1.
 * **ClassicReceiverExperience**: Enable the classic Receiver experience.
 * **SessionStateTimeout**: Set the session state timeout, in minutes.
