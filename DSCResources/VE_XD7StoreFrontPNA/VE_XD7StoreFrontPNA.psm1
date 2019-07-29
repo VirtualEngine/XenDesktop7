@@ -25,7 +25,6 @@ function Get-TargetResource
     process {
 
 		Import-Module Citrix.StoreFront -ErrorAction Stop -Verbose:$false;
-		Write-Verbose "DEBUG: Starting Get-TargetResource"
 		Write-Verbose -Message ($localizedData.CallingGetSTFStoreService -f $StoreName)
 		$StoreService = Get-STFStoreService -Verbose | Where-Object { $_.friendlyname -eq $StoreName };
 		Write-Verbose -Message $localizedData.CallingGetSTFStorePna
@@ -111,7 +110,6 @@ function Test-TargetResource
 
     process {
 
-		Write-Verbose "DEBUG: Starting Test-TargetResource"
         $targetResource = Get-TargetResource -StoreName $StoreName
         if ($Ensure -eq 'Present') {
 

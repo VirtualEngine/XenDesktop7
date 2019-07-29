@@ -444,9 +444,10 @@ function Set-TargetResource {
             }
             else {
                 #update params
-                $AllParams.Add('FriendlyName', $StoreName)
-                $AllParams.Add('VirtualPath', $StoreVirtualPath)
-                $AllParams.Add('SiteId', $SiteId)
+                $AllParams.Remove('StoreVirtualPath')
+                $AllParams['FriendlyName'] = $StoreName
+                $AllParams['VirtualPath'] = $StoreVirtualPath
+                $AllParams['SiteId'] = $SiteId
 
                 #Create
                 Write-Verbose -Message $localizedData.RunningAddSTFStoreService
