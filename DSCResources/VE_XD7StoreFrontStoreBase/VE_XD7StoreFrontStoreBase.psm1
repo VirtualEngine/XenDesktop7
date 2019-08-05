@@ -244,21 +244,20 @@ function Set-TargetResource
                 elseif ($AuthType -eq 'Anonymous')
                 {
                     $addSTFStoreServiceParams['Anonymous'] = $true
-
                 }
                 Write-Verbose -Message $localizedData.RunningAddSTFStoreService
                 $storeService = Add-STFStoreService @addSTFStoreServiceParams
             }
 
-            $setSTFStoreServiceParams.Remove('SiteId')
-            $setSTFStoreServiceParams.Remove('StoreVirtualPath')
-            $setSTFStoreServiceParams.Remove('StoreName')
-            $setSTFStoreServiceParams.Remove('AuthVirtualPath')
-            $setSTFStoreServiceParams.Remove('AuthType')
-            $setSTFStoreServiceParams.Remove('Ensure')
-
+            foreach ($parameterName in $($setSTFStoreServiceParams.Keys))
+            {
+                if ($parmeterName -notin 'LockedDown','AllowSessionReconnect','SubstituteDesktopImage')
+                {
+                    $setSTFStoreServiceParams.Remove($parameterName)
+                }
+            }
             Write-Verbose -Message $localizedData.RunningSetSTFStoreService
-            $storeService = Set-STFStoreService @setSTFStoreServiceParams -Confirm:$false
+            $storeService | Set-STFStoreService @setSTFStoreServiceParams -Confirm:$false
         }
         else
         {
