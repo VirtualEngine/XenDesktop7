@@ -37,8 +37,10 @@ VE_XD7StoreFrontStoreBase [string]
 Configuration XD7Example {
     Import-DscResource -ModuleName XenDesktop7
     VE_XD7StoreFrontStoreBase VE_XD7StoreFrontStoreBaseExample {
-        StoreName = 'mock'
+        StoreName = 'Store'
         AuthType = 'Explicit'
+        StoreVirtualPath = '/Citrix/Store'
+        AuthVirtualPath = '/Citrix/Authentication'
         Ensure = 'Present'
     }
 }

@@ -32,6 +32,7 @@ XD7StoreFrontRoamingGateway [string]
 * **Version**: The Citrix NetScaler Gateway version.
 * **GatewayUrl**: The Gateway Url.
 * **CallbackUrl**: The Gateway authentication call-back Url.
+  * _NOTE: The CallbackUrl should be suffixed with `/CitrixAuthService/AuthService.asmx`_
 * **SessionReliability**: Enable session reliability.
 * **RequestTicketTwoSTAs**: Request STA tickets from two STA servers.
 * **SubnetIPAddress**: IP address.
