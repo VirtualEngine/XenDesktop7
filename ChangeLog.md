@@ -9,7 +9,7 @@
   * Adds XD7AuthenticationServiceProtocol resource
 
 * Improvements
-  * Adds SessionStateTimeout and DefaultIISSite properties to XD7StoreFrontWebReceiverService#
+  * Adds SessionStateTimeout and DefaultIISSite properties to XD7StoreFrontWebReceiverService
 
 * Bug Fixes
   * Fix bug in XD7StoreFrontFarmConfiguration where PooledSocket and ServerCommunicationAttempts were returning incorrect values
