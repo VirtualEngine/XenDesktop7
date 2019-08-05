@@ -25,7 +25,7 @@ XD7StoreFrontRoamingBeacon [string]
 ```
 Configuration XD7Example {
     Import-DSCResource -ModuleName XenDesktop7 {
-    XD7StoreFrontRoamingBeacon XD7StoreFrontStoreFarmExample {
+    XD7StoreFrontRoamingBeacon XD7StoreFrontRoamingBeaconExample {
        SiteId = 1
        InternalURI = 'http://localhost/'
        ExternalURI = 'http://web.client1.com','http://web.client2.com'

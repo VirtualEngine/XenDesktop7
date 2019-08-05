@@ -148,6 +148,12 @@ function Set-TargetResource {
         if (($exitCode -eq 3010) -or ($Role -eq 'Controller')) {
             $global:DSCMachineStatus = 1;
         }
+        elseif ($Role -eq 'Storefront') {
+            ## Add the Storefront module path to the current session
+            if (Test-Path -Path "$env:ProgramFiles\Citrix\Receiver StoreFront\PowerShellSDK\Modules\") {
+                $env:PSModulePath += ";$env:ProgramFiles\Citrix\Receiver StoreFront\PowerShellSDK\Modules\";
+            }
+        }
 
     } #end process
 } #end function Set-TargetResource

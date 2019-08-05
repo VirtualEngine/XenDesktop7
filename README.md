@@ -1494,7 +1494,7 @@ VE_XD7StoreFrontStoreBase [string]
   * If not specified, this value defaults to /Citrix/Authentication.
 * **StoreVirtualPath**: Citrix StoreFront store virtual path.
   * If not specified, this value defaults to /Citrix/<StoreName>.
-* **SiteId**: Citrix StoreFront site id.
+* **SiteId**: Citrix StoreFront IIS site id.
   * If not specified, this value defaults to 1.
 * **LockedDown**: All the resources delivered by locked-down Store are auto subscribed and do not allow for un-subscription.
 * **Ensure**: Specifies whether the Store should be present or absent.
@@ -1506,8 +1506,10 @@ VE_XD7StoreFrontStoreBase [string]
 Configuration XD7Example {
     Import-DscResource -ModuleName XenDesktop7
     VE_XD7StoreFrontStoreBase VE_XD7StoreFrontStoreBaseExample {
-        StoreName = 'mock'
+        StoreName = 'Store'
         AuthType = 'Explicit'
+        StoreVirtualPath = '/Citrix/Store'
+        AuthVirtualPath = '/Citrix/Authentication'
         Ensure = 'Present'
     }
 }

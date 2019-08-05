@@ -15,6 +15,7 @@
   * Fix bug in XD7StoreFrontFarmConfiguration where PooledSocket and ServerCommunicationAttempts were returning incorrect values
   * Fix bug in XD7StoreFrontWebReceiverService where SiteId could not be specified
   * Fix "An item with the same key has already been added" error in XD7StoreFrontStore resource
+  * Adds Storefront module path to the session's $PSModulePath after feature install
 
 ### 2.8.0 (2019-07-19)
 
