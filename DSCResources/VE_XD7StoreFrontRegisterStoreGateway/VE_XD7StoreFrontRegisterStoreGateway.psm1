@@ -28,11 +28,6 @@ function Get-TargetResource
 		$GatewayName,
 
 		[Parameter(Mandatory = $true)]
-		[ValidateSet('CitrixAGBasic','CitrixAGBasicNoPassword','HttpBasic','Certificate','CitrixFederation','IntegratedWindows','Forms-Saml','ExplicitForms')]
-		[System.String[]]
-		$AuthenticationProtocol,
-
-		[Parameter(Mandatory = $true)]
 		[System.Boolean]
 		$EnableRemoteAccess,
 
@@ -47,13 +42,11 @@ function Get-TargetResource
 	if ($StoreService) {
 		Write-Verbose -Message $localizedData.CallingGetSTFAuthenticationService
 		$Auth = Get-STFAuthenticationService -VirtualPath ($StoreService.AuthenticationServiceVirtualPath) -SiteID ($StoreService.SiteId)
-		$EnabledProtocols = $auth.authentication.ProtocolChoices | Where-Object { $_.Enabled } | Select-object -ExpandProperty Name
 	}
 
 	$returnValue = @{
 		StoreName = [System.String]$StoreService.name
 		GatewayName = [System.String[]]$StoreService.gateways.Name
-		AuthenticationProtocol = [System.String[]]$EnabledProtocols
 	}
 
 	$returnValue
@@ -73,11 +66,6 @@ function Set-TargetResource
 		[Parameter(Mandatory = $true)]
 		[System.String[]]
 		$GatewayName,
-
-		[Parameter(Mandatory = $true)]
-		[ValidateSet('CitrixAGBasic','CitrixAGBasicNoPassword','HttpBasic','Certificate','CitrixFederation','IntegratedWindows','Forms-Saml','ExplicitForms')]
-		[System.String[]]
-		$AuthenticationProtocol,
 
 		[Parameter(Mandatory = $true)]
 		[System.Boolean]
@@ -101,26 +89,6 @@ function Set-TargetResource
 				Write-Verbose -Message ($localizedData.CallingGetSTFRoamingGateway -f $Name)
 				$GatewayService = Get-STFRoamingGateway -Name $Name
 				Register-STFStoreGateway -Gateway $GatewayService -StoreService $StoreService -DefaultGateway
-			}
-		}
-		foreach ($Protocol in $Auth.Authentication.ProtocolChoices) {
-			if ($AuthenticationProtocol -contains $Protocol.Name) {
-				if ($Protocol.Enabled) {
-					Write-Verbose -Message ($localizedData.ProtocolEnabled -f $Protocol)
-				}
-				else {
-					Write-Verbose -Message ($localizedData.EnablingProtocol -f $Protocol)
-					Enable-STFAuthenticationServiceProtocol -Name $Protocol.Name -AuthenticationService $Auth
-				}
-			}
-			else {
-				if ($Protocol.Enabled) {
-					Write-Verbose -Message ($localizedData.DisablingProtocol -f $Protocol)
-					Disable-STFAuthenticationServiceProtocol -Name $Protocol.Name -AuthenticationService $Auth
-				}
-				else {
-					Write-Verbose -Message ($localizedData.ProtocolDisabled -f $Protocol)
-				}
 			}
 		}
 	}
@@ -148,11 +116,6 @@ function Test-TargetResource
 		[Parameter(Mandatory = $true)]
 		[System.String[]]
 		$GatewayName,
-
-		[Parameter(Mandatory = $true)]
-		[ValidateSet('CitrixAGBasic','CitrixAGBasicNoPassword','HttpBasic','Certificate','CitrixFederation','IntegratedWindows','Forms-Saml','ExplicitForms')]
-		[System.String[]]
-		$AuthenticationProtocol,
 
 		[Parameter(Mandatory = $true)]
 		[System.Boolean]
