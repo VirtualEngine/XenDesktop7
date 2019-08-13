@@ -251,7 +251,7 @@ function Set-TargetResource
 
             foreach ($parameterName in $($setSTFStoreServiceParams.Keys))
             {
-                if ($parmeterName -notin 'LockedDown','AllowSessionReconnect','SubstituteDesktopImage')
+                if ($parameterName -notin 'LockedDown','AllowSessionReconnect','SubstituteDesktopImage')
                 {
                     $setSTFStoreServiceParams.Remove($parameterName)
                 }
