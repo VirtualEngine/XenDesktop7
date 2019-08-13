@@ -246,6 +246,8 @@ function Set-TargetResource
                     $addSTFStoreServiceParams['Anonymous'] = $true
                 }
                 Write-Verbose -Message $localizedData.RunningAddSTFStoreService
+                $addSTFStoreServiceParams.Remove("Ensure")
+                $addSTFStoreServiceParams.Remove("Verbose")
                 $storeService = Add-STFStoreService @addSTFStoreServiceParams
             }
 
@@ -257,6 +259,8 @@ function Set-TargetResource
                 }
             }
             Write-Verbose -Message $localizedData.RunningSetSTFStoreService
+            $setSTFStoreServiceParams.Remove("Ensure")
+            $setSTFStoreServiceParams.Remove("Verbose")
             $storeService | Set-STFStoreService @setSTFStoreServiceParams -Confirm:$false
         }
         else

@@ -64,6 +64,8 @@ function Set-TargetResource
 
 	if ($Ensure -eq 'Present') {
 		Write-Verbose -Message $localizedData.RunningAddSTFAuthenticationService
+		$PSBoundParameters.Remove("Ensure")
+		$PSBoundParameters.Remove("Verbose")
 		Add-STFAuthenticationService @PSBoundParameters
 	}
 	else {
