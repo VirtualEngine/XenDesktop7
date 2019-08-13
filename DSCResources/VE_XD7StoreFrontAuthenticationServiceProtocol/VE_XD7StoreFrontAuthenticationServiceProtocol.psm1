@@ -12,7 +12,7 @@ function Get-TargetResource
 
         ## Explicit authentication methods available
         [Parameter(Mandatory)]
-        [ValidateSet('IntegratedWindows','HttpBasic','ExplicitForms','CitrixFederation','CitrixAGBasic','Certificate')]
+        [ValidateSet('IntegratedWindows','HttpBasic','ExplicitForms','CitrixFederation','CitrixAGBasic','Certificate','CitrixAGBasicNoPassword','Forms-Saml')]
         [System.String[]] $AuthenticationProtocol,
 
         ## Citrix Storefront Authentication Service IIS Site Id
@@ -57,7 +57,7 @@ function Test-TargetResource
 
         ## Explicit authentication methods available
         [Parameter(Mandatory)]
-        [ValidateSet('IntegratedWindows','HttpBasic','ExplicitForms','CitrixFederation','CitrixAGBasic','Certificate')]
+        [ValidateSet('IntegratedWindows','HttpBasic','ExplicitForms','CitrixFederation','CitrixAGBasic','Certificate','CitrixAGBasicNoPassword','Forms-Saml')]
         [System.String[]] $AuthenticationProtocol,
 
         ## Citrix Storefront Authentication Service IIS Site Id
@@ -119,7 +119,7 @@ function Set-TargetResource
 
         ## Explicit authentication methods available
         [Parameter(Mandatory)]
-        [ValidateSet('IntegratedWindows','HttpBasic','ExplicitForms','CitrixFederation','CitrixAGBasic','Certificate')]
+        [ValidateSet('IntegratedWindows','HttpBasic','ExplicitForms','CitrixFederation','CitrixAGBasic','Certificate','CitrixAGBasicNoPassword','Forms-Saml')]
         [System.String[]] $AuthenticationProtocol,
 
         ## Citrix Storefront Authentication Service IIS Site Id
