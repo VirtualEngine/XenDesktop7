@@ -95,7 +95,7 @@ function Test-TargetResource
         [Parameter()]
 		[ValidateSet('Present','Absent')]
 		[System.String]
-		$Ensure
+		$Ensure = 'Present'
 	)
 
 	$targetResource = Get-TargetResource -VirtualPath $VirtualPath
