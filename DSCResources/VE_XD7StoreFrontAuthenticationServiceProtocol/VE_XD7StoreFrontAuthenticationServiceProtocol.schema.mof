@@ -3,7 +3,7 @@
 class VE_XD7StoreFrontAuthenticationServiceProtocol : OMI_BaseResource
 {
     [Key, Description("Citrix Storefront Authentication Service IIS Virtual Path")] String VirtualPath;
-    [Required, Description("Citrix Storefront Authentication protocols"), ValueMap{"IntegratedWindows","HttpBasic","ExplicitForms","CitrixFederation","CitrixAGBasic","Certificate","CitrixAGBasicNoPassword","Forms-Saml"}, Values{"IntegratedWindows","HttpBasic","ExplicitForms","CitrixFederation","CitrixAGBasic","Certificate""CitrixAGBasicNoPassword","Forms-Saml"}] String AuthenticationProtocol[];
+    [Required, Description("Citrix Storefront Authentication protocols"), ValueMap{"IntegratedWindows","HttpBasic","ExplicitForms","CitrixFederation","CitrixAGBasic","Certificate","CitrixAGBasicNoPassword","Forms-Saml"}, Values{"IntegratedWindows","HttpBasic","ExplicitForms","CitrixFederation","CitrixAGBasic","Certificate","CitrixAGBasicNoPassword","Forms-Saml"}] String AuthenticationProtocol[];
     [Write, Description("Citrix Storefront Authentication Service IIS Site Id")] UInt64 SiteId;
     [Write, ValueMap{"Present", "Absent"}, Values{"Present", "Absent"}] String Ensure;
 };
