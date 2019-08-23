@@ -181,7 +181,7 @@ function Set-TargetResource
 				$ChangedParams.Remove("StasUseLoadBalancing")
 				$IISPath = Get-WebApplication | Where-Object {$_.Path -eq "/Citrix/Roaming"} | Select-Object -ExpandProperty PhysicalPath
 				[xml]$xmlcontent = get-content "$IISPath\web.config"
-				$Gateway = $xmlcontent.configuration."citrix.deliveryservices".roamingRecords.gateways.gateway | Where {$_.name -eq $Name}
+				$Gateway = $xmlcontent.configuration."citrix.deliveryservices".roamingRecords.gateways.gateway | Where-Object {$_.name -eq $Name}
 				$Gateway.stasUseLoadBalancing = $StasUseLoadBalancing.ToString()
 				$xmlcontent.Save("$IISPath\web.config")
 			}
@@ -190,7 +190,7 @@ function Set-TargetResource
 				$ChangedParams.Remove("stasBypassDuration")
 				$IISPath = Get-WebApplication | Where-Object {$_.Path -eq "/Citrix/Roaming"} | Select-Object -ExpandProperty PhysicalPath
 				[xml]$xmlcontent = get-content "$IISPath\web.config"
-				$Gateway = $xmlcontent.configuration."citrix.deliveryservices".roamingRecords.gateways.gateway | Where {$_.name -eq $Name}
+				$Gateway = $xmlcontent.configuration."citrix.deliveryservices".roamingRecords.gateways.gateway | Where-Object {$_.name -eq $Name}
 				$Gateway.stasBypassDuration = $StasBypassDuration.ToString()
 				$xmlcontent.Save("$IISPath\web.config")
 			}

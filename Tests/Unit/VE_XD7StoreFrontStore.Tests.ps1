@@ -8,42 +8,23 @@ InModuleScope $sut {
      ## Stub functions
     function Get-STFStoreService { }
 
-    function Get-STFStoreFarm { }
-
     function Get-STFAuthenticationService { }
-
-    function Add-STFAuthenticationService { }
-
-    function Set-STFStoreService { }
-
-    function Set-STFStoreFarm { }
-
-    function New-STFStoreFarm { }
 
     function Add-STFStoreService { }
 
-    function Remove-STFAuthenticationService { }
+    function Set-STFStoreService { }
 
     function Remove-STFStoreService { }
 
-
-    Describe 'XenDesktop7\VE_XD7StoreFrontStore' {
+    Describe 'XenDesktop7\XD7StoreFrontStore' {
 
         # Guard mock
+        Mock AssertModule { }
         Mock Import-Module { }
 
         $testResource = @{
             StoreName = 'Store';
-            FarmName  = 'Farm1'
             AuthType  = 'Explicit';
-            Servers   = 'Server1', 'Server2';
-        }
-
-        $fakeResource = @{
-            StoreName = 'Store';
-            FarmName  = 'Farm1'
-            AuthType  = 'Explicit';
-            Servers   = 'Server1', 'Server2';
         }
 
         Context 'Get-TargetResource' {
@@ -58,7 +39,7 @@ InModuleScope $sut {
         Context 'Test-TargetResource' {
 
             It 'Returns a System.Boolean type' {
-                Mock -CommandName Get-TargetResource -MockWith { return $fakeResource; }
+                Mock -CommandName Get-TargetResource -MockWith { return $testResource; }
 
                 $result = Test-TargetResource @testResource;
 

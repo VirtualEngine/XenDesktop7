@@ -41,7 +41,6 @@ function Get-TargetResource
 	$StoreService = Get-STFStoreService | Where-object {$_.friendlyname -eq $StoreName};
 	if ($StoreService) {
 		Write-Verbose -Message $localizedData.CallingGetSTFAuthenticationService
-		$Auth = Get-STFAuthenticationService -VirtualPath ($StoreService.AuthenticationServiceVirtualPath) -SiteID ($StoreService.SiteId)
 	}
 
 	$returnValue = @{
@@ -81,7 +80,6 @@ function Set-TargetResource
 	Write-Verbose -Message ($localizedData.CallingGetSTFStoreService -f $StoreName)
 	$StoreService = Get-STFStoreService | Where-Object { $_.friendlyname -eq $StoreName }
 	Write-Verbose -Message ($localizedData.CallingGetSTFAuthenticationService)
-	$Auth = Get-STFAuthenticationService -VirtualPath ($StoreService.AuthenticationServiceVirtualPath) -SiteID ($StoreService.SiteId)
 
 	if ($Ensure -eq 'Present') {
 		if ($EnableRemoteAccess -eq $true) {
