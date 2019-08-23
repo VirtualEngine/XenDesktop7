@@ -1,5 +1,5 @@
 @{
-    ModuleVersion        = '2.8.2';
+    ModuleVersion        = '2.8.4';
     GUID                 = '3bacd95f-494b-4ea2-989b-09cb5e324940';
     Author               = 'Iain Brighton';
     CompanyName          = 'Virtual Engine';
@@ -40,7 +40,6 @@
                                 'XD7StoreFrontRoamingGateway',
                                 'XD7StoreFrontSessionStateTimeout',
                                 'XD7StoreFrontStore',
-                                'XD7StoreFrontStoreBase',
                                 'XD7StoreFrontStoreFarm',
                                 'XD7StoreFrontUnifiedExperience',
                                 'XD7StoreFrontWebReceiverCommunication',

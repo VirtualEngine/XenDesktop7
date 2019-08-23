@@ -47,7 +47,6 @@ __NOTE: The majority of the XD7StoreFront* resources use the newer StoreFront 3.
 * [XD7StoreFrontRoamingGateway](#xd7storefrontroaminggateway)
 * [XD7StoreFrontSessionStateTimeout](#xd7storefrontsessionstatetimeout)
 * [XD7StoreFrontStore](#xd7storefrontstore)
-* [XD7StoreFrontStoreBase](#xd7storefrontstorebase)
 * [XD7StoreFrontStoreFarm](#xd7storefrontstorefarm)
 * [XD7StoreFrontUnifiedExperience](#xd7storefrontunifiedexperience)
 * [XD7StoreFrontWebReceiverCommunication](#xd7storefrontwebreceivercommunication)
