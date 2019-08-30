@@ -14,6 +14,8 @@ InModuleScope $sut {
 
     function Disable-STFStorePna { }
 
+	function Get-Content { }
+
     Describe 'XenDesktop7\VE_XD7StoreFrontPNA' {
 
         # Guard mock
