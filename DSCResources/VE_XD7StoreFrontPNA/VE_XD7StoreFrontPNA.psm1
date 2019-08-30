@@ -19,11 +19,8 @@ function Get-TargetResource
 	(
 		[Parameter(Mandatory = $true)]
 		[System.String]
-		$StoreName,
+		$StoreName
 		
-		[Parameter(Mandatory = $true)]
-		[System.String]
-		$LogonMethod
 	)
 
     process {
