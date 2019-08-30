@@ -125,7 +125,7 @@ function Test-TargetResource
 
     process {
 
-        $targetResource = Get-TargetResource -StoreName $StoreName -LogonMethod $LogonMethod
+        $targetResource = Get-TargetResource -StoreName $StoreName
         if ($Ensure -eq 'Present') {
 
             if (($targetResource.Enabled -eq $True) -and ($targetResource.DefaultPnaService -eq $DefaultPnaService) -and ($targetResource.LogonMethod.ToLower() -eq $LogonMethod.ToLower())) {
