@@ -175,6 +175,25 @@ function Set-TargetResource
 		if ($Gateway) {
 			#Set changed parameters
 			Write-Verbose -Message $localizedData.CallingSetSTFRoamingGateway
+			#First need to hack a few properties that aren't available in the Set-STFRoamingGateway
+			If ($ChangedParams.ContainsKey("StasUseLoadBalancing")) {
+				Import-module WebAdministration -ErrorAction Stop -Verbose:$false;
+				$ChangedParams.Remove("StasUseLoadBalancing")
+				$IISPath = Get-WebApplication | Where-Object {$_.Path -eq "/Citrix/Roaming"} | Select-Object -ExpandProperty PhysicalPath
+				[xml]$xmlcontent = get-content "$IISPath\web.config"
+				$Gateway = $xmlcontent.configuration."citrix.deliveryservices".roamingRecords.gateways.gateway | Where-Object {$_.name -eq $Name}
+				$Gateway.stasUseLoadBalancing = $StasUseLoadBalancing.ToString()
+				$xmlcontent.Save("$IISPath\web.config")
+			}
+			If ($ChangedParams.ContainsKey("stasBypassDuration")) {
+				Import-module WebAdministration -ErrorAction Stop -Verbose:$false;
+				$ChangedParams.Remove("stasBypassDuration")
+				$IISPath = Get-WebApplication | Where-Object {$_.Path -eq "/Citrix/Roaming"} | Select-Object -ExpandProperty PhysicalPath
+				[xml]$xmlcontent = get-content "$IISPath\web.config"
+				$Gateway = $xmlcontent.configuration."citrix.deliveryservices".roamingRecords.gateways.gateway | Where-Object {$_.name -eq $Name}
+				$Gateway.stasBypassDuration = $StasBypassDuration.ToString()
+				$xmlcontent.Save("$IISPath\web.config")
+			}
 			Set-STFRoamingGateway @ChangedParams -confirm:$false
 		}
 		else {

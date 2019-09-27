@@ -167,6 +167,8 @@ function Set-TargetResource
 				$Params = $PSBoundParameters
 				$Params.Remove('StoreName')
 				$Params.Add('StoreService',$StoreService)
+                $Params.Remove("Ensure")
+                $Params.Remove("Verbose")
 				Add-STFStoreFarm @Params
 			}
 			else {
@@ -207,6 +209,8 @@ function Set-TargetResource
 				}
 				$ChangedParams.Remove('StoreName')
 				Write-Verbose -Message ($localizedData.RunningSetSTFStoreFarm)
+                $ChangedParams.Remove("Ensure")
+                $ChangedParams.Remove("Verbose")
 				Set-STFStoreFarm @ChangedParams
 			}
 		}

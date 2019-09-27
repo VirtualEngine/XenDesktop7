@@ -10,7 +10,7 @@ Enables or disables StoreFront authentication service protocol(s).
 XD7StoreFrontAuthenticationServiceProtocol [string]
 {
     VirtualPath = [String]
-    AuthenticationProtocol = [String[]]
+    AuthenticationProtocol[] = [String] { CitrixAGBasic | CitrixAGBasicNoPassword | HttpBasic | Certificate | CitrixFederation | IntegratedWindows | Forms-Saml | ExplicitForms }
     [ SiteId = [Uint64] ]
     [ Ensure = [String] { Present | Absent } ]
 }

@@ -9,7 +9,6 @@ XD7StoreFrontRegisterStoreGateway [string]
 {
     StoreName = [String]
     GatewayName = [String[]]
-    AuthenticationProtocol[] = [String] { CitrixAGBasic | CitrixAGBasicNoPassword | HttpBasic | Certificate | CitrixFederation | IntegratedWindows | Forms-Saml | ExplicitForms }
     EnableRemoteAccess = [Boolean]
     [ Ensure = [String] { Present | Absent } ]
 }
@@ -19,7 +18,6 @@ XD7StoreFrontRegisterStoreGateway [string]
 
 * **StoreName**: Citrix StoreFront name.
 * **GatewayName[]**: Gateway name.
-* **AuthenticationProtocol[]**: Authentication Protocol.
 * **EnableRemoteAccess**: Enable Remote Access.
 * **Ensure**: Ensure.
 
@@ -31,7 +29,6 @@ Configuration XD7Example {
     XD7StoreFrontRegisterStoreGateway XD7StoreFrontRegisterStoreGatewayExample {
         GatewayName = 'Netscaler'
         StoreName = 'mock'
-        AuthenticationProtocol = @('ExplicitForms','CitrixFederation','CitrixAGBasicNoPassword')
         EnableRemoteAccess = $True
         Ensure = 'Present'
     }
