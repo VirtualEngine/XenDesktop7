@@ -148,7 +148,6 @@ function Set-TargetResource
         [ValidateSet('Present','Absent')]
         [System.String]
         $Ensure = 'Present'
-
 	)
     process {
 
@@ -166,7 +165,7 @@ function Set-TargetResource
 				#Create new one
 				$Params = $PSBoundParameters
 				$Params.Remove('StoreName')
-				$Params.Add('StoreService',$StoreService)
+				$null = $Params.Add('StoreService', $StoreService)
                 $Params.Remove("Ensure")
                 $Params.Remove("Verbose")
 				Add-STFStoreFarm @Params
@@ -177,7 +176,7 @@ function Set-TargetResource
 					StoreService = $StoreService
 					FarmName = $FarmName
 				}
-				If ($Servers) {
+				if ($Servers) {
 					$ChangedParams.Add('Servers',$Servers)
 				}
 				$targetResource = Get-TargetResource -StoreName $StoreName -FarmName $FarmName
@@ -308,8 +307,7 @@ function Test-TargetResource
         [ValidateSet('Present','Absent')]
         [System.String]
         $Ensure = 'Present'
-
-		)
+	)
     process {
 
 		$targetResource = Get-TargetResource -StoreName $StoreName -FarmName $FarmName
