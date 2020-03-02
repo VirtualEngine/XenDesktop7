@@ -2,7 +2,7 @@
 
 ## Versions ##
 
-### Unreleased
+### 2.9.0 (2020-03-02)
 
 * Features
   * Adds XD7StoreFrontStoreBase resource
