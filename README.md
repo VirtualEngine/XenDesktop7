@@ -1401,14 +1401,6 @@ Creates or sets a StoreFront store and all it's properties.
 ### Syntax
 
 ```
-
-## XD7StoreFrontStore
-
-Creates or sets a StoreFront store and all it's properties.
-
-### Syntax
-
-```
 VE_XD7StoreFrontStore [string]
 {
     StoreName = [String]
