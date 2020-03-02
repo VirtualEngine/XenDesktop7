@@ -213,10 +213,10 @@ function Set-TargetResource
             }
             if (!($PSBoundParameters.ContainsKey('Zones'))) {
                 $Zones = [System.String[]]$Gateway.Zones
-                Write-Verbose -Message ($localizedData.SettingZones -f $Zones)
+                Write-Verbose -Message ($localizedData.SettingZones -f ($Zones -join ','))
             }
             else {
-                Write-Verbose -Message ($localizedData.UpdatingZones -f $Zones)
+                Write-Verbose -Message ($localizedData.UpdatingZones -f ($Zones -join ','))
             }
             if (!($PSBoundParameters.ContainsKey('EnabledOnDirectAccess'))) {
                 $EnabledOnDirectAccess = [System.Boolean]$Gateway.EnabledOnDirectAccess

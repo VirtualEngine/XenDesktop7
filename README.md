@@ -10,6 +10,8 @@ is not supported. This typically only affects the
 [XenDesktop7Lab](https://github.com/virtualengine/XenDesktop7Lab) composite resources as the
 XD7StoreFront* resources don't have a `Credential` parameter.__
 
+__NOTE: The majority of the XD7StoreFront* resources use the newer StoreFront 3.6+ PowerShell module and not the legacy StoreFront 3.0 SDK.__
+
 ## Included Resources
 
 * [XD7AccessPolicy](#xd7accesspolicy)
@@ -32,6 +34,7 @@ XD7StoreFront* resources don't have a `Credential` parameter.__
 * [XD7StoreFrontAccountSelfService](#xd7storefrontaccountselfservice)
 * [XD7StoreFrontAuthenticationMethod](#xd7storefrontauthenticationmethod)
 * [XD7StoreFrontAuthenticationService](#xd7storefrontauthenticationservice)
+* [XD7StoreFrontAuthenticationServiceProtocol](#xd7storefrontauthenticationserviceprotocol)
 * [XD7StoreFrontBaseUrl](#xd7storefrontbaseurl)
 * [XD7StoreFrontExplicitCommonOptions](#xd7storefrontexplicitcommonoptions)
 * [XD7StoreFrontFarmConfiguration](#xd7storefrontfarmconfiguration)
@@ -765,7 +768,7 @@ XD7StoreFront [string]
 
 ### Properties
 
-* **SiteId**: Citrix StoreFront base url.
+* **SiteId**: Citrix Storefront IIS site id.
 * **HostBaseUrl**: Citrix StoreFront host base url.
   * If not specified, this value defaults to http://localhost.
 * **Ensure**: Whether the Storefront deployment should be added or removed.
@@ -877,7 +880,7 @@ XD7StoreFrontAuthenticationService [string]
 
 * **VirtualPath**: The IIS virtual path to use for the service.
 * **FriendlyName**: The friendly name the service should be known as.
-* **SiteId**: The IIS site to configure the Authentication service for.
+* **SiteId**: Citrix Storefront IIS site id to configure the Authentication service for.
 * **Ensure**: Ensure.  If not specified, this value defaults to Present.
 
 ### Configuration
@@ -889,6 +892,46 @@ Configuration XD7Example {
         VirtualPath = '/Citrix/mockweb'
         FriendlyName = 'mockauth'
         SiteId = 1
+    }
+}
+```
+
+## XD7StoreFrontAuthenticationServiceProtocol
+
+Enables or disables StoreFront authentication service protocol(s).
+
+**NOTE: this is a replacement for the `XD7StoreFrontAuthenticationMethod` resource implemented using the new StoreFront 3.x PowerShell cmdlets.**
+
+### Syntax
+
+```
+XD7StoreFrontAuthenticationServiceProtocol [string]
+{
+    VirtualPath = [String]
+    AuthenticationProtocol = [String[]]
+    [ SiteId = [Uint64] ]
+    [ Ensure = [String] { Present | Absent } ]
+}
+```
+
+### Properties
+
+* **VirtualPath**: Citrix Storefront Authentication Service IIS virtual path.
+* **AuthenticationProtocol**: Citrix Storefront Authentication protocols to enable or disable.
+* **SiteId**: Citrix Storefront Authentication Service IIS Site Id.
+  * If not specified, this value defaults to 1.
+* **Ensure**: Specifies whether to enable or disable the authentication protocol(s).
+  * If not specified, this value defaults to 'Present'.
+
+### Configuration
+
+```
+Configuration XD7Example {
+    Import-DSCResource -ModuleName XenDesktop7 {
+    XD7StoreFrontAuthenticationServiceProtocol AuthenticationServiceProtocolExample {
+       VirtualPath = '/Citrix/Authentication'
+       AuthenticationProtocol= 'ExplicitForms','IntegratedWindows','CitrixAGBasic'
+       Ensure = 'Present'
     }
 }
 ```
@@ -1236,7 +1279,7 @@ XD7StoreFrontRoamingBeacon [string]
 
 ### Properties
 
-* **SiteId**: Site Id.
+* **SiteId**: Citrix Storefront IIS Site Id.
 * **InternalUri**: Beacon internal address uri. You can set this one by itself.
 * **ExternalUri**: Beacon external address uri. If you specify Externaluri, you must also include Internaluri.
 
@@ -1358,24 +1401,21 @@ Creates or sets a StoreFront store and all it's properties.
 ### Syntax
 
 ```
-XD7StoreFrontStore [string]
+
+## XD7StoreFrontStore
+
+Creates or sets a StoreFront store and all it's properties.
+
+### Syntax
+
+```
+VE_XD7StoreFrontStore [string]
 {
     StoreName = [String]
     AuthType = [String] { Explicit | Anonymous }
-    Servers = [String[]]
-    FarmName = [String]
-    [ Port = [UInt32] ]
-    [ TransportType = [String] { HTTP | HTTPS | SSL } ]
-    [ LoadBalance = [Boolean] ]
-    [ FarmType = [String] { XenApp | XenDesktop | AppController } ]
     [ AuthVirtualPath = [String] ]
     [ StoreVirtualPath = [String] ]
     [ SiteId = [UInt64] ]
-    [ ServiceUrls = [String[]] ]
-    [ SSLRelayPort = [UInt32] ]
-    [ AllFailedBypassDuration = [UInt32] ]
-    [ BypassDuration = [UInt32] ]
-    [ Zones = [String[]] ]
     [ LockedDown = [Boolean] ]
     [ Ensure = [String] { Present | Absent } ]
 }
@@ -1385,39 +1425,26 @@ XD7StoreFrontStore [string]
 
 * **StoreName**: Citrix StoreFront name.
 * **AuthType**: Citrix StoreFront Authentication type.
-* **FarmName**: Citrix StoreFront farm name.
-* **Port**: Citrix StoreFront port.
-* **TransportType**: Citrix StoreFront transport type.
-* **Servers[]**: Citrix StoreFront delivery controllers.
-* **LoadBalance**: Citrix StoreFront enable load balancing.
-* **FarmType**: Citrix StoreFront farm type.
 * **AuthVirtualPath**: Citrix StoreFront authenication service virtual path.
-  * If not specified, this value defaults to /Citrix/<StoreName>auth.
+  * If not specified, this value defaults to /Citrix/Authentication.
 * **StoreVirtualPath**: Citrix StoreFront store virtual path.
   * If not specified, this value defaults to /Citrix/<StoreName>.
-* **SiteId**: Citrix StoreFront site id.
+* **SiteId**: Citrix StoreFront IIS site id.
   * If not specified, this value defaults to 1.
-* **ServiceUrls[]**: Citrix StoreFront service urls.
-* **SSLRelayPort**: Citrix StoreFront ssl relay port.
-* **AllFailedBypassDuration**: Citrix StoreFront all failed bypass duration.
-* **BypassDuration**: Citrix StoreFront bypass duration.
-* **Zones[]**: Citrix StoreFront zones.
 * **LockedDown**: All the resources delivered by locked-down Store are auto subscribed and do not allow for un-subscription.
-* **Ensure**: Ensure.
+* **Ensure**: Specifies whether the Store should be present or absent.
+  * If not specified, this value defaults to 'Present'.
 
 ### Configuration
 
 ```
 Configuration XD7Example {
     Import-DscResource -ModuleName XenDesktop7
-    XD7StoreFrontStore XD7StoreFrontStoreExample {
-        StoreName = 'mock'
-        FarmName = 'mockfarm'
-        Port = 8010
-        TransportType = 'HTTP'
-        Servers = "testserver01,testserver02"
-        FarmType = 'XenDesktop'
+    VE_XD7StoreFrontStore VE_XD7StoreFrontStoreExample {
+        StoreName = 'Store'
         AuthType = 'Explicit'
+        StoreVirtualPath = '/Citrix/Store'
+        AuthVirtualPath = '/Citrix/Authentication'
         Ensure = 'Present'
     }
 }
@@ -1682,6 +1709,8 @@ XD7StoreFrontWebReceiverService [string]
     VirtualPath = [String]
     SiteId = [UInt64]
     [ ClassicReceiverExperience = [Boolean] ]
+    [ SessionStateTimeout = [UInt32] ]
+    [ DefaultIISSite = [Boolean] ]
     [ FriendlyName = [String] ]
     [ Ensure = [String] { Present | Absent } ]
 }
@@ -1691,10 +1720,13 @@ XD7StoreFrontWebReceiverService [string]
 
 * **StoreName**: StoreFront store name.
 * **VirtualPath**: Site virtual path.
-* **SiteId**: IIS site id.
+* **SiteId**: Citrix Storefront IIS Site Id.
   * If not specified, this value defaults to 1.
 * **ClassicReceiverExperience**: Enable the classic Receiver experience.
+* **SessionStateTimeout**: Set the session state timeout, in minutes.
+* **DefaultIISSite**:Set the Receiver for Web site as the default page in IIS.
 * **FriendlyName**: Friendly name to identify the Receiver for Web service.
+  * **Note: this name cannot be changed after initial configuration**
 * **Ensure**: Whether the Storefront Web Receiver Service should be added or removed.
 
 ### Configuration

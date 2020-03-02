@@ -5,7 +5,7 @@ ConvertFrom-StringData @'
     ProcessLaunched                     = Process Id '{0}' launched.
     WaitingForProcessToExit             = Waiting for process Id '{0}' to exit..
     ProcessExited                       = Process Id '{0}' exited with code '{1}'.
-    XenDesktopSDKNotFoundError          = Citrix XenDesktop 7.x Powershell SDK/Snap-in was not found.
+    XenDesktopSDKNotFoundError          = Citrix XenDesktop 7.x Powershell Module/SDK/Snap-in was not found.
     NoValidSetupMediaError              = No valid '{0}' setup media found in path '{1}'.
     MachineNotFoundError                = Citrix XenDesktop 7.x machine name '{0}' was not found.
     AmbiguousMachineReferenceError      = Citrix XenDesktop 7.x machine reference '{0}' is ambiguous. Specify the machine's FQDN.

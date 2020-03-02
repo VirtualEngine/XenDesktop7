@@ -38,6 +38,7 @@ Task Init {
     Set-Variable version -Value $manifest.Version -Scope Script;
     Write-Host (" Building module '{0}'." -f $manifest.Name) -ForegroundColor Yellow;
     Write-Host (" Building version '{0}'." -f $version) -ForegroundColor Yellow;
+
 } #end task Init
 
 # Synopsis: Cleans the release directory
@@ -66,7 +67,7 @@ Task Test -Depends Init {
     if ($testResult.FailedCount -gt 0) {
         Write-Error ('Failed "{0}" unit tests.' -f $testResult.FailedCount);
     }
-}
+} #end task Test
 
 # Synopsis: Copies release files to the release directory
 Task Deploy -Depends Clean {
@@ -75,12 +76,14 @@ Task Deploy -Depends Clean {
         Write-Host (' Copying {0}' -f $PSItem.FullName) -ForegroundColor Yellow;
         Copy-Item -Path $PSItem -Destination $releasePath -Recurse;
     }
-} #end
+
+} #end task Deploy
 
 # Synopsis: Signs files in release directory
 Task Sign -Depends Deploy {
 
     if (-not (Get-ChildItem -Path 'Cert:\CurrentUser\My' | Where-Object Thumbprint -eq $thumbprint)) {
+
         ## Decrypt and import code signing cert
         .\appveyor-tools\secure-file.exe -decrypt .\VE_Certificate_2021.pfx.enc -secret $env:certificate_secret
         $certificatePassword = ConvertTo-SecureString -String $env:certificate_secret -AsPlainText -Force
@@ -102,7 +105,8 @@ Task Sign -Depends Deploy {
             Write-Host (' {0}.' -f $signResult.Status) -ForegroundColor Green;
         }
     }
-}
+
+} #end task Sign
 
 Task Version -Depends Deploy {
 
@@ -110,12 +114,14 @@ Task Version -Depends Deploy {
     $nuspec = [System.Xml.XmlDocument] (Get-Content -Path $nuSpecPath -Raw)
     $nuspec.Package.MetaData.Version = $version.ToString()
     $nuspec.Save($nuSpecPath)
-}
+
+} #end task Version
 
 # Synopsis: Publishes release module to PSGallery
 Task Publish_PSGallery -Depends Version {
 
     Publish-Module -Path $releasePath -NuGetApiKey "$env:gallery_api_key" -Verbose;
+
 } #end task Publish
 
 # Synopsis: Creates release module Nuget package
@@ -123,7 +129,8 @@ Task Package -Depends Build {
 
     $targetNuSpecPath = Join-Path -Path $releasePath -ChildPath "$ModuleName.nuspec"
     NuGet.exe pack "$targetNuSpecPath" -OutputDirectory "$env:TEMP"
-}
+
+} #end task Package
 
 # Synopsis: Publish release module to Dropbox repository
 Task Publish_Dropbox -Depends Package {
@@ -131,7 +138,8 @@ Task Publish_Dropbox -Depends Package {
     $targetNuPkgPath = Join-Path -Path "$env:TEMP" -ChildPath "$ModuleName.$version.nupkg"
     $destinationPath = "$env:USERPROFILE\Dropbox\PSRepository"
     Copy-Item -Path "$targetNuPkgPath"-Destination $destinationPath -Force
-}
+
+} #end task Publish_Dropbox
 
 # Synopsis: Publish test results to AppVeyor
 Task AppVeyor {
@@ -142,9 +150,12 @@ Task AppVeyor {
         Write-Verbose "UPLOADING TEST FILE: $address $source" -Verbose
         (New-Object 'System.Net.WebClient').UploadFile( $address, $source )
     }
-}
+
+} #end task AppVeyor
 
 Task Default -Depends Init, Clean, Test
-Task Build -Depends Default, Deploy, Version, Sign;
+Task Build -Depends Default, Deploy, Version, Sign
 Task Publish -Depends Build, Package, Publish_PSGallery
 Task Local -Depends Build, Package, Publish_Dropbox
+Task UnsignedBuild -Depends Default, Deploy, Version
+Task UnsignedLocal -Depends UnsignedBuild, Package, Publish_Dropbox

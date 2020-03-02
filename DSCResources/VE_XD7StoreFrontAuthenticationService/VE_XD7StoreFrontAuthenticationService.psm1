@@ -64,6 +64,8 @@ function Set-TargetResource
 
 	if ($Ensure -eq 'Present') {
 		Write-Verbose -Message $localizedData.RunningAddSTFAuthenticationService
+		$PSBoundParameters.Remove("Ensure")
+		$PSBoundParameters.Remove("Verbose")
 		Add-STFAuthenticationService @PSBoundParameters
 	}
 	else {
@@ -95,7 +97,7 @@ function Test-TargetResource
         [Parameter()]
 		[ValidateSet('Present','Absent')]
 		[System.String]
-		$Ensure
+		$Ensure = 'Present'
 	)
 
 	$targetResource = Get-TargetResource -VirtualPath $VirtualPath

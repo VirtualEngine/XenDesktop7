@@ -6,25 +6,23 @@ Import-Module (Join-Path $moduleRoot -ChildPath "\DSCResources\$sut\$sut.psm1") 
 InModuleScope $sut {
 
      ## Stub functions
-    function Get-STFStoreService { }
-
     function Get-STFAuthenticationService { }
 
-    function Add-STFStoreService { }
+    function Get-STFAuthenticationServiceProtocol { }
 
-    function Set-STFStoreService { }
+    function Enable-STFAuthenticationServiceProtocol { }
 
-    function Remove-STFStoreService { }
+    function Disable-STFAuthenticationServiceProtocol { }
 
-    Describe 'XenDesktop7\XD7StoreFrontStore' {
+    Describe 'XenDesktop7\XD7StoreFrontAuthenticationServiceProtocol' {
 
         # Guard mock
         Mock AssertModule { }
         Mock Import-Module { }
 
         $testResource = @{
-            StoreName = 'Store';
-            AuthType  = 'Explicit';
+            VirtualPath = '/Citrix/Authentication';
+            AuthenticationProtocol  = 'IntegratedWindows','ExplicitForms';
         }
 
         Context 'Get-TargetResource' {

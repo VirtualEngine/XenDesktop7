@@ -10,6 +10,7 @@
     FunctionsToExport = @(
                             'Add-PSSnapin',
                             'AddInvokeScriptBlockCredentials',
+                            'AssertModule',
                             'AssertXDModule',
                             'FindXDModule',
                             'GetHostname',

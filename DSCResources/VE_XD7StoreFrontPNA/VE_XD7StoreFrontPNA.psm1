@@ -25,15 +25,18 @@ function Get-TargetResource
     process {
 
 		Import-Module Citrix.StoreFront -ErrorAction Stop -Verbose:$false;
-		Write-Verbose "DEBUG: Starting Get-TargetResource"
 		Write-Verbose -Message ($localizedData.CallingGetSTFStoreService -f $StoreName)
 		$StoreService = Get-STFStoreService -Verbose | Where-Object { $_.friendlyname -eq $StoreName };
 		Write-Verbose -Message $localizedData.CallingGetSTFStorePna
 		$StorePNA = Get-STFStorePna -StoreService $StoreService
 
+		$StoreConfigFile = $StoreService.ConfigurationFile
+		[xml]$StoreConfig = Get-Content $StoreConfigFile -ErrorAction SilentlyContinue
+
         $targetResource = @{
 			StoreName = [System.String]$StoreName
 			DefaultPnaService = [System.Boolean]$StorePNA.DefaultPnaService
+			LogonMethod = [System.String]$StoreConfig.configuration.'citrix.deliveryservices'.pnaProtocolResources.logonMethod
 			Enabled = [System.Boolean]$StorePNA.PnaEnabled
 		};
 
@@ -58,6 +61,11 @@ function Set-TargetResource
 		[System.Boolean]
 		$DefaultPnaService,
 
+		[Parameter()]
+		[ValidateSet('Anonymous','Prompt','SSON','Smartcard_SSON','Smartcard_Prompt')]
+		[System.String]
+		$LogonMethod = "Prompt",
+
         [Parameter()]
 		[ValidateSet('Absent','Present')]
 		[System.String]
@@ -72,11 +80,11 @@ function Set-TargetResource
 		if ($Ensure -eq 'Present') {
 			If ($DefaultPnaService -eq $True) {
 				Write-Verbose -Message $localizedData.CallingEnableSTFStorePna
-				Enable-STFStorePna -StoreService $StoreService -DefaultPnaService
+				Enable-STFStorePna -StoreService $StoreService -LogonMethod $LogonMethod -DefaultPnaService
 			}
 			else {
 				Write-Verbose -Message $localizedData.CallingEnableSTFStorePna
-				Enable-STFStorePna -StoreService $StoreService
+				Enable-STFStorePna -StoreService $StoreService -LogonMethod $LogonMethod
 			}
 		}
 		else {
@@ -103,6 +111,11 @@ function Test-TargetResource
 		[System.Boolean]
 		$DefaultPnaService,
 
+		[Parameter()]
+		[ValidateSet('Anonymous','Prompt','SSON','Smartcard_SSON','Smartcard_Prompt')]
+		[System.String]
+		$LogonMethod = "Prompt",
+
         [Parameter()]
 		[ValidateSet('Absent','Present')]
 		[System.String]
@@ -111,11 +124,10 @@ function Test-TargetResource
 
     process {
 
-		Write-Verbose "DEBUG: Starting Test-TargetResource"
         $targetResource = Get-TargetResource -StoreName $StoreName
         if ($Ensure -eq 'Present') {
 
-            if (($targetResource.Enabled -eq $True) -and ($targetResource.DefaultPnaService -eq $DefaultPnaService)) {
+            if (($targetResource.Enabled -eq $True) -and ($targetResource.DefaultPnaService -eq $DefaultPnaService) -and ($targetResource.LogonMethod.ToLower() -eq $LogonMethod.ToLower())) {
                 Write-Verbose -Message ($localizedData.ResourceInDesiredState -f $SiteId)
                 return $true
             }
@@ -126,7 +138,7 @@ function Test-TargetResource
         }
         else {
 
-            if (($targetResource.Enabled -ne $False) -or ($targetResource.DefaultPnaService -ne $DefaultPnaService)) {
+            if (($targetResource.Enabled -ne $False) -or ($targetResource.DefaultPnaService -ne $DefaultPnaService) -or ($targetResource.LogonMethod.ToLower() -ne $LogonMethod.ToLower())) {
                 Write-Verbose -Message ($localizedData.ResourceNotInDesiredState -f $SiteId)
                 return $false
             }
