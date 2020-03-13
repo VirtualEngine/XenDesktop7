@@ -2,6 +2,12 @@
 
 ## Versions ##
 
+### Unreleased
+
+* Improvements
+  * Adds 'IgnoreHardwareCheckFailure' property to XD7Feature and XD7Features resources (CVAD 1906+)
+  * Adds 'FAS' role to XD7Feature and XD7Features resources
+
 ### 2.9.0 (2020-03-02)
 
 * Features
