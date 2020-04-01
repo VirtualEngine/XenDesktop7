@@ -1,11 +1,13 @@
 Import-LocalizedData -BindingVariable localizedData -FileName VE_XD7SiteConfig.Resources.psd1;
 
 
-function Get-TargetResource {
+function Get-TargetResource
+{
     [CmdletBinding()]
     [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingEmptyCatchBlock', '')]
     [OutputType([System.Collections.Hashtable])]
-    param (
+    param
+    (
         ## Single instance key
         [Parameter(Mandatory)]
         [ValidateSet('Yes')]
@@ -42,59 +44,61 @@ function Get-TargetResource {
         [System.Management.Automation.CredentialAttribute()]
         $Credential
     )
-    begin {
-
+    begin
+    {
         AssertXDModule -Name 'Citrix.Broker.Admin.V2' -IsSnapIn;
-
-    } #end begin
-    process {
-
+    }
+    process
+    {
         $scriptBlock = {
 
             Add-PSSnapin -Name 'Citrix.Broker.Admin.V2' -ErrorAction Stop;
 
-            try {
-                $brokerSite = Get-BrokerSite;
+            try
+            {
+                $brokerSite = Get-BrokerSite
             }
             catch { }
 
             $targetResource = @{
-                TrustRequestsSentToTheXmlServicePort = $brokerSite.TrustRequestsSentToTheXmlServicePort;
-                SecureIcaRequired = $brokerSite.SecureIcaRequired;
-                DnsResolutionEnabled = $brokerSite.DnsResolutionEnabled;
+                TrustRequestsSentToTheXmlServicePort = $brokerSite.TrustRequestsSentToTheXmlServicePort
+                SecureIcaRequired = $brokerSite.SecureIcaRequired
+                DnsResolutionEnabled = $brokerSite.DnsResolutionEnabled
                 BaseOU = if ($brokerSite.BaseOU) { $brokerSite.BaseOU.ToString() };
-                ConnectionLeasingEnabled = $brokerSite.ConnectionLeasingEnabled;
-                SiteName = $brokerSite.Name;
-            };
+                ConnectionLeasingEnabled = $brokerSite.ConnectionLeasingEnabled
+                SiteName = $brokerSite.Name
+            }
 
-            return $targetResource;
+            return $targetResource
 
         } #end scriptBlock
 
         $invokeCommandParams = @{
-            ScriptBlock = $scriptBlock;
-            ErrorAction = 'Stop';
+            ScriptBlock = $scriptBlock
+            ErrorAction = 'Stop'
         }
 
-        Write-Verbose $localizedData.InvokingScriptBlock;
-        if ($Credential) {
-            AddInvokeScriptBlockCredentials -Hashtable $invokeCommandParams -Credential $Credential;
-            $targetResource = Invoke-Command @invokeCommandParams -Verbose:$Verbose;
+        Write-Verbose $localizedData.InvokingScriptBlock
+        if ($Credential)
+        {
+            AddInvokeScriptBlockCredentials -Hashtable $invokeCommandParams -Credential $Credential
+            $targetResource = Invoke-Command @invokeCommandParams -Verbose:$Verbose
         }
-        else {
-            $invokeScriptBlock = [System.Management.Automation.ScriptBlock]::Create($scriptBlock.ToString().Replace('$using:','$'));
-            $targetResource = InvokeScriptBlock -ScriptBlock $invokeScriptBlock;
+        else
+        {
+            $invokeScriptBlock = [System.Management.Automation.ScriptBlock]::Create($scriptBlock.ToString().Replace('$using:','$'))
+            $targetResource = InvokeScriptBlock -ScriptBlock $invokeScriptBlock
         }
-        return $targetResource;
+        return $targetResource
+    }
+}
 
-    } #end process
-} #end function Get-TargetResource
-
-
-function Test-TargetResource {
+function Test-TargetResource
+{
     [CmdletBinding()]
     [OutputType([System.Boolean])]
-    param (
+    param
+    (
         ## Single instance key
         [Parameter(Mandatory)]
         [ValidateSet('Yes')]
@@ -131,9 +135,9 @@ function Test-TargetResource {
         [System.Management.Automation.CredentialAttribute()]
         $Credential
     )
-    process {
-
-        $targetResource = Get-TargetResource @PSBoundParameters;
+    process
+    {
+        $targetResource = Get-TargetResource @PSBoundParameters
 
         $parameters = @(
             'TrustRequestsSentToTheXmlServicePort',
@@ -145,38 +149,42 @@ function Test-TargetResource {
 
         $inCompliance = $true;
 
-        foreach ($parameter in $parameters) {
+        foreach ($parameter in $parameters)
+        {
+            if ($PSBoundParameters.ContainsKey($parameter))
+            {
+                $expectedValue = $PSBoundParameters[$parameter]
+                $actualValue = $targetResource[$parameter]
 
-            if ($PSBoundParameters.ContainsKey($parameter)) {
-
-                $expectedValue = $PSBoundParameters[$parameter];
-                $actualValue = $targetResource[$parameter];
-
-                if ($expectedValue -ne $actualValue) {
-                    Write-Verbose ($localizedData.ResourcePropertyMismatch -f $parameter, $expectedValue, $actualValue);
-                    $inCompliance = $false;
+                if ($expectedValue -ne $actualValue)
+                {
+                    Write-Verbose ($localizedData.ResourcePropertyMismatch -f $parameter, $expectedValue, $actualValue)
+                    $inCompliance = $false
 
                 }
             }
         }
 
-        if ($inCompliance) {
-            Write-Verbose ($localizedData.ResourceInDesiredState -f 'SiteConfig');
+        if ($inCompliance)
+        {
+            Write-Verbose ($localizedData.ResourceInDesiredState -f 'SiteConfig')
         }
-        else {
-            Write-Verbose ($localizedData.ResourceNotInDesiredState -f 'SiteConfig');
+        else
+        {
+            Write-Verbose ($localizedData.ResourceNotInDesiredState -f 'SiteConfig')
         }
 
-        return $inCompliance;
+        return $inCompliance
+    }
+}
 
-    } #end process
-} #end function Test-TargetResource
 
-
-function Set-TargetResource {
+function Set-TargetResource
+{
     [CmdletBinding()]
     [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseShouldProcessForStateChangingFunctions', '')]
-    param (
+    param
+    (
         ## Single instance key
         [Parameter(Mandatory)]
         [ValidateSet('Yes')]
@@ -213,50 +221,12 @@ function Set-TargetResource {
         [System.Management.Automation.CredentialAttribute()]
         $Credential
     )
-    begin {
-
+    begin
+    {
         AssertXDModule -Name 'Citrix.Broker.Admin.V2' -IsSnapIn;
-
-    } #end begin
-    process {
-
-        $scriptBlock = {
-
-            Add-PSSnapin -Name 'Citrix.Broker.Admin.V2' -ErrorAction Stop;
-
-            $setBrokerSiteParams = @{ };
-
-            if (($using:PSBoundParameters).ContainsKey('TrustRequestsSentToTheXmlServicePort')) {
-                $setBrokerSiteParams['TrustRequestsSentToTheXmlServicePort'] = $using:TrustRequestsSentToTheXmlServicePort;
-            }
-
-            if (($using:PSBoundParameters).ContainsKey('SecureIcaRequired')) {
-                $setBrokerSiteParams['SecureIcaRequired'] = $using:SecureIcaRequired;
-            }
-
-            if (($using:PSBoundParameters).ContainsKey('DnsResolutionEnabled')) {
-                $setBrokerSiteParams['DnsResolutionEnabled'] = $using:DnsResolutionEnabled;
-            }
-
-            if (($using:PSBoundParameters).ContainsKey('BaseOU')) {
-                $setBrokerSiteParams['BaseOU'] = $using:BaseOU;
-            }
-
-            if (($using:PSBoundParameters).ContainsKey('ConnectionLeasingEnabled')) {
-                $setBrokerSiteParams['ConnectionLeasingEnabled'] = $using:ConnectionLeasingEnabled;
-            }
-
-            if ($setBrokerSiteParams.Keys.Count -gt 0) {
-                $null = Set-BrokerSite @setBrokerSiteParams;
-            }
-
-        } #end scriptBlock
-
-        $invokeCommandParams = @{
-            ScriptBlock = $scriptBlock;
-            ErrorAction = 'Stop';
-        }
-
+    }
+    process
+    {
         $parameters = @(
             'TrustRequestsSentToTheXmlServicePort',
             'SecureIcaRequired',
@@ -264,29 +234,105 @@ function Set-TargetResource {
             'BaseOU',
             'ConnectionLeasingEnabled'
         )
-        foreach ($parameter in $parameters) {
-            if ($PSBoundParameters.ContainsKey($parameter)) {
+
+        foreach ($parameter in $parameters)
+        {
+            if ($PSBoundParameters.ContainsKey($parameter))
+            {
                 $scriptBlockParam = "{0}' = '{1}" -f $parameter, $PSBoundParameters[$parameter];
                 Write-Verbose ($localizedData.InvokingScriptBlockWithParam -f $scriptBlockParam);
             }
         }
 
-        if ($Credential) {
-            AddInvokeScriptBlockCredentials -Hashtable $invokeCommandParams -Credential $Credential;
-            [ref] $null = Invoke-Command  @invokeCommandParams;
+        if ($Credential)
+        {
+            $scriptBlock = {
+
+                Add-PSSnapin -Name 'Citrix.Broker.Admin.V2' -ErrorAction Stop
+                $setBrokerSiteParams = @{ }
+
+                if (($using:PSBoundParameters).ContainsKey('TrustRequestsSentToTheXmlServicePort'))
+                {
+                    $setBrokerSiteParams['TrustRequestsSentToTheXmlServicePort'] = $using:TrustRequestsSentToTheXmlServicePort
+                }
+
+                if (($using:PSBoundParameters).ContainsKey('SecureIcaRequired'))
+                {
+                    $setBrokerSiteParams['SecureIcaRequired'] = $using:SecureIcaRequired
+                }
+
+                if (($using:PSBoundParameters).ContainsKey('DnsResolutionEnabled'))
+                {
+                    $setBrokerSiteParams['DnsResolutionEnabled'] = $using:DnsResolutionEnabled
+                }
+
+                if (($using:PSBoundParameters).ContainsKey('BaseOU'))
+                {
+                    $setBrokerSiteParams['BaseOU'] = $using:BaseOU
+                }
+
+                if (($using:PSBoundParameters).ContainsKey('ConnectionLeasingEnabled'))
+                {
+                    $setBrokerSiteParams['ConnectionLeasingEnabled'] = $using:ConnectionLeasingEnabled
+                }
+
+                if ($setBrokerSiteParams.Keys.Count -gt 0)
+                {
+                    $null = Set-BrokerSite @setBrokerSiteParams
+                }
+
+            } #end scriptBlock
+
+            $invokeCommandParams = @{
+                ScriptBlock = $scriptBlock
+                ErrorAction = 'Stop'
+            }
+
+            AddInvokeScriptBlockCredentials -Hashtable $invokeCommandParams -Credential $Credential
+            [ref] $null = Invoke-Command  @invokeCommandParams
         }
-        else {
-            $invokeScriptBlock = [System.Management.Automation.ScriptBlock]::Create($scriptBlock.ToString().Replace('$using:','$'));
-            [ref] $null = InvokeScriptBlock -ScriptBlock $invokeScriptBlock;
+        else
+        {
+            ## Support PSDSCRunAsCredential
+
+            Add-PSSnapin -Name 'Citrix.Broker.Admin.V2' -ErrorAction Stop
+            $setBrokerSiteParams = @{ }
+
+            if ($PSBoundParameters.ContainsKey('TrustRequestsSentToTheXmlServicePort'))
+            {
+                $setBrokerSiteParams['TrustRequestsSentToTheXmlServicePort'] = $TrustRequestsSentToTheXmlServicePort
+            }
+
+            if ($PSBoundParameters.ContainsKey('SecureIcaRequired'))
+            {
+                $setBrokerSiteParams['SecureIcaRequired'] = $SecureIcaRequired
+            }
+
+            if ($PSBoundParameters.ContainsKey('DnsResolutionEnabled'))
+            {
+                $setBrokerSiteParams['DnsResolutionEnabled'] = $DnsResolutionEnabled
+            }
+
+            if ($PSBoundParameters.ContainsKey('BaseOU'))
+            {
+                $setBrokerSiteParams['BaseOU'] = $BaseOU
+            }
+
+            if ($PSBoundParameters.ContainsKey('ConnectionLeasingEnabled'))
+            {
+                $setBrokerSiteParams['ConnectionLeasingEnabled'] = $ConnectionLeasingEnabled
+            }
+
+            if ($setBrokerSiteParams.Keys.Count -gt 0)
+            {
+                $null = Set-BrokerSite @setBrokerSiteParams
+            }
         }
-
-    } #end process
-} #end function Test-TargetResource
-
-
-$moduleRoot = Split-Path -Path $MyInvocation.MyCommand.Path -Parent;
+    }
+}
 
 ## Import the XD7Common library functions
+$moduleRoot = Split-Path -Path $MyInvocation.MyCommand.Path -Parent;
 $moduleParent = Split-Path -Path $moduleRoot -Parent;
 Import-Module (Join-Path -Path $moduleParent -ChildPath 'VE_XD7Common');
 
