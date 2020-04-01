@@ -2,6 +2,16 @@
 
 ## Versions ##
 
+### 2.10.0 (2020-04-01)
+
+* Improvements
+  * Adds 'IgnoreHardwareCheckFailure' property to XD7Feature and XD7Features resources (CVAD 1906+)
+  * Adds 'FAS' role to XD7Feature and XD7Features resources
+  * Adds 'MinimumFunctionalLevel' property to XD7Catalog
+
+* Bug Fixes
+  * Adds PsDscRunAsCredential support to XD7SiteConfig
+
 ### 2.9.0 (2020-03-02)
 
 * Features

@@ -168,6 +168,7 @@ XD7Catalog [string]
     [ IsMultiSession = [bool] ]
     [ PvsAddress = [string] ]
     [ PvsDomain = [string] ]
+    [ MinimumFunctionalLevel = [string] ]
     [ Ensure = [string] { Present | Absent } ]
     [ Credential = [PSCredential] ]
 }
@@ -183,6 +184,7 @@ XD7Catalog [string]
 * **IsMultiSession**: Flags the machine catalog supports multiple concurrent sessions on each machine.
 * **PvsAddress**: Address of the PVS server. This option is only required if the provisioning type is set to PVS.
 * **PvsDomain**: Domain of the PVS server. This option is only required if the provisioning type is set to PVS.
+* **MinimumFunctionalLevel**: The minimum functional VDA level required for machines to work successfully in the catalog.
 * **Ensure**: Whether the catalog is to be available or not. Supported values are Present or Absent. If not specified, it defaults to Present.
 * **Credential**: Specifies optional credential of a user which has permissions to create the catalog. __This property is required for Powershell 4.0.__
 
