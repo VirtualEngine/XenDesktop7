@@ -9,6 +9,7 @@ Import-Module (Join-Path $moduleRoot -ChildPath "\DSCResources\$sut\$sut.psm1") 
 InModuleScope $sut {
 
     function Get-BrokerSite { }
+    function Set-BrokerSite { }
 
     Describe 'XenDesktop7\VE_XD7SiteConfig' {
 
@@ -106,13 +107,6 @@ InModuleScope $sut {
             Mock AssertXDModule { };
             Mock Add-PSSnapin;
             Mock -CommandName InvokeScriptBlock -MockWith { & $ScriptBlock; };
-
-            It 'Invokes script block without credentials by default' {
-
-                Set-TargetResource @testSiteConfig;
-
-                Assert-MockCalled InvokeScriptBlock -Exactly 1 -Scope It;
-            }
 
             It 'Invokes script block with credentials and CredSSP when specified' {
                 Mock -CommandName Invoke-Command -ParameterFilter { $Credential -eq $testCredential -and $Authentication -eq 'CredSSP' } { }
