@@ -2,6 +2,11 @@
 
 ## Versions ##
 
+### 2.10.1 (2020-05-12)
+
+* Bug Fixes
+  * Detects Citrix PowerShell modules relocated in CVAD 1912+ (#48)
+
 ### 2.10.0 (2020-04-01)
 
 * Improvements
