@@ -11,7 +11,7 @@ class VE_XD7StoreFrontOptimalGateway : OMI_BaseResource
 	[Write, Description("Time before retrying a failed STA server")] String StasBypassDuration;
 	[Write, Description("Enable session reliability")] Boolean EnableSessionReliability;
 	[Write, Description("Request STA tickets from two STA servers")] Boolean UseTwoTickets;
-	[Read, Description("Farms")] String Farms[];
+	[Write, Description("Farms")] String Farms[];
 	[Write, Description("Zones")] String Zones[];
 	[Write, Description("Enabled On Direct Access")] Boolean EnabledOnDirectAccess;
 	[Write, Description("Ensure"), ValueMap{"Present","Absent"}, Values{"Present","Absent"}] String Ensure;
