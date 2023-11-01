@@ -31,18 +31,24 @@ function Get-TargetResource {
     }
     process {
 
-        function global:Write-Host {
+        function global:Write-Host
+        {
             [CmdletBinding()]
-            param (
+            param
+            (
                 [Parameter(Position = 0, ValueFromPipeline, ValueFromRemainingArguments)]
                 [System.Object] $Object,
                 [System.Management.Automation.SwitchParameter] $NoNewLine,
                 [System.ConsoleColor] $ForegroundColor,
                 [System.ConsoleColor] $BackgroundColor
             )
-            foreach ($message in $Object) {
-                try { Write-Verbose -Message $message }
-                catch { }
+            process
+            {
+                foreach ($message in $Object)
+                {
+                    try { Write-Verbose -Message $message }
+                    catch { }
+                }
             }
         }
 
@@ -155,18 +161,24 @@ function Set-TargetResource {
     }
     process {
 
-        function global:Write-Host {
+        function global:Write-Host
+        {
             [CmdletBinding()]
-            param (
+            param
+            (
                 [Parameter(Position = 0, ValueFromPipeline, ValueFromRemainingArguments)]
                 [System.Object] $Object,
                 [System.Management.Automation.SwitchParameter] $NoNewLine,
                 [System.ConsoleColor] $ForegroundColor,
                 [System.ConsoleColor] $BackgroundColor
             )
-            foreach ($message in $Object) {
-                try { Write-Verbose -Message $message }
-                catch { }
+            process
+            {
+                foreach ($message in $Object)
+                {
+                    try { Write-Verbose -Message $message }
+                    catch { }
+                }
             }
         }
 

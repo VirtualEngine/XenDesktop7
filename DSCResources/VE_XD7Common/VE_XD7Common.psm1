@@ -166,15 +166,19 @@ function FindXDModule
     )
     process
     {
-        $module = Get-ChildItem -Path $Path -Include "$Name.psd1" -File -Recurse
-        if (-not $module)
+        if (Test-Path -Path $Path)
         {
-            # If we have no .psd1 file, search for a .psm1 (for StoreFront)
-            $module = Get-ChildItem -Path $Path -Include "$Name.psm1" -File -Recurse
+            $module = Get-ChildItem -Path $Path -Include "$Name.psd1" -File -Recurse
+            if (-not $module)
+            {
+                # If we have no .psd1 file, search for a .psm1 (for StoreFront)
+                $module = Get-ChildItem -Path $Path -Include "$Name.psm1" -File -Recurse
+            }
         }
 
         if (-not $module -and (Test-Path -Path 'C:\Program Files\Citrix\PowerShellModules' -PathType Container))
         {
+            ## Try searching new (1912+) later module location (#48)
             $module = Get-ChildItem -Path 'C:\Program Files\Citrix\PowerShellModules' -Include "$Name.psd1" -File -Recurse
         }
 
@@ -183,14 +187,16 @@ function FindXDModule
 }
 
 
-function TestXDModule {
+function TestXDModule
+{
 <#
     .SYNOPSIS
         Tests whether Powershell modules or Snapin are available/registered.
 #>
     [CmdletBinding()]
     [OutputType([System.Boolean])]
-    param (
+    param
+    (
         [Parameter()]
         [ValidateNotNullOrEmpty()]
         [System.String] $Name = 'Citrix.XenDesktop.Admin',
@@ -202,33 +208,36 @@ function TestXDModule {
         [Parameter()]
         [System.Management.Automation.SwitchParameter] $IsSnapin
     )
-    process {
-
-        if ($IsSnapin) {
-
-            if (Get-PSSnapin -Name $Name -Registered -ErrorAction SilentlyContinue) {
-                return $true;
+    process
+    {
+        if ($IsSnapin)
+        {
+            if (Get-PSSnapin -Name $Name -Registered -ErrorAction SilentlyContinue)
+            {
+                return $true
             }
         }
 
         ## If testing a snap-in and it fails, try resolving it as a module (#18)
-        if (FindXDModule -Name $Name -Path $Path) {
-            return $true;
+        if (FindXDModule -Name $Name -Path $Path)
+        {
+            return $true
         }
 
-        return $false;
+        return $false
+    }
+}
 
-    } #end process
-} #end TestModule
 
-
-function AssertXDModule {
+function AssertXDModule
+{
 <#
     .SYNOPSIS
         Asserts whether all the specified modules are present, throwing if not.
 #>
     [CmdletBinding()]
-    param (
+    param
+    (
         [Parameter()]
         [ValidateNotNullOrEmpty()]
         [System.String[]] $Name,
@@ -240,65 +249,66 @@ function AssertXDModule {
         [Parameter()]
         [System.Management.Automation.SwitchParameter] $IsSnapin
     )
-    process {
-
-        foreach ($moduleName in $Name) {
-
-            if (-not (TestXDModule -Name $moduleName -Path $Path -IsSnapin:$IsSnapin)) {
-
-                ThrowInvalidProgramException -ErrorId $moduleName -ErrorMessage $localized.XenDesktopSDKNotFoundError;
+    process
+    {
+        foreach ($moduleName in $Name)
+        {
+            if (-not (TestXDModule -Name $moduleName -Path $Path -IsSnapin:$IsSnapin))
+            {
+                ThrowInvalidProgramException -ErrorId $moduleName -ErrorMessage $localized.XenDesktopSDKNotFoundError
             }
-        } #end foreach module
+        }
+    }
+}
 
-    } #end process
-} #end function AssertXDModule
+function AssertModule
+{
+<#
+    .SYNOPSIS
+        Asserts whether all the specified modules are present, throwing if not.
+#>
+    [CmdletBinding()]
+    param
+    (
+        [Parameter()]
+        [ValidateNotNullOrEmpty()]
+        [System.String[]] $Name
+    )
+    process
+    {
+        foreach ($moduleName in $Name)
+        {
+            if (-not (Get-Module -Name $moduleName -ListAvailable -ErrorAction SilentlyContinue))
+            {
+                ThrowInvalidProgramException -ErrorId $moduleName -ErrorMessage $localized.XenDesktopModuleNotFoundError
+            }
+        }
+    }
+}
 
-function AssertModule {
-    <#
-        .SYNOPSIS
-            Asserts whether all the specified modules are present, throwing if not.
-    #>
-        [CmdletBinding()]
-        param (
-            [Parameter()]
-            [ValidateNotNullOrEmpty()]
-            [System.String[]] $Name
-        )
-        process {
-
-            foreach ($moduleName in $Name) {
-
-                if (-not (Get-Module -Name $moduleName -ListAvailable -ErrorAction SilentlyContinue)) {
-
-                    ThrowInvalidProgramException -ErrorId $moduleName -ErrorMessage $localized.XenDesktopModuleNotFoundError;
-                }
-            } #end foreach module
-
-        } #end process
-    } #end function AssertModule
-
-function Add-PSSnapin {
+function Add-PSSnapin
+{
 <#
     .SYNOPSIS
         Proxy function to load Citrix PowerShell snapins within a module
         at the global scope.
 #>
     [CmdletBinding()]
-    param (
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidOverwritingBuiltInCmdlets', '')]
+    param
+    (
         [Parameter(Mandatory, ValueFromPipeline, ValueFromPipelineByPropertyName)]
         [System.String[]] $Name
     )
-    process {
-
-        foreach ($snapinName in $Name) {
-
-            $modulePath = Join-Path -Path $PSScriptRoot -ChildPath "$snapinName.psm1";
-            Import-Module -Name $modulePath -Global -Verbose:$false;
-
-        } #end foreach snapin
-
-    } #end process
-} #end function Add-PSSnapin
+    process
+    {
+        foreach ($snapinName in $Name)
+        {
+            $modulePath = Join-Path -Path $PSScriptRoot -ChildPath "$snapinName.psm1"
+            Import-Module -Name $modulePath -Global -Verbose:$false
+        }
+    }
+}
 
 
 function GetXDBrokerMachine {

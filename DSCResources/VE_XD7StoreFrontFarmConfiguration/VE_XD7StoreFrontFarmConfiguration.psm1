@@ -30,10 +30,7 @@ function Get-TargetResource
         Write-Verbose -Message ($localizedData.CallingGetSTFStoreService -f $StoreName)
         $StoreService = Get-STFStoreService | Where-Object { $_.friendlyname -eq $StoreName }
         Write-Verbose -Message $localizedData.CallingGetSTFStoreFarmConfiguration
-        ## This is a hack, as Get-STFStoreFarm throws an error if run twice in quick succession?!
-        $null = Get-STFStoreFarm -StoreService $StoreService -Verbose -OutVariable Configuration
-        # XML contains some data points that we cannot obtain using the cmdlet
-        $storeSettings = $([xml]$(Get-Content $StoreService.ConfigurationFile)).configuration.'citrix.deliveryservices'.wing.farmsets.farmset
+        $Configuration = Get-STFStoreFarmConfiguration -StoreService $StoreService
     }
     catch {
 
@@ -48,8 +45,8 @@ function Get-TargetResource
         LeasingStatusExpiryFailed = [System.String]$Configuration.LeasingStatusExpiryFailed
         LeasingStatusExpiryLeasing = [System.String]$Configuration.LeasingStatusExpiryLeasing
         LeasingStatusExpiryPending = [System.String]$Configuration.LeasingStatusExpiryPending
-        PooledSockets = [System.Boolean]$($storeSettings.pooledSockets -eq "on")
-        ServerCommunicationAttempts = [System.UInt32]$storeSettings.serverCommunicationAttempts
+        PooledSockets = [System.Boolean]$Configuration.PooledSockets
+        ServerCommunicationAttempts = [System.UInt32]$Configuration.ServerCommunicationAttempts
         BackgroundHealthCheckPollingPeriod = [System.String]$Configuration.BackgroundHealthCheckPollingPeriod
         AdvancedHealthCheck = [System.Boolean]$Configuration.AdvancedHealthCheck
     }

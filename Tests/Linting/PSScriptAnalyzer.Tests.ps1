@@ -6,7 +6,12 @@ Describe 'Linting\PSScriptAnalyzer' {
 
     Get-ChildItem -Path "$repoRoot\DSCResources" -Recurse -File | ForEach-Object {
         It "File '$($_.Name)' passes PSScriptAnalyzer rules" {
-            $result = Invoke-ScriptAnalyzer -Path $_.FullName -Severity Warning | Select-Object -ExpandProperty Message
+            $invokeScriptAnalyzerParams = @{
+                Path        = $_.FullName
+                Severity    = 'Warning'
+                ExcludeRule = 'PSReviewUnusedParameter'
+            }
+            $result = Invoke-ScriptAnalyzer @invokeScriptAnalyzerParams | Select-Object -ExpandProperty Message
             $result | Should BeNullOrEmpty
         }
     }

@@ -185,7 +185,13 @@ function Test-TargetResource {
                 $actual = $targetResource[$property];
                 if ($PSBoundParameters[$property] -is [System.String[]]) {
 
-                    if (Compare-Object -ReferenceObject $expected -DifferenceObject $actual) {
+                    if (($null -ne $expected) -and ($null -eq $actual))
+                    {
+                        ## No existing Access policy configured (#53)
+                        Write-Verbose ($localizedData.ResourcePropertyMismatch -f $property, ($expected -join ','), '');
+                        $inCompliance = $false;
+                    }
+                    elseif (Compare-Object -ReferenceObject $expected -DifferenceObject $actual) {
                         Write-Verbose ($localizedData.ResourcePropertyMismatch -f $property, ($expected -join ','), ($actual -join ','));
                         $inCompliance = $false;
                     }
