@@ -2,10 +2,13 @@
 
 ## Versions ##
 
-### 2.10.1 (2020-05-12)
+### 2.10.1 (2023-11-01)
 
 * Bug Fixes
   * Detects Citrix PowerShell modules relocated in CVAD 1912+ (#48)
+  * Adds $null check when testing for existing Access Policy policy configuration (#53)
+  * Changes 'XD7StoreFrontFarmConfiguration\Get-TargetResource' to use 'Get-STFFarmConfiguration' cmdlet (#54)
+  * Changes 'XD7StoreFrontOptimalGateway' schema property 'Farms' from 'Read' to 'Write' (#55)
 
 ### 2.10.0 (2020-04-01)
 
