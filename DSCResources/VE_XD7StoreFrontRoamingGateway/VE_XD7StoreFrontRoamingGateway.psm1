@@ -53,7 +53,7 @@ function Get-TargetResource
 		SessionReliability = [System.Boolean]$Gateway.SessionReliability
 		RequestTicketTwoSTAs = [System.Boolean]$Gateway.RequestTicketTwoStas
 		SubnetIPAddress = [System.String]$Gateway.IpAddress
-		SecureTicketAuthorityUrls = [System.String[]]$Gateway.SecureTicketAuthorityUrls
+		SecureTicketAuthorityUrls = [System.String[]]$Gateway.SecureTicketAuthorityUrls.StaUrl
 		StasUseLoadBalancing = [System.Boolean]$Gateway.StasUseLoadBalancing
 		StasBypassDuration = [System.String]$Gateway.StasBypassDuration
 		GslbUrl = [System.String]$Gateway.GslbLocation

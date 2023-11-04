@@ -2,6 +2,11 @@
 
 ## Versions ##
 
+### 2.10.2 (2023-11-04)
+
+* Bug Fixes
+  * Fixes 'XD7StoreFrontRoamingGateway\Test-TargetResource' failing when StaUrl configured (#60)
+
 ### 2.10.1 (2023-11-01)
 
 * Bug Fixes
